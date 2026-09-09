@@ -58,47 +58,81 @@ Return ONLY valid JSON with these exact keys:
     ollama_result.setdefault("repair_steps", [])
     ollama_result.setdefault("needs_escalation", ollama_result["confidence"] < 0.7)
 
-    # 4. Persist inspection
+    # 4. Determine decision bands & escalation rules
+    confidence = ollama_result["confidence"]
+    finding = ollama_result["finding"]
+    finding_clean = finding.strip().lower()
+
+    is_normal = (
+        finding_clean in ("normal", "no issue", "ok")
+        or "operating within standard tolerances" in finding_clean
+    )
+    is_safety = bool(ollama_result.get("needs_escalation")) and (
+        ollama_result.get("reason") == "safety_critical"
+        or any(k in finding_clean for k in ("safety", "critical", "hazard", "leak", "crack"))
+    )
+
+    needs_escalation_flag = False
+    ticket = None
+
+    if is_normal:
+        needs_escalation_flag = False
+    elif confidence < 0.5 and not is_safety:
+        needs_escalation_flag = True
+    elif confidence >= 0.5 or is_safety:
+        if is_safety:
+            needs_escalation_flag = True
+
+    # 5. Persist inspection
     defect_loc = ollama_result.get("defect_location")
     inspection = Inspection(
         machine_id=machine.id,
-        finding=ollama_result["finding"],
-        confidence=ollama_result["confidence"],
+        finding=finding,
+        confidence=confidence,
         defect_location=json.dumps(defect_loc) if defect_loc else None,
         repair_steps=json.dumps(ollama_result["repair_steps"]),
-        needs_escalation=1 if ollama_result["needs_escalation"] else 0,
+        needs_escalation=1 if needs_escalation_flag else 0,
         model_status=ModelStatus.SUCCESS,
     )
     db.add(inspection)
     await db.flush()
 
-    # 5. Auto-ticket
-    ticket = None
-    finding_clean = ollama_result["finding"].strip().lower()
-    if ollama_result["confidence"] > 0.5 and finding_clean not in ("normal", "no issue", "ok"):
-        ticket = Ticket(
-            inspection_id=inspection.id,
-            machine_id=machine.id,
-            title=f"Inspection finding: {machine.machine_id}",
-            description=ollama_result["finding"],
-            status=TicketStatus.OPEN,
-            priority=1 if ollama_result["needs_escalation"] else 2,
-        )
-        db.add(ticket)
-        await db.flush()
-
-        if ollama_result["needs_escalation"]:
-            reason = "low_confidence" if ollama_result["confidence"] < 0.7 else "safety_critical"
+    # 6. Ticket & Escalation persistence
+    if not is_normal:
+        if confidence < 0.5 and not is_safety:
+            # Low confidence: escalation created WITHOUT ticket
             await create_escalation(
                 db=db,
-                ticket_id=ticket.id,
-                reason=reason,
-                inspection_confidence=ollama_result["confidence"],
-                inspection_finding=ollama_result["finding"],
+                ticket_id=None,
+                reason="low_confidence",
+                inspection_confidence=confidence,
+                inspection_finding=finding,
                 machine_id=machine.machine_id
             )
+        else:
+            # Ticket created: ALWAYS starts as PENDING_REVIEW
+            ticket = Ticket(
+                inspection_id=inspection.id,
+                machine_id=machine.id,
+                title=f"Inspection finding: {machine.machine_id}",
+                description=finding,
+                status=TicketStatus.PENDING_REVIEW,
+                priority=1 if is_safety else 2,
+            )
+            db.add(ticket)
+            await db.flush()
 
-    # 6. Audit log
+            if is_safety:
+                await create_escalation(
+                    db=db,
+                    ticket_id=ticket.id,
+                    reason="safety_critical",
+                    inspection_confidence=confidence,
+                    inspection_finding=finding,
+                    machine_id=machine.machine_id
+                )
+
+    # 7. Audit log
     audit = AuditLog(
         user_id=user_id,
         action="inspect",
@@ -106,8 +140,8 @@ Return ONLY valid JSON with these exact keys:
         resource_id=inspection.id,
         details=json.dumps({
             "machine_id": request.machine_id,
-            "confidence": ollama_result["confidence"],
-            "needs_escalation": ollama_result["needs_escalation"],
+            "confidence": confidence,
+            "needs_escalation": needs_escalation_flag,
             "ticket_created": ticket is not None
         })
     )

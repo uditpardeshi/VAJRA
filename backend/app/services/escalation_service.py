@@ -1,7 +1,7 @@
 import json
 import asyncio
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -11,7 +11,7 @@ from app.schemas.escalation import WSMessage
 
 async def create_escalation(
     db: AsyncSession,
-    ticket_id: int,
+    ticket_id: Optional[int],
     reason: str,  # "low_confidence" | "safety_critical" | "manual_review"
     inspection_confidence: float,
     inspection_finding: str,
@@ -26,11 +26,14 @@ async def create_escalation(
     db.add(escalation)
     await db.flush()
 
-    # Get ticket + machine info for notification
-    ticket_result = await db.execute(
-        select(Ticket).options(selectinload(Ticket.machine)).where(Ticket.id == ticket_id)
-    )
-    ticket = ticket_result.scalar_one()
+    priority = 2
+    if ticket_id is not None:
+        ticket_result = await db.execute(
+            select(Ticket).options(selectinload(Ticket.machine)).where(Ticket.id == ticket_id)
+        )
+        ticket = ticket_result.scalar_one_or_none()
+        if ticket:
+            priority = ticket.priority
 
     # Broadcast to reviewers & admins
     ws_msg = WSMessage(
@@ -42,7 +45,7 @@ async def create_escalation(
             "reason": reason,
             "confidence": inspection_confidence,
             "finding": inspection_finding,
-            "priority": ticket.priority,
+            "priority": priority,
         }
     )
     asyncio.create_task(ws_manager.broadcast_to_role("reviewer", ws_msg))
@@ -61,8 +64,7 @@ async def create_escalation(
         })
     )
     db.add(audit)
-    await db.commit()
-    await db.refresh(escalation)
+    await db.flush()
     return escalation
 
 async def acknowledge_escalation(

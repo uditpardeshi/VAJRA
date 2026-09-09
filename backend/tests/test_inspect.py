@@ -55,3 +55,25 @@ async def test_inspect_endpoint_model_unavailable_returns_503():
     data = response.json()["detail"]
     assert data["detail"] == "MODEL_UNAVAILABLE"
     assert data["reason"] == "connection_failed"
+
+@pytest.mark.asyncio
+async def test_inspect_low_confidence_creates_escalation_without_ticket():
+    transport = ASGITransport(app=app)
+    payload = {
+        "machine_id": "HX-204",
+        "image_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    }
+    mock_result = {
+        "finding": "Unclear wear mark observed on spindle casing",
+        "confidence": 0.42,
+        "defect_location": {"x": 0.3, "y": 0.4, "w": 0.1, "h": 0.1},
+        "repair_steps": ["Inspect housing manually"],
+        "needs_escalation": True
+    }
+    with patch("app.core.model_router.model_router.vision_inspect", return_value=mock_result):
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.post("/api/v1/inspect", json=payload)
+    assert response.status_code == 201
+    res = response.json()
+    assert res["confidence"] == 0.42
+    assert res["needs_escalation"] is True
