@@ -3,8 +3,9 @@ from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.tables import Inspection, Machine, AuditLog, Ticket, TicketStatus
+from app.models.tables import Inspection, Machine, AuditLog, Ticket, TicketStatus, ModelStatus
 from app.core.model_router import model_router
+from app.core.exceptions import ModelUnavailableError
 from app.schemas.inspection import InspectRequest, InspectResponse, DefectLocation
 from app.services.escalation_service import create_escalation
 
@@ -40,20 +41,15 @@ Return ONLY valid JSON with these exact keys:
         system_prompt += f"\nAdditional focus: {request.prompt_override}"
 
     # 3. Call vision model via router
-    ollama_result = await model_router.vision_inspect(
-        image_base64=request.image_base64,
-        system_prompt=system_prompt
-    )
-
-    # Handle parse errors
-    if "error" in ollama_result:
-        ollama_result = {
-            "finding": "Model response parse failed",
-            "confidence": 0.0,
-            "defect_location": None,
-            "repair_steps": [],
-            "needs_escalation": True
-        }
+    try:
+        ollama_result = await model_router.vision_inspect(
+            image_base64=request.image_base64,
+            system_prompt=system_prompt
+        )
+    except ModelUnavailableError:
+        raise
+    except Exception as e:
+        raise ModelUnavailableError("unexpected_error", e)
 
     # Normalize defaults
     ollama_result.setdefault("finding", "No finding returned")
@@ -71,6 +67,7 @@ Return ONLY valid JSON with these exact keys:
         defect_location=json.dumps(defect_loc) if defect_loc else None,
         repair_steps=json.dumps(ollama_result["repair_steps"]),
         needs_escalation=1 if ollama_result["needs_escalation"] else 0,
+        model_status=ModelStatus.SUCCESS,
     )
     db.add(inspection)
     await db.flush()

@@ -38,6 +38,11 @@ class Machine(Base):
     inspections = relationship("Inspection", back_populates="machine")
     tickets = relationship("Ticket", back_populates="machine")
 
+class ModelStatus(str, PyEnum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+
 class Inspection(Base):
     __tablename__ = "inspections"
     id = Column(Integer, primary_key=True, index=True)
@@ -48,6 +53,7 @@ class Inspection(Base):
     defect_location = Column(Text)             # JSON: {"x": 0.3, "y": 0.6, "w": 0.1, "h": 0.15}
     repair_steps = Column(Text)                # JSON array of strings
     needs_escalation = Column(Integer, default=0)  # 0/1
+    model_status = Column(Enum(ModelStatus), default=ModelStatus.SUCCESS, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     machine = relationship("Machine", back_populates="inspections")

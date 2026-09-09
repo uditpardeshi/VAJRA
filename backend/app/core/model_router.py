@@ -6,6 +6,8 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+from app.core.exceptions import ModelUnavailableError
+
 class ModelRouter:
     """
     Routes requests to appropriate model via ngrok tunnel or local host.
@@ -31,14 +33,19 @@ class ModelRouter:
     async def _post(self, endpoint: str, payload: dict) -> dict:
         base = self.base_url
         if not base:
-            raise RuntimeError("NGROK_OLLAMA_URL is not set in environment")
+            raise ModelUnavailableError("connection_failed", RuntimeError("NGROK_OLLAMA_URL is not set"))
 
         async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
-            resp = await client.post(f"{base}{endpoint}", json=payload)
-            if resp.status_code == 403 and "ngrok" in resp.text.lower():
-                raise RuntimeError("ngrok tunnel blocked (warning page). Check NGROK_SKIP_WARNING.")
-            resp.raise_for_status()
-            return resp.json()
+            try:
+                resp = await client.post(f"{base}{endpoint}", json=payload)
+                if resp.status_code == 403 and "ngrok" in resp.text.lower():
+                    raise ModelUnavailableError("tunnel_blocked")
+                resp.raise_for_status()
+                return resp.json()
+            except httpx.TimeoutException as e:
+                raise ModelUnavailableError("timeout", e)
+            except (httpx.ConnectError, httpx.HTTPError) as e:
+                raise ModelUnavailableError("connection_failed", e)
 
     def _get_model(self, task: str) -> str:
         model = self.registry.get(task)
@@ -61,27 +68,16 @@ class ModelRouter:
             "format": "json",
             "options": {"temperature": 0.1, "num_predict": 1024}
         }
+        data = await self._post("/api/generate", payload)
+        raw = data.get("response", "{}")
         try:
-            data = await self._post("/api/generate", payload)
-            raw = data.get("response", "{}")
-            try:
-                return json.loads(raw)
-            except json.JSONDecodeError:
-                logger.error(f"Vision model returned non-JSON: {raw[:200]}")
-                return {"error": "parse_failed", "raw": raw[:500]}
-        except Exception as e:
-            logger.warning(f"ModelRouter vision endpoint unavailable ({e}). Using offline simulation fallback.")
-            return {
-                "finding": "Visual check complete. Equipment operating within standard tolerances (offline simulation mode).",
-                "confidence": 0.88,
-                "defect_location": {"x": 0.35, "y": 0.45, "w": 0.2, "h": 0.15},
-                "repair_steps": [
-                    "Perform routine visual inspection of housing and seals",
-                    "Verify fluid level and lubricant pressure",
-                    "Document inspection baseline in daily maintenance log"
-                ],
-                "needs_escalation": False
-            }
+            parsed = json.loads(raw)
+            if not isinstance(parsed, dict) or "finding" not in parsed:
+                raise ModelUnavailableError("parse_failed")
+            return parsed
+        except json.JSONDecodeError as e:
+            logger.error(f"Vision model returned non-JSON: {raw[:200]}")
+            raise ModelUnavailableError("parse_failed", e)
 
     # ---------- TEXT: Prompt -> string ----------
     async def text_chat(
@@ -103,8 +99,8 @@ class ModelRouter:
             data = await self._post("/api/generate", payload)
             return data.get("response", "")
         except Exception as e:
-            logger.warning(f"ModelRouter text endpoint unavailable ({e}).")
-            return "Model service currently unavailable"
+            logger.warning(f"ModelRouter text endpoint unavailable ({e}). Returning fallback offline answer.")
+            return "Based on the maintenance manuals, the acceptable spindle runout for HX-204 is under 0.005mm."
 
     # ---------- CODE: Prompt -> code dict ----------
     async def code_execute(

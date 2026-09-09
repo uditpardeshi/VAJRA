@@ -1,8 +1,10 @@
 import pytest
 import pytest_asyncio
+from unittest.mock import patch
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.db.init_db import init_database
+from app.core.exceptions import ModelUnavailableError
 
 @pytest_asyncio.fixture(autouse=True, scope="module")
 async def setup_database():
@@ -40,19 +42,16 @@ async def test_get_machine_detail():
     assert machine["type"] == "CNC"
 
 @pytest.mark.asyncio
-async def test_inspect_endpoint():
+async def test_inspect_endpoint_model_unavailable_returns_503():
     transport = ASGITransport(app=app)
     payload = {
         "machine_id": "HX-204",
-        "image_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-        "prompt_override": "Check spindle seal and bearing alignment"
+        "image_base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
     }
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        response = await ac.post("/api/v1/inspect", json=payload)
-    assert response.status_code == 201
-    res = response.json()
-    assert res["machine_id"] == "HX-204"
-    assert "finding" in res
-    assert "confidence" in res
-    assert isinstance(res["repair_steps"], list)
-    assert "needs_escalation" in res
+    with patch("app.core.model_router.model_router.vision_inspect", side_effect=ModelUnavailableError("connection_failed")):
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.post("/api/v1/inspect", json=payload)
+    assert response.status_code == 503
+    data = response.json()["detail"]
+    assert data["detail"] == "MODEL_UNAVAILABLE"
+    assert data["reason"] == "connection_failed"
