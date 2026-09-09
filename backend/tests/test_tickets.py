@@ -5,7 +5,7 @@ from sqlalchemy import select
 from app.main import app
 from app.db.init_db import init_database
 from app.core.database import AsyncSessionLocal
-from app.models.tables import Ticket, TicketStatus, Escalation, EscalationStatus, Machine
+from app.models.tables import Ticket, TicketStatus, Escalation, EscalationStatus, Machine, Inspection
 
 @pytest_asyncio.fixture(autouse=True, scope="module")
 async def setup_database():
@@ -13,13 +13,27 @@ async def setup_database():
 
 @pytest.mark.asyncio
 async def test_ticket_approval_workflow():
-    # 1. Direct DB setup: Create machine, ticket pending review, and an escalation without ticket
+    # 1. Direct DB setup: Create machine, inspection, ticket pending review, and an escalation without ticket
     async with AsyncSessionLocal() as session:
         machine = await session.execute(select(Machine).where(Machine.machine_id == "HX-204"))
         machine_obj = machine.scalar_one()
 
+        inspection1 = Inspection(
+            machine_id=machine_obj.id,
+            finding="Spindle chatter anomaly",
+            confidence=0.75,
+        )
+        inspection2 = Inspection(
+            machine_id=machine_obj.id,
+            finding="Low confidence vibration",
+            confidence=0.45,
+        )
+        session.add(inspection1)
+        session.add(inspection2)
+        await session.flush()
+
         ticket = Ticket(
-            inspection_id=999,
+            inspection_id=inspection1.id,
             machine_id=machine_obj.id,
             title="Spindle chatter detected",
             description="Vibration sensor anomaly",
@@ -39,6 +53,7 @@ async def test_ticket_approval_workflow():
         await session.refresh(escalation)
         t_id = ticket.id
         e_id = escalation.id
+        insp2_id = inspection2.id
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -72,7 +87,7 @@ async def test_ticket_approval_workflow():
             "title": "Low confidence spindle issue",
             "description": "Converted by reviewer",
             "machine_id": machine_obj.id,
-            "inspection_id": 998
+            "inspection_id": insp2_id
         })
         assert res.status_code == 200
         converted_ticket = res.json()
