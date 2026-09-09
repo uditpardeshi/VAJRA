@@ -1,0 +1,1079 @@
+**COMPLETE UPDATED SLICE 1 BACKEND PROMPT** — includes ngrok/Colab, multi-model switching, testing guide, handoff file. Paste this into Antigravity (replaces previous).
+
+---
+
+## Project: Sovereign On-Premise AI Workbench — Slice 1 Backend (UPDATED)
+
+### Context
+- **Goal**: Backend foundation for manufacturing AI inspection workbench. 100% on-premise except model inference runs on **Google Colab GPU + ngrok tunnel**.
+- **Your role**: Backend only (FastAPI, SQLite, model routing). Frontend is separate.
+- **Demo scenario**: Manufacturing — 3 CNC machines. Worker photographs machine → backend routes to correct model via ngrok → returns structured inspection result.
+- **Model routing**: Different tasks → different models (vision for inspection, text for RAG/chat, future: code executor, etc.)
+
+---
+
+### Tech Stack (Locked)
+| Component | Choice |
+|-----------|--------|
+| API Framework | FastAPI (Python 3.11+) |
+| Model Host | **Google Colab + Ollama + ngrok** (URL changes per session) |
+| Models | `qwen2-vl` (vision), `llama3.2` (text), extensible for more |
+| Database | SQLite + SQLAlchemy 2.0 (async) |
+| Vector DB (later) | ChromaDB — prep config now |
+| Embeddings (later) | `sentence-transformers/all-MiniLM-L6-v2` — prep config now |
+| Networking | Bind `0.0.0.0:8000`, CORS for `http://localhost:5173` |
+| Image Transport | Base64 JSON |
+
+---
+
+### Required File Structure
+```
+backend/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   └── model_router.py       # NEW: multi-model client + routing
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── tables.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── inspection.py
+│   │   └── common.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── inspection_service.py
+│   │   └── machine_service.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       ├── routes_inspect.py
+│   │       └── routes_machines.py
+│   └── db/
+│       ├── __init__.py
+│       ├── init_db.py
+│       └── seed_data.py
+├── tests/
+│   └── test_inspect.py
+├── requirements.txt
+├── .env.example
+├── Dockerfile
+├── README.md
+├── test_smoke.py              # NEW: automated smoke test
+└── HANDOFF.md                 # NEW: living handoff doc (Antigravity maintains)
+```
+
+---
+
+### 1. Environment Config (`.env.example`)
+```env
+# Server
+HOST=0.0.0.0
+PORT=8000
+FRONTEND_ORIGIN=http://localhost:5173
+
+# Colab + ngrok (UPDATE PER SESSION)
+NGROK_OLLAMA_URL=https://your-colab-tunnel.ngrok-free.app
+NGROK_SKIP_WARNING=true
+
+# Model routing - map task → model name (must exist in Colab Ollama)
+MODEL_VISION=qwen2-vl
+MODEL_TEXT=llama3.2
+MODEL_CODE=codellama        # future: code executor
+MODEL_EMBEDDING=nomic-embed-text  # future: embeddings
+
+# Database
+DATABASE_URL=sqlite+aiosqlite:///./sovereign.db
+
+# RAG prep
+CHROMA_PERSIST_DIR=./chroma_db
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+```
+
+---
+
+### 2. Config (`app/core/config.py`)
+```python
+from pydantic_settings import BaseSettings
+from functools import lru_cache
+from typing import Dict
+
+class Settings(BaseSettings):
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    FRONTEND_ORIGIN: str = "http://localhost:5173"
+    
+    # ngrok tunnel to Colab Ollama
+    NGROK_OLLAMA_URL: str = ""
+    NGROK_SKIP_WARNING: bool = True
+    
+    # Model registry (task → model name)
+    MODEL_VISION: str = "qwen2-vl"
+    MODEL_TEXT: str = "llama3.2"
+    MODEL_CODE: str = "codellama"
+    MODEL_EMBEDDING: str = "nomic-embed-text"
+    
+    @property
+    def model_registry(self) -> Dict[str, str]:
+        return {
+            "vision": self.MODEL_VISION,
+            "text": self.MODEL_TEXT,
+            "code": self.MODEL_CODE,
+            "embedding": self.MODEL_EMBEDDING,
+        }
+    
+    DATABASE_URL: str = "sqlite+aiosqlite:///./sovereign.db"
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+@lru_cache()
+def get_settings() -> Settings:
+    return Settings()
+
+settings = get_settings()
+```
+
+---
+
+### 3. Model Router (`app/core/model_router.py`) — **NEW: Multi-model client**
+```python
+import httpx
+import json
+import logging
+from typing import Optional, List, Dict, Any
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
+class ModelRouter:
+    """
+    Routes requests to appropriate model via ngrok tunnel.
+    Supports: vision, text, code, embedding tasks.
+    """
+    
+    def __init__(self):
+        base = settings.NGROK_OLLAMA_URL.rstrip("/")
+        if not base:
+            raise RuntimeError("NGROK_OLLAMA_URL not set in .env")
+        self.base_url = base
+        self.registry = settings.model_registry
+        self.timeout = 180.0  # Colab cold start
+        
+        self.headers = {"Content-Type": "application/json"}
+        if settings.NGROK_SKIP_WARNING:
+            self.headers["ngrok-skip-browser-warning"] = "true"
+
+    async def _post(self, endpoint: str, payload: dict) -> dict:
+        async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
+            resp = await client.post(f"{self.base_url}{endpoint}", json=payload)
+            if resp.status_code == 403 and "ngrok" in resp.text.lower():
+                raise RuntimeError("ngrok tunnel blocked (warning page?). Check NGROK_SKIP_WARNING.")
+            resp.raise_for_status()
+            return resp.json()
+
+    def _get_model(self, task: str) -> str:
+        model = self.registry.get(task)
+        if not model:
+            raise ValueError(f"No model configured for task: {task}")
+        return model
+
+    # ---------- VISION: Image + prompt → structured JSON ----------
+    async def vision_inspect(
+        self,
+        image_base64: str,
+        system_prompt: str,
+        model: Optional[str] = None
+    ) -> dict:
+        payload = {
+            "model": model or self._get_model("vision"),
+            "prompt": system_prompt,
+            "images": [image_base64],
+            "stream": False,
+            "format": "json",
+            "options": {"temperature": 0.1, "num_predict": 1024}
+        }
+        data = await self._post("/api/generate", payload)
+        raw = data.get("response", "{}")
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            logger.error(f"Vision model returned non-JSON: {raw[:200]}")
+            return {"error": "parse_failed", "raw": raw[:500]}
+
+    # ---------- TEXT: Prompt → string ----------
+    async def text_chat(
+        self,
+        prompt: str,
+        system: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: float = 0.2,
+        max_tokens: int = 2048
+    ) -> str:
+        payload = {
+            "model": model or self._get_model("text"),
+            "prompt": prompt,
+            "system": system,
+            "stream": False,
+            "options": {"temperature": temperature, "num_predict": max_tokens}
+        }
+        data = await self._post("/api/generate", payload)
+        return data.get("response", "")
+
+    # ---------- CODE: Prompt → code + execution result (future) ----------
+    async def code_execute(
+        self,
+        prompt: str,
+        system: Optional[str] = None,
+        model: Optional[str] = None
+    ) -> dict:
+        """Generate code, return code string. Execution is separate (sandbox)."""
+        payload = {
+            "model": model or self._get_model("code"),
+            "prompt": prompt,
+            "system": system or "You are a Python expert. Generate clean, safe code only.",
+            "stream": False,
+            "options": {"temperature": 0.1, "num_predict": 2048}
+        }
+        data = await self._post("/api/generate", payload)
+        return {"code": data.get("response", "")}
+
+    # ---------- EMBEDDINGS: Text → vector (future) ----------
+    async def embed(self, texts: List[str], model: Optional[str] = None) -> List[List[float]]:
+        payload = {
+            "model": model or self._get_model("embedding"),
+            "input": texts
+        }
+        data = await self._post("/api/embed", payload)
+        return data.get("embeddings", [])
+
+    # ---------- HEALTH: List available models ----------
+    async def list_models(self) -> List[dict]:
+        data = await self._post("/api/tags", {})
+        return data.get("models", [])
+
+model_router = ModelRouter()
+```
+
+---
+
+### 4. SQLite Schema (`app/models/tables.py`) — *unchanged*
+```python
+from datetime import datetime
+from enum import Enum as PyEnum
+from sqlalchemy import (
+    Column, Integer, String, Text, Float, DateTime, ForeignKey, Enum, Index
+)
+from sqlalchemy.orm import relationship, declarative_base
+
+Base = declarative_base()
+
+class UserRole(str, PyEnum):
+    ENGINEER = "engineer"
+    REVIEWER = "reviewer"
+    ADMIN = "admin"
+
+class TicketStatus(str, PyEnum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+class EscalationStatus(str, PyEnum):
+    PENDING = "pending"
+    ACKNOWLEDGED = "acknowledged"
+    RESOLVED = "resolved"
+
+class Machine(Base):
+    __tablename__ = "machines"
+    id = Column(Integer, primary_key=True, index=True)
+    machine_id = Column(String(50), unique=True, index=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    type = Column(String(50), nullable=False)
+    location = Column(String(100))
+    manual_path = Column(String(255))
+    specs_json = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    inspections = relationship("Inspection", back_populates="machine")
+    tickets = relationship("Ticket", back_populates="machine")
+
+class Inspection(Base):
+    __tablename__ = "inspections"
+    id = Column(Integer, primary_key=True, index=True)
+    machine_id = Column(Integer, ForeignKey("machines.id"), nullable=False, index=True)
+    image_path = Column(String(255))
+    finding = Column(Text, nullable=False)
+    confidence = Column(Float, nullable=False)
+    defect_location = Column(Text)
+    repair_steps = Column(Text)
+    needs_escalation = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    machine = relationship("Machine", back_populates="inspections")
+    ticket = relationship("Ticket", back_populates="inspection", uselist=False)
+
+class Ticket(Base):
+    __tablename__ = "tickets"
+    id = Column(Integer, primary_key=True, index=True)
+    inspection_id = Column(Integer, ForeignKey("inspections.id"), unique=True, nullable=False)
+    machine_id = Column(Integer, ForeignKey("machines.id"), nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text)
+    status = Column(Enum(TicketStatus), default=TicketStatus.OPEN, index=True)
+    priority = Column(Integer, default=2)
+    assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    resolved_at = Column(DateTime, nullable=True)
+
+    machine = relationship("Machine", back_populates="tickets")
+    inspection = relationship("Inspection", back_populates="ticket")
+    escalation = relationship("Escalation", back_populates="ticket", uselist=False)
+
+class Escalation(Base):
+    __tablename__ = "escalations"
+    id = Column(Integer, primary_key=True, index=True)
+    ticket_id = Column(Integer, ForeignKey("tickets.id"), unique=True, nullable=False)
+    reason = Column(Text)
+    status = Column(Enum(EscalationStatus), default=EscalationStatus.PENDING, index=True)
+    reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    resolved_at = Column(DateTime, nullable=True)
+
+    ticket = relationship("Ticket", back_populates="escalation")
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    full_name = Column(String(100))
+    role = Column(Enum(UserRole), default=UserRole.ENGINEER, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    action = Column(String(100), nullable=False, index=True)
+    resource_type = Column(String(50))
+    resource_id = Column(Integer)
+    details = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    user = relationship("User")
+
+Index("ix_inspections_machine_created", Inspection.machine_id, Inspection.created_at)
+Index("ix_tickets_status_created", Ticket.status, Ticket.created_at)
+Index("ix_audit_log_user_created", AuditLog.user_id, AuditLog.created_at)
+```
+
+---
+
+### 5. Pydantic Schemas (`app/schemas/inspection.py`) — *unchanged*
+```python
+from typing import Optional, List
+from pydantic import BaseModel, Field, ConfigDict
+from datetime import datetime
+
+class DefectLocation(BaseModel):
+    x: float = Field(..., ge=0, le=1)
+    y: float = Field(..., ge=0, le=1)
+    w: float = Field(..., ge=0, le=1)
+    h: float = Field(..., ge=0, le=1)
+
+class InspectRequest(BaseModel):
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "machine_id": "HX-204",
+            "image_base64": "/9j/4AAQSkZJRgABAQ...",
+            "prompt_override": "Focus on spindle wear and oil leaks"
+        }
+    })
+    machine_id: str
+    image_base64: str
+    prompt_override: Optional[str] = None
+
+class InspectResponse(BaseModel):
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "inspection_id": 1,
+            "machine_id": "HX-204",
+            "finding": "Spindle shows abnormal wear pattern. Oil leak detected at seal.",
+            "confidence": 0.87,
+            "defect_location": {"x": 0.42, "y": 0.58, "w": 0.15, "h": 0.12},
+            "repair_steps": [
+                "Stop machine and lock out power",
+                "Remove spindle housing cover",
+                "Inspect seal for damage",
+                "Replace seal if worn",
+                "Reassemble and test run"
+            ],
+            "needs_escalation": False,
+            "created_at": "2026-09-09T14:32:10.123Z"
+        }
+    })
+    inspection_id: int
+    machine_id: str
+    finding: str
+    confidence: float = Field(..., ge=0, le=1)
+    defect_location: Optional[DefectLocation] = None
+    repair_steps: List[str] = []
+    needs_escalation: bool
+    created_at: datetime
+
+class MachineResponse(BaseModel):
+    id: int
+    machine_id: str
+    name: str
+    type: str
+    location: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class MachineListResponse(BaseModel):
+    machines: List[MachineResponse]
+```
+
+---
+
+### 6. Inspection Service (`app/services/inspection_service.py`) — *updated to use model_router*
+```python
+import json
+from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from app.models.tables import Inspection, Machine, AuditLog, Ticket, TicketStatus, Escalation, EscalationStatus
+from app.core.model_router import model_router
+from app.schemas.inspection import InspectRequest, InspectResponse, DefectLocation
+
+async def create_inspection(
+    db: AsyncSession,
+    request: InspectRequest,
+    user_id: int = 1
+) -> InspectResponse:
+    machine = await db.execute(
+        select(Machine).where(Machine.machine_id == request.machine_id)
+    )
+    machine = machine.scalar_one_or_none()
+    if not machine:
+        raise ValueError(f"Machine {request.machine_id} not found")
+
+    specs = json.loads(machine.specs_json) if machine.specs_json else {}
+
+    # Build prompt
+    system_prompt = f"""You are an expert industrial maintenance engineer analyzing equipment photos.
+Machine: {machine.machine_id}
+Key Specs: {json.dumps(specs, indent=2)}
+
+Analyze the image for: wear, misalignment, leaks, cracks, abnormal vibration signs, safety hazards.
+Return ONLY valid JSON with these exact keys:
+- "finding": string (concise technical description)
+- "confidence": float 0.0-1.0
+- "defect_location": object with x,y,w,h normalized 0-1 (or null)
+- "repair_steps": array of strings (ordered, actionable)
+- "needs_escalation": boolean (true if safety-critical or confidence < 0.7)
+"""
+    if request.prompt_override:
+        system_prompt += f"\nAdditional focus: {request.prompt_override}"
+
+    # Call vision model via router
+    ollama_result = await model_router.vision_inspect(
+        image_base64=request.image_base64,
+        system_prompt=system_prompt
+    )
+
+    # Handle parse errors
+    if "error" in ollama_result:
+        ollama_result = {
+            "finding": "Model response parse failed",
+            "confidence": 0.0,
+            "defect_location": None,
+            "repair_steps": [],
+            "needs_escalation": True
+        }
+
+    # Normalize
+    ollama_result.setdefault("finding", "No finding returned")
+    ollama_result.setdefault("confidence", 0.5)
+    ollama_result.setdefault("defect_location", None)
+    ollama_result.setdefault("repair_steps", [])
+    ollama_result.setdefault("needs_escalation", ollama_result["confidence"] < 0.7)
+
+    # Persist
+    defect_loc = ollama_result.get("defect_location")
+    inspection = Inspection(
+        machine_id=machine.id,
+        finding=ollama_result["finding"],
+        confidence=ollama_result["confidence"],
+        defect_location=json.dumps(defect_loc) if defect_loc else None,
+        repair_steps=json.dumps(ollama_result["repair_steps"]),
+        needs_escalation=1 if ollama_result["needs_escalation"] else 0,
+    )
+    db.add(inspection)
+    await db.flush()
+
+    # Auto-ticket
+    ticket = None
+    if ollama_result["confidence"] > 0.5 and ollama_result["finding"].strip().lower() not in ("normal", "no issue", "ok"):
+        ticket = Ticket(
+            inspection_id=inspection.id,
+            machine_id=machine.id,
+            title=f"Inspection finding: {machine.machine_id}",
+            description=ollama_result["finding"],
+            status=TicketStatus.OPEN,
+            priority=1 if ollama_result["needs_escalation"] else 2,
+        )
+        db.add(ticket)
+        await db.flush()
+
+        if ollama_result["needs_escalation"]:
+            escalation = Escalation(
+                ticket_id=ticket.id,
+                reason="low_confidence" if ollama_result["confidence"] < 0.7 else "safety_critical",
+                status=EscalationStatus.PENDING,
+            )
+            db.add(escalation)
+
+    # Audit
+    audit = AuditLog(
+        user_id=user_id,
+        action="inspect",
+        resource_type="inspection",
+        resource_id=inspection.id,
+        details=json.dumps({
+            "machine_id": request.machine_id,
+            "confidence": ollama_result["confidence"],
+            "needs_escalation": ollama_result["needs_escalation"],
+            "ticket_created": ticket is not None
+        })
+    )
+    db.add(audit)
+
+    await db.commit()
+    await db.refresh(inspection)
+
+    return InspectResponse(
+        inspection_id=inspection.id,
+        machine_id=machine.machine_id,
+        finding=inspection.finding,
+        confidence=inspection.confidence,
+        defect_location=DefectLocation(**json.loads(inspection.defect_location)) if inspection.defect_location else None,
+        repair_steps=json.loads(inspection.repair_steps) if inspection.repair_steps else [],
+        needs_escalation=bool(inspection.needs_escalation),
+        created_at=inspection.created_at
+    )
+
+async def get_machines(db: AsyncSession) -> list[Machine]:
+    from sqlalchemy import select
+    result = await db.execute(select(Machine).order_by(Machine.machine_id))
+    return result.scalars().all()
+
+async def get_machine(db: AsyncSession, machine_id: str) -> Machine | None:
+    from sqlalchemy import select
+    result = await db.execute(select(Machine).where(Machine.machine_id == machine_id))
+    return result.scalar_one_or_none()
+```
+
+---
+
+### 7. API Routes (`app/api/v1/routes_inspect.py`) — *unchanged*
+```python
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+from app.services.inspection_service import create_inspection, get_machines, get_machine
+from app.schemas.inspection import InspectRequest, InspectResponse, MachineListResponse, MachineResponse
+
+router = APIRouter(prefix="/api/v1", tags=["inspection"])
+
+@router.post("/inspect", response_model=InspectResponse, status_code=status.HTTP_201_CREATED)
+async def inspect_equipment(
+    request: InspectRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        return await create_inspection(db, request)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inspection failed: {str(e)}")
+
+@router.get("/machines", response_model=MachineListResponse)
+async def list_machines(db: AsyncSession = Depends(get_db)):
+    machines = await get_machines(db)
+    return MachineListResponse(machines=[MachineResponse.model_validate(m) for m in machines])
+
+@router.get("/machines/{machine_id}", response_model=MachineResponse)
+async def get_machine_detail(machine_id: str, db: AsyncSession = Depends(get_db)):
+    machine = await get_machine(db, machine_id)
+    if not machine:
+        raise HTTPException(status_code=404, detail="Machine not found")
+    return MachineResponse.model_validate(machine)
+```
+
+---
+
+### 8. Database Init + Seed (`app/db/seed_data.py`) — *unchanged*
+```python
+import json
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.tables import Machine, User, UserRole
+
+MACHINES = [
+    {
+        "machine_id": "HX-204",
+        "name": "Horizontal Machining Center HX-204",
+        "type": "CNC",
+        "location": "Bay A, Line 1",
+        "manual_path": "manuals/HX-204_maintenance.pdf",
+        "specs_json": json.dumps({
+            "spindle_speed_rpm": 12000,
+            "max_tool_diameter_mm": 100,
+            "spindle_taper": "BT40",
+            "coolant_pressure_bar": 20,
+            "acceptable_spindle_runout_um": 5,
+            "oil_type": "ISO VG 32",
+            "bearing_replacement_interval_hours": 8000
+        })
+    },
+    {
+        "machine_id": "CNC-500",
+        "name": "Vertical Machining Center CNC-500",
+        "type": "CNC",
+        "location": "Bay B, Line 2",
+        "manual_path": "manuals/CNC-500_maintenance.pdf",
+        "specs_json": json.dumps({
+            "spindle_speed_rpm": 15000,
+            "max_tool_diameter_mm": 80,
+            "spindle_taper": "HSK-A63",
+            "coolant_pressure_bar": 30,
+            "acceptable_spindle_runout_um": 3,
+            "oil_type": "ISO VG 46",
+            "bearing_replacement_interval_hours": 6000
+        })
+    },
+    {
+        "machine_id": "LATHE-3",
+        "name": "CNC Lathe LATHE-3",
+        "type": "LATHE",
+        "location": "Bay C, Line 1",
+        "manual_path": "manuals/LATHE-3_maintenance.pdf",
+        "specs_json": json.dumps({
+            "max_turning_diameter_mm": 300,
+            "max_turning_length_mm": 500,
+            "spindle_speed_rpm": 4000,
+            "chuck_size_inch": 10,
+            "tailstock_taper": "MT4",
+            "acceptable_spindle_runout_um": 8,
+            "oil_type": "ISO VG 68",
+            "bearing_replacement_interval_hours": 10000
+        })
+    }
+]
+
+USERS = [
+    {"username": "engineer1", "full_name": "Rajesh Kumar", "role": UserRole.ENGINEER},
+    {"username": "reviewer1", "full_name": "Priya Sharma", "role": UserRole.REVIEWER},
+    {"username": "admin1", "full_name": "Amit Singh", "role": UserRole.ADMIN},
+]
+
+async def seed_data(db: AsyncSession):
+    from sqlalchemy import select
+    existing = await db.execute(select(Machine).limit(1))
+    if existing.scalar_one_or_none():
+        return
+
+    for m in MACHINES:
+        db.add(Machine(**m))
+    for u in USERS:
+        db.add(User(**u))
+    await db.commit()
+```
+
+---
+
+### 9. Database Setup (`app/core/database.py`)
+```python
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
+from app.core.config import settings
+
+engine = create_async_engine(settings.DATABASE_URL, echo=False, future=True)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
+
+async def get_db() -> AsyncSession:
+    async with AsyncSessionLocal() as session:
+        yield session
+
+async def init_db():
+    from app.models.tables import Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    # Seed
+    async with AsyncSessionLocal() as session:
+        from app.db.seed_data import seed_data
+        await seed_data(session)
+```
+
+---
+
+### 10. Main App (`app/main.py`) — *unchanged*
+```python
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+from app.core.database import init_db
+from app.api.v1 import routes_inspect, routes_machines
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+app = FastAPI(
+    title="Sovereign AI Workbench API",
+    version="1.0.0",
+    description="On-premise agentic AI for confidential industrial inspection",
+    lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.FRONTEND_ORIGIN, "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(routes_inspect.router)
+app.include_router(routes_machines.router)
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "sovereign-workbench"}
+
+@app.get("/")
+async def root():
+    return {"message": "Sovereign AI Workbench API", "docs": "/docs"}
+```
+
+---
+
+### 11. Requirements (`requirements.txt`)
+```
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+sqlalchemy==2.0.36
+aiosqlite==0.20.0
+pydantic==2.9.2
+pydantic-settings==2.5.2
+httpx==0.28.1
+python-multipart==0.0.9
+python-dotenv==1.0.1
+# RAG prep
+chromadb==0.5.5
+sentence-transformers==3.3.0
+# Document processing prep
+pymupdf==1.24.7
+python-docx==1.1.2
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+```
+
+---
+
+### 12. Automated Smoke Test (`test_smoke.py`) — **NEW**
+```python
+# test_smoke.py - Run after backend starts: python test_smoke.py
+import base64
+import httpx
+import json
+import sys
+import asyncio
+
+BASE = "http://localhost:8000/api/v1"
+ROOT = "http://localhost:8000"
+
+# 1x1 pixel JPEG base64 (tiny test image)
+TINY_JPEG = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/AB//2Q=="
+
+def test_health():
+    r = httpx.get(f"{ROOT}/health", timeout=5)
+    assert r.status_code == 200 and r.json()["status"] == "ok"
+    print("✅ Health check")
+
+def test_machines():
+    r = httpx.get(f"{BASE}/machines", timeout=5)
+    assert r.status_code == 200
+    machines = r.json()["machines"]
+    assert len(machines) == 3
+    ids = {m["machine_id"] for m in machines}
+    assert ids == {"HX-204", "CNC-500", "LATHE-3"}
+    print(f"✅ Machines: {ids}")
+
+def test_inspect():
+    r = httpx.post(f"{BASE}/inspect", json={
+        "machine_id": "HX-204",
+        "image_base64": TINY_JPEG
+    }, timeout=180)  # Colab cold start
+    
+    assert r.status_code == 201, f"Status {r.status_code}: {r.text}"
+    data = r.json()
+    required = ["inspection_id", "machine_id", "finding", "confidence", "defect_location", "repair_steps", "needs_escalation", "created_at"]
+    for k in required:
+        assert k in data, f"Missing key: {k}"
+    assert 0 <= data["confidence"] <= 1
+    assert isinstance(data["repair_steps"], list)
+    assert isinstance(data["needs_escalation"], bool)
+    print(f"✅ Inspect: id={data['inspection_id']}, confidence={data['confidence']}, escalation={data['needs_escalation']}")
+    return data["inspection_id"]
+
+async def test_db_persisted(inspection_id: int):
+    import aiosqlite
+    async with aiosqlite.connect("sovereign.db") as db:
+        cur = await db.execute("SELECT finding, confidence, needs_escalation FROM inspections WHERE id=?", (inspection_id,))
+        row = await cur.fetchone()
+        assert row, "Inspection not in DB"
+        print(f"✅ DB inspection: finding={row[0][:40]}..., conf={row[1]}, esc={row[2]}")
+        
+        cur = await db.execute("SELECT id, status FROM tickets WHERE inspection_id=?", (inspection_id,))
+        ticket = await cur.fetchone()
+        if ticket:
+            print(f"✅ Ticket auto-created: id={ticket[0]}, status={ticket[1]}")
+        else:
+            print("ℹ️ No ticket (confidence <= 0.5 or finding='normal')")
+        
+        cur = await db.execute("SELECT action, resource_type FROM audit_log WHERE resource_id=?", (inspection_id,))
+        audit = await cur.fetchone()
+        assert audit and audit[0] == "inspect"
+        print(f"✅ Audit log: {audit}")
+
+if __name__ == "__main__":
+    try:
+        test_health()
+        test_machines()
+        insp_id = test_inspect()
+        asyncio.run(test_db_persisted(insp_id))
+        print("\n🎉 ALL SMOKE TESTS PASSED")
+    except Exception as e:
+        print(f"\n❌ FAILED: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+```
+
+---
+
+### 13. Handoff File (`HANDOFF.md`) — **Antigravity creates & maintains this**
+```markdown
+# Sovereign AI Workbench — Backend Handoff
+
+## Current Status
+- **Slice**: 1 (Foundation + Camera Backend + Model Router)
+- **Last Updated**: 2026-09-09
+- **Implemented By**: Antigravity
+- **Reviewed By Planner**: No
+
+## Completed Components
+- [ ] FastAPI project structure
+- [ ] Config (Pydantic Settings + .env with model registry)
+- [ ] Model Router (vision, text, code, embedding tasks via ngrok)
+- [ ] SQLite models (Machine, Inspection, Ticket, Escalation, User, AuditLog)
+- [ ] Pydantic schemas (InspectRequest, InspectResponse, MachineResponse)
+- [ ] Inspection service (create_inspection, get_machines)
+- [ ] API routes (POST /inspect, GET /machines, GET /machines/{id})
+- [ ] Database init + seed data (3 machines, 3 users)
+- [ ] Main app (lifespan, CORS, health endpoint)
+- [ ] Requirements.txt
+- [ ] README with run instructions
+- [ ] Smoke test script (test_smoke.py)
+- [ ] HANDOFF.md (this file)
+
+## API Contract (frozen for frontend)
+```
+POST /api/v1/inspect
+Request: { machine_id: string, image_base64: string, prompt_override?: string }
+Response: { inspection_id, machine_id, finding, confidence, defect_location?, repair_steps[], needs_escalation, created_at }
+```
+
+## Database Schema
+- machines (id, machine_id, name, type, location, manual_path, specs_json, timestamps)
+- inspections (id, machine_id, finding, confidence, defect_location, repair_steps, needs_escalation, created_at)
+- tickets (id, inspection_id, machine_id, title, description, status, priority, assigned_to, timestamps)
+- escalations (id, ticket_id, reason, status, reviewer_id, timestamps)
+- users (id, username, full_name, role, created_at)
+- audit_log (id, user_id, action, resource_type, resource_id, details, created_at)
+
+## Model Routing (task → model)
+| Task | Model | Endpoint |
+|------|-------|----------|
+| Vision inspection | qwen2-vl | `/api/generate` with images[] |
+| Text chat/RAG | llama3.2 | `/api/generate` |
+| Code generation | codellama | `/api/generate` |
+| Embeddings | nomic-embed-text | `/api/embed` |
+
+## Known Issues / Decisions
+- [ ] **Model hosting**: Ollama runs on Google Colab GPU, exposed via ngrok tunnel
+- [ ] **ngrok URL changes per session** — must update NGROK_OLLAMA_URL in .env before each demo
+- [ ] **ngrok warning page** — bypassed via `ngrok-skip-browser-warning: true` header
+- [ ] **Cold start latency** — first request after Colab idle can take 30-60s (model load)
+- [ ] **Timeout set to 180s** for Colab cold starts
+- [ ] **Model registry in config** — easy to swap models per task without code changes
+
+## Next Slice Dependencies
+- Slice 2 needs: ChromaDB config, embedding model download, manual PDFs in `manuals/`
+- Slice 3 (frontend) needs: CORS working, /inspect contract stable
+
+## Commands to Run
+```bash
+# Start
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Test
+python test_smoke.py
+
+# DB inspect
+sqlite3 sovereign.db ".schema"
+sqlite3 sovereign.db "SELECT * FROM machines;"
+sqlite3 sovereign.db "SELECT id, machine_id, confidence, needs_escalation FROM inspections;"
+
+# Check ngrok tunnel
+curl -H "ngrok-skip-browser-warning: true" $NGROK_OLLAMA_URL/api/tags
+```
+```
+
+---
+
+### 14. README.md
+```markdown
+# Sovereign AI Workbench — Backend
+
+## Prerequisites
+- Python 3.11+
+- **Google Colab** running Ollama with models:
+  ```bash
+  # In Colab notebook:
+  !curl -fsSL https://ollama.com/install.sh | sh
+  !ollama serve &
+  !ollama pull qwen2-vl
+  !ollama pull llama3.2
+  !ollama pull codellama
+  !ollama pull nomic-embed-text
+  # Expose via ngrok:
+  !ngrok http 11434
+  ```
+- Copy ngrok HTTPS URL to backend `.env` as `NGROK_OLLAMA_URL`
+
+## Setup
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env: set NGROK_OLLAMA_URL=https://xxxx.ngrok-free.app
+```
+
+## Run
+```bash
+# Development
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Production
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+## Test
+```bash
+# Automated smoke test
+python test_smoke.py
+
+# Manual curl
+curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/machines
+
+# Real image test
+python -c "
+import base64
+with open('test_machine.jpg', 'rb') as f:
+    print(base64.b64encode(f.read()).decode())
+" > img.b64
+
+curl -X POST http://localhost:8000/api/v1/inspect \
+  -H "Content-Type: application/json" \
+  -d "{\"machine_id\": \"HX-204\", \"image_base64\": \"$(cat img.b64)\"}" | jq .
+```
+
+## Network Access (Phone on same WiFi)
+1. Find laptop IP: `ipconfig` (Windows) / `hostname -I` (Linux/Mac)
+2. Phone browser: `http://<LAPTOP_IP>:8000/docs` → Swagger UI
+3. Frontend calls `http://<LAPTOP_IP>:8000/api/v1/inspect`
+
+## Model Switching
+Edit `.env` to change models per task:
+```env
+MODEL_VISION=qwen2-vl
+MODEL_TEXT=llama3.2
+MODEL_CODE=codellama
+MODEL_EMBEDDING=nomic-embed-text
+```
+No code changes needed — router reads from config.
+```
+
+---
+
+### Acceptance Criteria (Definition of Done)
+- [ ] `uvicorn app.main:app --host 0.0.0.0 --port 8000` starts without errors
+- [ ] `GET /health` returns `{"status": "ok"}`
+- [ ] `GET /api/v1/machines` returns 3 seeded machines
+- [ ] `POST /api/v1/inspect` with base64 image returns `InspectResponse` in <3s (after warm)
+- [ ] Response includes all required fields with correct types
+- [ ] Inspection persisted to SQLite
+- [ ] Ticket auto-created when `confidence > 0.5` and finding ≠ normal
+- [ ] Escalation record created when `needs_escalation=true`
+- [ ] Audit log entry written
+- [ ] CORS allows `http://localhost:5173`
+- [ ] `python test_smoke.py` passes all checks
+- [ ] `HANDOFF.md` created and updated with current status
+
+---
+
+### Frontend Handoff (API Contract)
+```
+POST /api/v1/inspect
+Content-Type: application/json
+
+Request:
+{
+  "machine_id": "HX-204",
+  "image_base64": "<base64-jpeg>",
+  "prompt_override": "optional custom focus"
+}
+
+Response (201):
+{
+  "inspection_id": 1,
+  "machine_id": "HX-204",
+  "finding": "Spindle shows abnormal wear...",
+  "confidence": 0.87,
+  "defect_location": {"x": 0.42, "y": 0.58, "w": 0.15, "h": 0.12},
+  "repair_steps": ["Stop machine...", "Remove cover...", "..."],
+  "needs_escalation": false,
+  "created_at": "2026-09-09T14:32:10.123Z"
+}
+```
+
+---
+
+**That's the complete, updated Slice 1 Backend prompt.** Paste this into Antigravity. It will replace the previous implementation with ngrok/Colab support, multi-model routing, smoke test, and handoff file.

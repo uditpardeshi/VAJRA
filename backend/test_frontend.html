@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign AI Workbench — Backend Test Harness</title>
+<style>
+  * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+  body { max-width: 1000px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+  .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  h1 { color: #1a1a2e; }
+  h2 { color: #16213e; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+  label { display: block; margin: 10px 0 5px; font-weight: 500; }
+  select, input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+  button { padding: 10px 20px; background: #0f3460; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-right: 10px; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #1a1a2e; }
+  .btn-danger { background: #e94560; }
+  .btn-success { background: #27ae60; }
+  pre { background: #1a1a2e; color: #eaeaea; padding: 15px; border-radius: 4px; overflow: auto; max-height: 400px; font-size: 12px; }
+  .status { padding: 8px 12px; border-radius: 4px; font-weight: 500; display: inline-block; margin: 5px 0; }
+  .status.ok { background: #d4edda; color: #155724; }
+  .status.err { background: #f8d7da; color: #721c24; }
+  .status.warn { background: #fff3cd; color: #856404; }
+  .hidden { display: none !important; }
+  video { max-width: 100%; border-radius: 4px; background: #000; }
+  canvas { border: 2px solid #0f3460; border-radius: 4px; }
+  .ws-status { display: inline-flex; align-items: center; gap: 8px; }
+  .ws-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+  .ws-dot.connected { background: #27ae60; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .log-entry { padding: 5px 10px; font-family: monospace; font-size: 12px; border-bottom: 1px solid #eee; }
+  .log-entry.escalation { background: #fff3cd; }
+  .log-entry.inspection { background: #d4edda; }
+  .log-entry.chat { background: #d6eaf8; }
+</style>
+</head>
+<body>
+<h1>🔧 Sovereign AI Workbench — Backend Test Harness</h1>
+<div class="ws-status">
+  <span class="ws-dot" id="wsDot"></span>
+  <span id="wsStatus">WebSocket: Disconnected</span>
+  <button onclick="connectWS()">Connect WS</button>
+  <button onclick="disconnectWS()">Disconnect</button>
+</div>
+
+<!-- Config -->
+<div class="card">
+  <h2>⚙️ Configuration</h2>
+  <label>Backend Base URL</label>
+  <input type="text" id="baseUrl" value="/api/v1" placeholder="/api/v1">
+  <label>WebSocket URL</label>
+  <input type="text" id="wsUrl" value="" placeholder="ws://localhost:8000/api/v1/ws/escalations">
+  <label>Role</label>
+  <select id="wsRole"><option value="reviewer">Reviewer</option><option value="admin">Admin</option><option value="engineer">Engineer</option></select>
+  <label>User ID</label>
+  <input type="number" id="wsUserId" value="2" min="1">
+</div>
+
+<!-- 1. Camera Inspection -->
+<div class="card">
+  <h2>📷 Camera Inspection (Slice 1 + 5)</h2>
+  <div class="grid">
+    <div>
+      <label>Machine</label>
+      <select id="inspectMachine"></select>
+      <label>Prompt Override (optional)</label>
+      <input type="text" id="inspectPrompt" placeholder="Focus on spindle wear...">
+      <br><br>
+      <video id="video" autoplay playsinline width="320" height="240"></video>
+      <br><br>
+      <button onclick="startCamera()">Start Camera</button>
+      <button onclick="captureAndInspect()">📸 Capture & Inspect</button>
+      <button onclick="stopCamera()">Stop</button>
+    </div>
+    <div>
+      <canvas id="canvas" width="320" height="240" class="hidden"></canvas>
+      <div id="inspectResult" class="status">No inspection yet</div>
+      <pre id="inspectJson"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Chat / RAG -->
+<div class="card">
+  <h2>💬 Chat / RAG (Slice 2)</h2>
+  <div class="grid">
+    <div>
+      <label>Question</label>
+      <textarea id="chatQuestion" rows="3" placeholder="What is the acceptable spindle runout for HX-204?"></textarea>
+      <label>Machine Filter (optional)</label>
+      <select id="chatMachine"><option value="">All Machines</option></select>
+      <label>Top K</label>
+      <input type="number" id="chatTopK" value="3" min="1" max="10" style="width: 80px;">
+      <br><br>
+      <button onclick="sendChat()">🔍 Ask</button>
+    </div>
+    <div>
+      <div id="chatResult" class="status">No query yet</div>
+      <pre id="chatJson"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Escalation WebSocket -->
+<div class="card">
+  <h2>🚨 Escalation WebSocket (Slice 5)</h2>
+  <div id="wsLog" style="max-height: 300px; overflow-y: auto; background: #fafafa; border-radius: 4px; padding: 10px;">
+    <div class="log-entry">Waiting for WebSocket messages...</div>
+  </div>
+  <button onclick="clearWsLog()">Clear Log</button>
+</div>
+
+<!-- 4. Agent Document Analysis -->
+<div class="card">
+  <h2>🤖 Agent Document Analysis (Slice 6)</h2>
+  <div class="grid">
+    <div>
+      <label>Machine</label>
+      <select id="agentMachine"></select>
+      <label>Analysis Type</label>
+      <select id="agentType">
+        <option value="thickness_approval">Thickness Approval</option>
+        <option value="wear_analysis">Wear Analysis</option>
+        <option value="compliance_check">Compliance Check</option>
+      </select>
+      <label>Inspection Report (PDF/DOCX)</label>
+      <input type="file" id="agentFile" accept=".pdf,.docx">
+      <br><br>
+      <button onclick="uploadAndAnalyze()">📤 Upload & Analyze</button>
+    </div>
+    <div>
+      <div id="agentResult" class="status">No analysis yet</div>
+      <pre id="agentJson"></pre>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Agent Runs History -->
+<div class="card">
+  <h2>📋 Agent Runs History</h2>
+  <button onclick="loadAgentRuns()">Refresh</button>
+  <pre id="runsJson" style="max-height: 300px;"></pre>
+</div>
+
+<script>
+// STATE
+let videoStream = null;
+let ws = null;
+let machines = [];
+
+// UTILITIES
+const $ = (id) => document.getElementById(id);
+
+function base() {
+  let val = $('baseUrl').value.trim();
+  if (val.startsWith("http")) return val.replace(/\/+$/, '');
+  return window.location.origin + (val.startsWith("/") ? val : "/" + val).replace(/\/+$/, '');
+}
+
+function wsBase() {
+  let val = $('wsUrl').value.trim();
+  if (val) return val.replace(/\/+$/, '');
+  const loc = window.location;
+  const wsProto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProto}//${loc.host}/api/v1/ws/escalations`;
+}
+
+function logWs(type, payload) {
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> [${type.toUpperCase()}] ${JSON.stringify(payload).slice(0, 300)}`;
+  $('wsLog').prepend(entry);
+}
+
+function setWsConnected(connected) {
+  $('wsDot').classList.toggle('connected', connected);
+  $('wsStatus').textContent = `WebSocket: ${connected ? 'Connected' : 'Disconnected'}`;
+}
+
+// MACHINES LOADING
+async function loadMachines() {
+  try {
+    const res = await fetch(`${base()}/machines`);
+    const data = await res.json();
+    machines = data.machines || [];
+    ['inspectMachine', 'chatMachine', 'agentMachine'].forEach(id => {
+      const sel = $(id);
+      const firstVal = sel.value;
+      sel.innerHTML = '<option value="">Select Machine</option>' + 
+        machines.map(m => `<option value="${m.machine_id}">${m.machine_id} — ${m.name}</option>`).join('');
+      if (firstVal) sel.value = firstVal;
+    });
+  } catch (e) {
+    console.error('Failed to load machines:', e);
+  }
+}
+
+// CAMERA
+async function startCamera() {
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } 
+    });
+    $('video').srcObject = videoStream;
+    $('video').classList.remove('hidden');
+    $('canvas').classList.add('hidden');
+  } catch (e) {
+    alert('Camera access denied: ' + e.message);
+  }
+}
+
+function stopCamera() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+    videoStream = null;
+  }
+  $('video').classList.add('hidden');
+  $('canvas').classList.remove('hidden');
+}
+
+function captureAndInspect() {
+  const video = $('video');
+  const canvas = $('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = video.videoWidth || 320;
+  canvas.height = video.videoHeight || 240;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+  video.classList.add('hidden');
+  canvas.classList.remove('hidden');
+  
+  const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+  doInspect(base64);
+}
+
+async function doInspect(base64) {
+  const machineId = $('inspectMachine').value;
+  const prompt = $('inspectPrompt').value;
+  
+  if (!machineId) { alert('Select a machine'); return; }
+  
+  $('inspectResult').className = 'status warn';
+  $('inspectResult').textContent = 'Inspecting...';
+  $('inspectJson').textContent = '...';
+  
+  try {
+    const res = await fetch(`${base()}/inspect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ machine_id: machineId, image_base64: base64, prompt_override: prompt })
+    });
+    
+    const data = await res.json();
+    $('inspectJson').textContent = JSON.stringify(data, null, 2);
+    
+    if (res.ok) {
+      $('inspectResult').className = 'status ok';
+      $('inspectResult').textContent = `✅ Inspection #${data.inspection_id} — Confidence: ${(data.confidence*100).toFixed(0)}% — ${data.needs_escalation ? '⚠️ ESCALATED' : 'OK'}`;
+      logWs('inspection', data);
+    } else {
+      $('inspectResult').className = 'status err';
+      $('inspectResult').textContent = `❌ Error: ${data.detail || 'Unknown'}`;
+    }
+  } catch (e) {
+    $('inspectResult').className = 'status err';
+    $('inspectResult').textContent = `❌ Network error: ${e.message}`;
+  }
+}
+
+// CHAT / RAG
+async function sendChat() {
+  const question = $('chatQuestion').value.trim();
+  const machineId = $('chatMachine').value || null;
+  const topK = parseInt($('chatTopK').value) || 3;
+  
+  if (!question) { alert('Enter a question'); return; }
+  
+  $('chatResult').className = 'status warn';
+  $('chatResult').textContent = 'Querying...';
+  $('chatJson').textContent = '...';
+  
+  try {
+    const res = await fetch(`${base()}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, machine_id: machineId, top_k: topK })
+    });
+    
+    const data = await res.json();
+    $('chatJson').textContent = JSON.stringify(data, null, 2);
+    
+    if (res.ok) {
+      $('chatResult').className = 'status ok';
+      $('chatResult').textContent = `✅ Answer (confidence: ${(data.confidence*100).toFixed(0)}%, ${data.citations.length} citations)`;
+      logWs('chat', { question, citations: data.citations.length });
+    } else {
+      $('chatResult').className = 'status err';
+      $('chatResult').textContent = `❌ Error: ${data.detail || 'Unknown'}`;
+    }
+  } catch (e) {
+    $('chatResult').className = 'status err';
+    $('chatResult').textContent = `❌ Network error: ${e.message}`;
+  }
+}
+
+// WEBSOCKET
+function connectWS() {
+  const role = $('wsRole').value;
+  const userId = $('wsUserId').value;
+  const url = `${wsBase()}?role=${role}&user_id=${userId}`;
+  
+  ws = new WebSocket(url);
+  
+  ws.onopen = () => {
+    setWsConnected(true);
+    logWs('system', { event: 'connected', role, userId });
+  };
+  
+  ws.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'pong') return;
+      logWs(msg.type, msg.payload);
+    } catch (e) {
+      logWs('raw', event.data);
+    }
+  };
+  
+  ws.onclose = () => {
+    setWsConnected(false);
+    logWs('system', { event: 'disconnected' });
+  };
+  
+  ws.onerror = (e) => {
+    logWs('error', { message: 'WebSocket error' });
+  };
+  
+  setInterval(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ ping: true }));
+    }
+  }, 30000);
+}
+
+function disconnectWS() {
+  if (ws) { ws.close(); ws = null; }
+  setWsConnected(false);
+}
+
+function clearWsLog() {
+  $('wsLog').innerHTML = '<div class="log-entry">Log cleared</div>';
+}
+
+// AGENT DOCUMENT ANALYSIS
+async function uploadAndAnalyze() {
+  const file = $('agentFile').files[0];
+  const machineId = $('agentMachine').value;
+  const analysisType = $('agentType').value;
+  
+  if (!file) { alert('Select a file'); return; }
+  if (!machineId) { alert('Select a machine'); return; }
+  
+  $('agentResult').className = 'status warn';
+  $('agentResult').textContent = 'Analyzing... (this may take a moment)';
+  $('agentJson').textContent = '...';
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('machine_id', machineId);
+  formData.append('analysis_type', analysisType);
+  
+  try {
+    const res = await fetch(`${base()}/analyze-doc`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await res.json();
+    $('agentJson').textContent = JSON.stringify(data, null, 2);
+    
+    if (res.ok && data.status === 'completed') {
+      $('agentResult').className = 'status ok';
+      $('agentResult').textContent = `✅ Run #${data.run_id} — ${data.result.recommendation} — Deviation: ${data.result.deviation_mm ?? 'N/A'} mm`;
+      logWs('agent', { run_id: data.run_id, recommendation: data.result.recommendation });
+    } else if (res.ok && data.status === 'failed') {
+      $('agentResult').className = 'status err';
+      $('agentResult').textContent = `❌ Failed: ${data.result.error}`;
+    } else {
+      $('agentResult').className = 'status err';
+      $('agentResult').textContent = `❌ HTTP ${res.status}: ${data.detail || 'Unknown'}`;
+    }
+  } catch (e) {
+    $('agentResult').className = 'status err';
+    $('agentResult').textContent = `❌ Network error: ${e.message}`;
+  }
+}
+
+async function loadAgentRuns() {
+  try {
+    const res = await fetch(`${base()}/agent/runs?limit=20`);
+    const data = await res.json();
+    $('runsJson').textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    $('runsJson').textContent = 'Error: ' + e.message;
+  }
+}
+
+// INIT
+loadMachines();
+setTimeout(() => { if ($('wsRole').value !== 'engineer') connectWS(); }, 500);
+window.addEventListener('beforeunload', () => { stopCamera(); disconnectWS(); });
+</script>
+</body>
+</html>
