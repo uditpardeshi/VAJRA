@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: str = "./chroma_db"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+    SECRET_KEY: str = "sovereign-demo-secret-change-me-prod"
+    WS_TOKEN_TTL_MINUTES: int = 5
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -51,22 +51,43 @@ async def resolve(
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+import uuid
+from app.core.security import decode_ws_token
+
 # WebSocket endpoint for real-time alerts
 @router.websocket("/ws/escalations")
 async def websocket_escalations(
     websocket: WebSocket,
-    role: str = Query(..., description="reviewer|admin|engineer"),
-    user_id: int = Query(..., description="User ID from auth")
+    token: str = Query(...),
 ):
-    if role not in ("reviewer", "admin", "engineer"):
-        await websocket.close(code=4001, reason="Invalid role")
+    try:
+        auth = decode_ws_token(token)
+    except ValueError as e:
+        await websocket.close(code=4001, reason=str(e))
         return
+
+    role, user_id = auth["role"], auth["user_id"]
 
     await ws_manager.connect(websocket, role, user_id)
     try:
         while True:
             data = await websocket.receive_text()
-            await websocket.send_text(json.dumps({"type": "pong", "timestamp": datetime.utcnow().isoformat()}))
+            try:
+                msg = json.loads(data)
+            except json.JSONDecodeError:
+                continue
+
+            if msg.get("type") == "ack":
+                await ws_manager._ack_received(websocket, msg.get("msg_id"))
+                continue
+
+            if msg.get("type") == "ping":
+                await websocket.send_text(json.dumps({
+                    "type": "pong",
+                    "msg_id": str(uuid.uuid4()),
+                    "timestamp": datetime.utcnow().isoformat()
+                }))
+                continue
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket, role, user_id)
     except Exception as e:
