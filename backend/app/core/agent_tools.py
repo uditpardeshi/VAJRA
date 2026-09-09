@@ -75,17 +75,14 @@ async def knowledge_search(query: str, machine_id: Optional[str] = None, top_k: 
 # ============================================================
 # TOOL 3: Calculator - safe arithmetic
 # ============================================================
+from simpleeval import simple_eval
+
 async def calculator(expression: str) -> Dict[str, Any]:
-    """Safely evaluate arithmetic expression."""
-    allowed = set("0123456789.+-*/() ")
-    clean_expr = expression.strip()
-    if not all(c in allowed for c in clean_expr):
-        return {"error": "Invalid characters in expression"}
-    
+    """Safely evaluate arithmetic expression using simpleeval."""
+    allowed_names = {"pi": 3.14159, "e": 2.71828}
     try:
-        # Safe evaluation with empty builtins
-        result = eval(clean_expr, {"__builtins__": {}}, {})
-        return {"expression": clean_expr, "result": float(result)}
+        result = simple_eval(expression.strip(), names=allowed_names)
+        return {"expression": expression, "result": float(result)}
     except Exception as e:
         return {"error": f"Calculation failed: {str(e)}"}
 
