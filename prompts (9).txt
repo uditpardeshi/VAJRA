@@ -1,0 +1,327 @@
+### **Issue 3 Prompt for Antigravity — Human-in-Loop: Ticket Approve/Reject Endpoints**
+
+---
+
+## **BACKEND PROMPT: Reviewer Ticket Approval Workflow**
+
+### **Context**
+- **Problem**: Tickets auto-created without any human review step.
+- **Fix**: All tickets start `pending_review`. Reviewer must **Approve** → `open` or **Reject** → `rejected`. Add backend endpoints for this.
+- **Prereq**: Issue 2 fix must be applied (three confidence bands + `pending_review` status + nullable escalation `ticket_id`).
+
+---
+
+### **Files to Modify**
+
+#### 1. `app/models/tables.py` — TicketStatus already has `PENDING_REVIEW` + `REJECTED` (from Issue 2 prompt)
+
+#### 2. `app/schemas/ticket.py` (NEW FILE)
+```python
+from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime
+from app.models.tables import TicketStatus
+
+class TicketActionRequest(BaseModel):
+    reviewer_id: int
+    note: Optional[str] = None
+
+class TicketApproveRequest(TicketActionRequest):
+    # Optionally assign to engineer
+    assigned_to: Optional[int] = None
+
+class TicketResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    inspection_id: int
+    machine_id: int
+    title: str
+    description: Optional[str] = None
+    status: TicketStatus
+    priority: int
+    assigned_to: Optional[int] = None
+    created_at: datetime
+    resolved_at: Optional[datetime] = None
+```
+
+#### 3. `app/services/ticket_service.py` (NEW FILE)
+```python
+import json
+from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update
+from app.models.tables import Ticket, TicketStatus, AuditLog, Escalation, EscalationStatus
+from app.core.websocket_manager import ws_manager
+from app.schemas.escalation import WSMessage
+import asyncio
+
+async def approve_ticket(
+    db: AsyncSession,
+    ticket_id: int,
+    reviewer_id: int,
+    assigned_to: Optional[int] = None,
+    note: Optional[str] = None
+) -> Ticket:
+    """Approve pending_review ticket → status=open."""
+    ticket = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
+    ticket = ticket.scalar_one_or_none()
+    if not ticket:
+        raise ValueError(f"Ticket {ticket_id} not found")
+
+    if ticket.status != TicketStatus.PENDING_REVIEW:
+        raise ValueError(f"Ticket {ticket_id} is not pending_review (current: {ticket.status})")
+
+    ticket.status = TicketStatus.OPEN
+    if assigned_to:
+        ticket.assigned_to = assigned_to
+
+    # Audit
+    audit = AuditLog(
+        user_id=reviewer_id,
+        action="ticket_approved",
+        resource_type="ticket",
+        resource_id=ticket.id,
+        details=json.dumps({"note": note, "assigned_to": assigned_to})
+    )
+    db.add(audit)
+    await db.commit()
+    await db.refresh(ticket)
+
+    # Notify via WS (engineers assigned)
+    if assigned_to:
+        ws_msg = WSMessage(type="ticket_approved", payload={
+            "ticket_id": ticket.id,
+            "assigned_to": assigned_to,
+            "title": ticket.title
+        })
+        asyncio.create_task(ws_manager.send_to_user(assigned_to, ws_msg))
+
+    return ticket
+
+
+async def reject_ticket(
+    db: AsyncSession,
+    ticket_id: int,
+    reviewer_id: int,
+    note: str
+) -> Ticket:
+    """Reject pending_review ticket → status=rejected. No work performed."""
+    ticket = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
+    ticket = ticket.scalar_one_or_none()
+    if not ticket:
+        raise ValueError(f"Ticket {ticket_id} not found")
+
+    if ticket.status != TicketStatus.PENDING_REVIEW:
+        raise ValueError(f"Ticket {ticket_id} is not pending_review (current: {ticket.status})")
+
+    if not note:
+        raise ValueError("Rejection requires a note explaining why")
+
+    ticket.status = TicketStatus.REJECTED
+    ticket.resolved_at = datetime.utcnow()
+
+    # Audit
+    audit = AuditLog(
+        user_id=reviewer_id,
+        action="ticket_rejected",
+        resource_type="ticket",
+        resource_id=ticket.id,
+        details=json.dumps({"note": note})
+    )
+    db.add(audit)
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
+
+
+async def list_pending_review_tickets(db: AsyncSession) -> list[Ticket]:
+    """For reviewer dashboard: all tickets awaiting approval."""
+    result = await db.execute(
+        select(Ticket)
+        .where(Ticket.status == TicketStatus.PENDING_REVIEW)
+        .order_by(Ticket.created_at.asc())
+    )
+    return result.scalars().all()
+
+
+async def convert_escalation_without_ticket(
+    db: AsyncSession,
+    escalation_id: int,
+    reviewer_id: int,
+    title: str,
+    description: str,
+    machine_id: int,
+    inspection_id: Optional[int] = None
+) -> Ticket:
+    """
+    For <0.5 confidence escalations (no ticket exists yet):
+    Reviewer decides to convert → creates a new pending_review ticket from escalation.
+    """
+    escalation = await db.execute(select(Escalation).where(Escalation.id == escalation_id))
+    escalation = escalation.scalar_one_or_none()
+    if not escalation:
+        raise ValueError(f"Escalation {escalation_id} not found")
+
+    ticket = Ticket(
+        inspection_id=inspection_id or 0,
+        machine_id=machine_id,
+        title=title,
+        description=description,
+        status=TicketStatus.PENDING_REVIEW,
+        priority=2,
+    )
+    db.add(ticket)
+    await db.flush()
+
+    escalation.ticket_id = ticket.id
+    escalation.status = EscalationStatus.ACKNOWLEDGED
+    escalation.reviewer_id = reviewer_id
+
+    # Audit
+    audit = AuditLog(
+        user_id=reviewer_id,
+        action="escalation_converted_to_ticket",
+        resource_type="ticket",
+        resource_id=ticket.id,
+        details=json.dumps({"escalation_id": escalation_id})
+    )
+    db.add(audit)
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
+```
+
+#### 4. `app/api/v1/routes_tickets.py` (NEW FILE)
+```python
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
+from app.core.database import get_db
+from app.services.ticket_service import (
+    approve_ticket, reject_ticket, list_pending_review_tickets, convert_escalation_without_ticket
+)
+from app.schemas.ticket import TicketApproveRequest, TicketActionRequest, TicketResponse
+
+router = APIRouter(prefix="/api/v1", tags=["tickets"])
+
+@router.get("/tickets/pending-review", response_model=List[TicketResponse])
+async def list_pending_review(db: AsyncSession = Depends(get_db)):
+    """Reviewer: all tickets waiting for approval."""
+    tickets = await list_pending_review_tickets(db)
+    return [TicketResponse.model_validate(t) for t in tickets]
+
+@router.post("/tickets/{ticket_id}/approve", response_model=TicketResponse)
+async def approve(
+    ticket_id: int,
+    request: TicketApproveRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Approve pending ticket → open. Optionally assign to engineer (assigned_to)."""
+    try:
+        ticket = await approve_ticket(
+            db, ticket_id, request.reviewer_id,
+            assigned_to=request.assigned_to, note=request.note
+        )
+        return TicketResponse.model_validate(ticket)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/tickets/{ticket_id}/reject", response_model=TicketResponse)
+async def reject(
+    ticket_id: int,
+    request: TicketActionRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Reject pending ticket. Requires note."""
+    try:
+        if not request.note:
+            raise ValueError("Rejection requires a note explaining why")
+        ticket = await reject_ticket(db, ticket_id, request.reviewer_id, request.note)
+        return TicketResponse.model_validate(ticket)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/escalations/{escalation_id}/convert-to-ticket", response_model=TicketResponse)
+async def convert_escalation(
+    escalation_id: int,
+    request: dict,
+    db: AsyncSession = Depends(get_db)
+):
+    """For <0.5 confidence escalations: convert to ticket (pending_review)."""
+    try:
+        ticket = await convert_escalation_without_ticket(
+            db, escalation_id,
+            reviewer_id=request["reviewer_id"],
+            title=request["title"],
+            description=request.get("description", ""),
+            machine_id=request["machine_id"],
+            inspection_id=request.get("inspection_id")
+        )
+        return TicketResponse.model_validate(ticket)
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+```
+
+#### 5. `app/main.py` — Register new router
+```python
+from app.api.v1 import routes_tickets
+app.include_router(routes_tickets.router)
+```
+
+---
+
+### **Reviewer Workflow (After Fix)**
+
+```
+Worker inspection → ticket created (pending_review) or escalation (no ticket)
+        ↓
+Reviewer dashboard → "Pending Review" queue
+        ↓
+   ┌────────────┐
+   ├ Approve → status=open, optionally assigned_to engineer
+   │           → WS notify engineer
+   ├ Reject  → status=rejected, note required
+   │           → ticket closed, no work done
+   └ Convert escalation (<0.5) → new pending_review ticket
+```
+
+---
+
+### **Testing Commands**
+```bash
+# 1. Start backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# 2. Trigger an inspection → get ticket_id (or escalation_id)
+python test_smoke.py
+
+# 3. List pending review tickets
+curl http://localhost:8000/api/v1/tickets/pending-review
+
+# 4. Approve ticket 1, assign to engineer (user_id=1)
+curl -X POST http://localhost:8000/api/v1/tickets/1/approve \
+  -H "Content-Type: application/json" \
+  -d '{"reviewer_id": 2, "assigned_to": 1, "note": "Looks valid, assign"}'
+
+# 5. Reject ticket 2 (requires note)
+curl -X POST http://localhost:8000/api/v1/tickets/2/reject \
+  -H "Content-Type: application/json" \
+  -d '{"reviewer_id": 2, "note": "False alarm — dirty lens"}'
+
+# 6. Convert escalation 1 (if no ticket exists from <0.5 confidence)
+curl -X POST http://localhost:8000/api/v1/escalations/1/convert-to-ticket \
+  -H "Content-Type: application/json" \
+  -d '{"reviewer_id": 2, "title": "Spindle noise concern", "description": "Reported by worker, converting", "machine_id": 1}'
+
+# 7. Verify DB
+sqlite3 sovereign.db "SELECT id, status FROM tickets;"
+```
+
+---
+
+### **Handoff Note for Antigravity**
+> **Depends on Issue 2 (already done)**: `TicketStatus.pending_review/rejected` must exist, `Escalation.ticket_id` is nullable. Add `ticket_service.py`, `routes_tickets.py`, schemas. Do NOT modify inspection_service.py ticket creation logic. All new endpoints only.
+
+---
+
+**Issue 3 done.** Next: **Issue 4** (WebSocket auth + reliability Level 2). Ready?

@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: str = "./chroma_db"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+    SECRET_KEY: str = "sovereign-demo-secret-change-me-prod"
+    WS_TOKEN_TTL_MINUTES: int = 5
+
     # Multimodal RAG (RAG-Anything) settings
     RAG_MODE: str = "multimodal"  # "multimodal" | "chroma"
     RAG_STORAGE_DIR: str = "./rag_storage"

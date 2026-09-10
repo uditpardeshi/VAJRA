@@ -1,0 +1,229 @@
+**HANDOFF PROMPT FOR ANTIGRAVITY — Post-Fix Verification Report**
+
+---
+
+## **Instructions for Antigravity**
+
+After implementing all fixes, **fill out this entire document** and save as `FIX_VERIFICATION.md` in backend root. I (the planner) will review it.
+
+---
+
+## **FIX_VERIFICATION.md Template**
+
+```markdown
+# Sovereign AI Workbench — Fix Verification Report
+
+**Date**: 2026-09-10
+**Implemented By**: Antigravity
+**Reviewed By Planner**: No
+
+---
+
+## ✅ Issue 1: Silent Fallback Confidence
+
+**Problem**: Model failure returned default confidence (≥0.7) → failed inspection silently passed as "confident", skipped escalation.
+
+**Fix Applied**:
+- [ ] Added `ModelUnavailableError` in `app/core/exceptions.py`
+- [ ] `model_router.vision_inspect()` raises `ModelUnavailableError` on timeout/connection/parse failure (no fallback)
+- [ ] `inspection_service.create_inspection()` catches `ModelUnavailableError` → re-raises (no ticket created)
+- [ ] `routes_inspect.inspect_equipment()` catches `ModelUnavailableError` → returns **HTTP 503** with:
+  ```json
+  {"detail": "MODEL_UNAVAILABLE", "reason": "<reason>", "message": "AI model unavailable — inspection not recorded. Please retry."}
+  ```
+- [ ] Added `model_status` column to `Inspection` table (enum: `success`/`failed`/`timeout`)
+- [ ] `InspectResponse` schema includes `model_status`
+
+**Verification**:
+```bash
+# Stop ngrok → run smoke test
+python test_smoke.py
+# Expected: HTTP 503, no ticket in DB
+
+# Check DB
+sqlite3 sovereign.db "SELECT id, model_status, finding FROM inspections ORDER BY id DESC LIMIT 3;"
+# Expected: model_status='failed' or no new row on model failure
+```
+
+**Status**: ☐ Done / ☐ Partial / ☐ Blocked
+**Notes**: 
+
+---
+
+## ✅ Issues 2 + 3: Confidence Threshold Overlap + Human-in-Loop
+
+**Problem**: Overlapping thresholds (ticket >0.5, escalation <0.7) → duplicate records in 0.5–0.7. High-confidence (>0.7) auto-created `open` tickets with no approval.
+
+**Fix Applied**:
+- [ ] Three confidence bands implemented in `inspection_service.create_inspection()`:
+
+| Confidence | Ticket | Status | Escalation |
+|------------|--------|--------|------------|
+| > 0.7 | ✅ | `pending_review` | ❌ |
+| 0.5–0.7 | ✅ | `pending_review` | ❌ |
+| < 0.5 | ❌ | — | ✅ `low_confidence` |
+
+- [ ] All tickets start `pending_review` (never auto-`open`)
+- [ ] `TicketStatus` enum: added `PENDING_REVIEW`, `REJECTED`
+- [ ] `Escalation.ticket_id` → nullable (escalations can exist without tickets for <0.5)
+- [ ] `EscalationReason`: `LOW_CONFIDENCE` (only <0.5), `SAFETY_CRITICAL` (high-confidence safety)
+- [ ] Reviewer endpoints in `routes_tickets.py`:
+  - `GET /tickets/pending-review`
+  - `POST /tickets/{id}/approve` → `status=open`, optional `assigned_to`
+  - `POST /tickets/{id}/reject` → `status=rejected`, requires `note`
+  - `POST /escalations/{id}/convert-to-ticket` (for <0.5 escalations)
+
+**Verification**:
+```bash
+# Test each band via smoke test with prompted confidence
+# Check DB
+sqlite3 sovereign.db "SELECT t.id, t.status, e.id, e.reason FROM tickets t LEFT JOIN escalations e ON e.ticket_id=t.id ORDER BY t.id DESC LIMIT 6;"
+
+# Approve/reject via API
+curl -X POST http://localhost:8000/api/v1/tickets/1/approve -d '{"reviewer_id":2,"assigned_to":1}'
+curl -X POST http://localhost:8000/api/v1/tickets/2/reject -d '{"reviewer_id":2,"note":"False alarm"}'
+```
+
+**Status**: ☐ Done / ☐ Partial / ☐ Blocked
+**Notes**: 
+
+---
+
+## ✅ Issue 4: WebSocket Auth + Reliability (Level 2)
+
+**Problem**: Query-param auth (spoofable), fire-and-forget broadcasts (message loss).
+
+**Fix Applied**:
+- [ ] Added `pyjwt` + `SECRET_KEY` in config
+- [ ] `POST /api/v1/auth/ws-token` → short JWT (5 min) with `{user_id, role, type:"ws"}`
+- [ ] WS endpoint: `?token=<jwt>` (validates via `decode_ws_token()`)
+- [ ] `WebSocketManager` upgrade:
+  - Every outbound message gets `msg_id` (UUID)
+  - `send_json()` → awaits ACK (3s timeout), retries max 3x (2s backoff)
+  - `_ack_received()` removes from retry queue
+  - `broadcast_to_role()` / `broadcast_all()` now `await` (ACK + retry)
+- [ ] Client contract documented: must send `{"type":"ack","msg_id":...}` for each message
+- [ ] Heartbeat: client sends `{"type":"ping"}` every 30s, server replies `pong`
+
+**Verification**:
+```bash
+# Get token
+curl -X POST http://localhost:8000/api/v1/auth/ws-token -d '{"user_id":2,"role":"reviewer"}'
+# Connect with token (Python script)
+python -c "
+import asyncio, websockets, json
+async def main():
+    async with websockets.connect('ws://localhost:8000/api/v1/ws/escalations?token=<TOKEN>') as ws:
+        msg = await ws.recv()
+        data = json.loads(msg)
+        print('Received:', data)
+        await ws.send(json.dumps({'type':'ack','msg_id':data['msg_id']}))
+asyncio.run(main())
+"
+# Expected: connects, receives message, ACK works, no retry needed
+```
+
+**Status**: ☐ Done / ☐ Partial / ☐ Blocked
+**Notes**: 
+
+---
+
+## ✅ Issue 5: Calculator `eval()` → `simpleeval`
+
+**Problem**: `eval()` in `agent_tools.calculator()` — injection risk.
+
+**Fix Applied**:
+- [ ] Added `simpleeval==0.9.13` to `requirements.txt`
+- [ ] Replaced `calculator()` in `agent_tools.py`:
+  ```python
+  from simpleeval import simple_eval
+  async def calculator(expression: str):
+      allowed_names = {"pi": 3.14159, "e": 2.71828}
+      try:
+          result = simple_eval(expression, names=allowed_names)
+          return {"expression": expression, "result": float(result)}
+      except Exception as e:
+          return {"error": f"Calculation failed: {str(e)}"}
+  ```
+
+**Verification**:
+```bash
+python -c "
+import asyncio
+from app.core.agent_tools import calculator
+async def test():
+    for expr in ['3.5-2.8','pi*2','abs(-1)','__import__(\"os\")']:
+        print(f'{expr:20} → {await calculator(expr)}')
+asyncio.run(test())
+"
+# Expected: math works, abs/__import__ blocked
+```
+
+**Status**: ☐ Done / ☐ Partial / ☐ Blocked
+**Notes**: 
+
+---
+
+## ⏭️ Issue 6: AR Calibration
+**Status**: SKIPPED — Frontend responsibility (backend returns normalized coords + `model_input_resolution`)
+
+---
+
+## 🟡 Issue 7: Mock Analytics Data
+**Status**: DEFERRED — Kept mock data for demo per decision
+
+---
+
+## ❌ Issue 8: RAG Chunking Quality
+**Status**: DEFERRED — Working well enough for demo
+
+---
+
+## ❌ Issue 9: Colab Cold Start 30-60s
+**Status**: PENDING — Not fixed yet (accepted tradeoff)
+
+---
+
+## ⚪ Issue 10: iOS PWA Install
+**Status**: LOW — Skip unless demo device is iPhone
+
+---
+
+## 📋 Summary Checklist
+
+| Issue | Status | Verified? |
+|-------|--------|-----------|
+| 1. Silent fallback confidence | ☐ Done | ☐ |
+| 2. Confidence threshold overlap | ☐ Done | ☐ |
+| 3. Human-in-loop (pending_review) | ☐ Done | ☐ |
+| 4. WS auth + reliability (Level 2) | ☐ Done | ☐ |
+| 5. Calculator safe eval | ☐ Done | ☐ |
+| 6. AR calibration | ⏭️ Skipped | — |
+| 7. Mock analytics | 🟡 Deferred | — |
+| 8. RAG chunking | 🟡 Deferred | — |
+| 9. Colab cold start | 🔴 Pending | — |
+| 10. iOS PWA | ⚪ Low | — |
+
+---
+
+## 🧪 Full Regression Test
+```bash
+# Run all smoke tests
+cd backend
+source .venv/bin/activate
+python test_smoke.py
+python test_rag.py
+python test_escalation.py
+python test_agent.py
+
+# All should pass 🎉
+```
+
+---
+
+## 📝 Antigravity Notes / Blockers
+> List any deviations, partial implementations, or blockers here.
+
+```
+```
+```

@@ -4,6 +4,8 @@ from app.core.database import get_db
 from app.services.inspection_service import create_inspection
 from app.schemas.inspection import InspectRequest, InspectResponse
 
+from app.core.exceptions import ModelUnavailableError
+
 router = APIRouter(prefix="/api/v1", tags=["inspection"])
 
 @router.post("/inspect", response_model=InspectResponse, status_code=status.HTTP_201_CREATED)
@@ -17,6 +19,15 @@ async def inspect_equipment(
     """
     try:
         return await create_inspection(db, request)
+    except ModelUnavailableError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "detail": "MODEL_UNAVAILABLE",
+                "reason": e.reason,
+                "message": "AI model unavailable — inspection not recorded. Please retry."
+            }
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

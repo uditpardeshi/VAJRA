@@ -13,10 +13,12 @@ class UserRole(str, PyEnum):
     ADMIN = "admin"
 
 class TicketStatus(str, PyEnum):
+    PENDING_REVIEW = "pending_review"
     OPEN = "open"
     IN_PROGRESS = "in_progress"
     RESOLVED = "resolved"
     CLOSED = "closed"
+    REJECTED = "rejected"
 
 class EscalationStatus(str, PyEnum):
     PENDING = "pending"
@@ -38,6 +40,11 @@ class Machine(Base):
     inspections = relationship("Inspection", back_populates="machine")
     tickets = relationship("Ticket", back_populates="machine")
 
+class ModelStatus(str, PyEnum):
+    SUCCESS = "success"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+
 class Inspection(Base):
     __tablename__ = "inspections"
     id = Column(Integer, primary_key=True, index=True)
@@ -48,6 +55,7 @@ class Inspection(Base):
     defect_location = Column(Text)             # JSON: {"x": 0.3, "y": 0.6, "w": 0.1, "h": 0.15}
     repair_steps = Column(Text)                # JSON array of strings
     needs_escalation = Column(Integer, default=0)  # 0/1
+    model_status = Column(Enum(ModelStatus), default=ModelStatus.SUCCESS, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     machine = relationship("Machine", back_populates="inspections")
@@ -60,7 +68,7 @@ class Ticket(Base):
     machine_id = Column(Integer, ForeignKey("machines.id"), nullable=False, index=True)
     title = Column(String(200), nullable=False)
     description = Column(Text)
-    status = Column(Enum(TicketStatus), default=TicketStatus.OPEN, index=True)
+    status = Column(Enum(TicketStatus), default=TicketStatus.PENDING_REVIEW, index=True)
     priority = Column(Integer, default=2)  # 1=critical, 2=high, 3=medium, 4=low
     assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
@@ -73,7 +81,7 @@ class Ticket(Base):
 class Escalation(Base):
     __tablename__ = "escalations"
     id = Column(Integer, primary_key=True, index=True)
-    ticket_id = Column(Integer, ForeignKey("tickets.id"), unique=True, nullable=False)
+    ticket_id = Column(Integer, ForeignKey("tickets.id"), nullable=True, unique=False)
     reason = Column(Text)  # "low_confidence" | "safety_critical" | "manual_review"
     status = Column(Enum(EscalationStatus), default=EscalationStatus.PENDING, index=True)
     reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=True)

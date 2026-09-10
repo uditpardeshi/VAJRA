@@ -6,7 +6,7 @@ from app.models.tables import EscalationStatus
 class EscalationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    ticket_id: int
+    ticket_id: Optional[int] = None
     reason: str
     status: EscalationStatus
     reviewer_id: Optional[int] = None
