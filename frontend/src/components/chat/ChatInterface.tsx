@@ -283,34 +283,6 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
     URL.revokeObjectURL(url)
   }
 
-  const toggleSpeechInput = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech recognition is not supported in this browser.')
-      return
-    }
-
-    if (isListening) {
-      setIsListening(false)
-      return
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = 'en-US'
-
-    recognition.onstart = () => setIsListening(true)
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setInput((prev) => (prev ? `${prev} ${transcript}` : transcript))
-      setIsListening(false)
-    }
-    recognition.onerror = () => setIsListening(false)
-    recognition.onend = () => setIsListening(false)
-    recognition.start()
-  }
-
   // Drag & drop handlers
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
