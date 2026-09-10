@@ -17,11 +17,11 @@ export function EscalationDetailModal({ escalation, onClose, onAcknowledge, onRe
 
   return (
     <Modal isOpen={!!escalation} onClose={onClose} title={`Escalation Detail #${escalation.id}`}>
-      <div className="space-y-4 text-sm text-slate-700">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="space-y-4 text-sm text-slate-200">
+        <div className="flex items-center justify-between border-b border-[#23334d] pb-3">
           <div>
             <span className="text-xs text-slate-400 block uppercase font-bold">Reason</span>
-            <span className="font-semibold text-slate-900">{escalation.reason}</span>
+            <span className="font-bold text-white text-base">{escalation.reason}</span>
           </div>
           <Badge variant={escalation.status === 'pending' ? 'accent' : 'success'}>
             {escalation.status}
@@ -30,17 +30,17 @@ export function EscalationDetailModal({ escalation, onClose, onAcknowledge, onRe
 
         <div>
           <span className="text-xs text-slate-400 block uppercase font-bold">Created At</span>
-          <span>{formatDate(escalation.created_at)}</span>
+          <span className="text-slate-200 font-mono">{formatDate(escalation.created_at)}</span>
         </div>
 
         {escalation.ticket && (
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-            <span className="text-xs font-bold text-slate-800">Associated Ticket #{escalation.ticket.id}</span>
-            <p className="text-xs text-slate-600">{escalation.ticket.title}</p>
+          <div className="p-3 bg-[#0c1220] border border-[#23334d] rounded-xl space-y-1">
+            <span className="text-xs font-bold text-white">Associated Ticket #{escalation.ticket.id}</span>
+            <p className="text-xs text-slate-200">{escalation.ticket.title}</p>
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#23334d]">
           {escalation.status === 'pending' && (
             <Button variant="outline" onClick={() => onAcknowledge(escalation.id)}>
               Acknowledge

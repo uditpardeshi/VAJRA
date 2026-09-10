@@ -12,19 +12,26 @@ class Citation(BaseModel):
     image_snippet_url: Optional[str] = None
     modality: str = "text"  # "text" | "table" | "figure"
 
+class ChatHistoryItem(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
 class ChatRequest(BaseModel):
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "question": "What is the acceptable spindle runout for HX-204?",
             "machine_id": "HX-204",
             "session_id": "thread-12345",
-            "top_k": 5
+            "top_k": 5,
+            "reasoning": True
         }
     })
     question: str
     machine_id: Optional[str] = None
     session_id: Optional[str] = None
     top_k: int = Field(5, ge=1, le=10)
+    reasoning: bool = True
+    history: Optional[List[ChatHistoryItem]] = None
 
 class ChatResponse(BaseModel):
     model_config = ConfigDict(json_schema_extra={
@@ -46,6 +53,15 @@ class ChatResponse(BaseModel):
     answer: str
     citations: List[Citation]
     confidence: float = Field(..., ge=0, le=1)
+    created_at: datetime
+
+class ChatMessageItemResponse(BaseModel):
+    id: int
+    session_id: str
+    role: str
+    content: str
+    citations: Optional[List[Citation]] = None
+    confidence: Optional[float] = None
     created_at: datetime
 
 class SessionFileItem(BaseModel):

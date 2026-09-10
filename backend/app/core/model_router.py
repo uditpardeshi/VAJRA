@@ -89,22 +89,29 @@ class ModelRouter:
         system: Optional[str] = None,
         model: Optional[str] = None,
         temperature: float = 0.7,
-        max_tokens: int = 1024
+        max_tokens: int = 1024,
+        messages: Optional[List[Dict[str, str]]] = None
     ) -> str:
         base = self.base_url
         if not base:
             return "Model service currently unavailable (NGROK_OLLAMA_URL not set)."
 
-        messages = []
-        if system:
-            messages.append({"role": "system", "content": system})
-        messages.append({"role": "user", "content": prompt})
+        chat_messages = []
+        if messages:
+            chat_messages = list(messages)
+            if system and not any(m.get("role") == "system" for m in chat_messages):
+                chat_messages.insert(0, {"role": "system", "content": system})
+        else:
+            if system:
+                chat_messages.append({"role": "system", "content": system})
+            chat_messages.append({"role": "user", "content": prompt})
 
         # 1. Primary: /api/chat with X-VAJRA-KEY (OpenAI / vLLM / Qwen format)
         payload_chat = {
-            "messages": messages,
+            "messages": chat_messages,
             "max_tokens": max_tokens,
             "temperature": temperature,
+            "top_p": 0.9,
         }
         if model:
             payload_chat["model"] = model
@@ -125,9 +132,18 @@ class ModelRouter:
             logger.warning(f"Error calling /api/chat at {base}: {e}")
 
         # 2. Fallback: Ollama /api/generate
+        # If multi-turn messages exist, format into prompt text
+        gen_prompt = prompt
+        if messages and len(messages) > 1:
+            turns = []
+            for m in messages:
+                role_label = "System" if m["role"] == "system" else "Technician" if m["role"] == "user" else "VAJRA"
+                turns.append(f"{role_label}: {m['content']}")
+            gen_prompt = "\n\n".join(turns) + "\n\nVAJRA:"
+
         payload_gen = {
             "model": model or self._get_model("text"),
-            "prompt": prompt,
+            "prompt": gen_prompt,
             "system": system,
             "stream": False,
             "options": {"temperature": temperature, "num_predict": max_tokens}

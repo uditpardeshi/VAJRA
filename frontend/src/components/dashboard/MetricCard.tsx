@@ -13,25 +13,25 @@ export interface MetricCardProps {
 
 export function MetricCard({ icon: Icon, label, value, trend, color = 'primary' }: MetricCardProps) {
   const iconBg = {
-    primary: 'bg-primary-50 text-primary',
-    accent: 'bg-accent-50 text-accent',
-    success: 'bg-emerald-50 text-emerald-600',
-    warning: 'bg-amber-50 text-amber-600',
+    primary: 'bg-[#77BA99]/15 text-[#77BA99] border border-[#77BA99]/30',
+    accent: 'bg-[#D33F49]/15 text-[#D33F49] border border-[#D33F49]/30',
+    success: 'bg-[#77BA99]/20 text-[#77BA99] border border-[#77BA99]/40',
+    warning: 'bg-[#D7C0D0]/20 text-[#D7C0D0] border border-[#D7C0D0]/40',
   }
 
   return (
-    <Card variant="default" className="space-y-2">
+    <Card className="space-y-1.5 p-3 sm:p-3.5 bg-[#262730] border border-[#3d3e4b] shadow-md">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</span>
-        <div className={cn('p-2 rounded-xl', iconBg[color])}>
-          <Icon className="w-5 h-5" />
+        <span className="text-[10px] sm:text-[11px] font-bold text-[#D7C0D0] uppercase tracking-wider">{label}</span>
+        <div className={cn('p-1.5 rounded-lg', iconBg[color])}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-extrabold tracking-tight text-slate-900">{value}</span>
+      <div className="flex items-baseline justify-between pt-0.5">
+        <span className="text-xl sm:text-2xl font-black tracking-tight text-[#EFF0D1]">{value}</span>
         {trend && (
-          <div className={cn('flex items-center gap-0.5 text-xs font-bold', trend.positive ? 'text-emerald-600' : 'text-rose-600')}>
+          <div className={cn('flex items-center gap-0.5 text-xs font-bold', trend.positive ? 'text-[#77BA99]' : 'text-[#D33F49]')}>
             {trend.positive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             <span>{trend.value > 0 ? `+${trend.value}%` : `${trend.value}%`}</span>
           </div>

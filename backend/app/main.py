@@ -8,7 +8,10 @@ from fastapi.responses import FileResponse
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.v1 import routes_inspect, routes_machines, routes_chat, routes_escalation, routes_agent, routes_tickets, routes_auth
+from app.api.v1 import (
+    routes_inspect, routes_machines, routes_chat, routes_escalation,
+    routes_agent, routes_tickets, routes_auth, routes_analytics
+)
 
 BASE_DIR = Path(__file__).parent.parent
 
@@ -48,6 +51,7 @@ app.include_router(routes_chat.router)
 app.include_router(routes_escalation.router)
 app.include_router(routes_agent.router)
 app.include_router(routes_tickets.router)
+app.include_router(routes_analytics.router)
 
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)

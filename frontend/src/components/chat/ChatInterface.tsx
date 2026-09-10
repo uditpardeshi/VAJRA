@@ -25,8 +25,8 @@ import {
   Cpu,
   Table,
   Search,
-  Sparkles,
-  Bot,
+  ArrowUpRight,
+  Activity,
   ShieldCheck,
 } from 'lucide-react'
 import type { ChatMessage as ChatMessageType, Machine, SessionFileItem } from '@/types/api'
@@ -46,11 +46,11 @@ export interface ChatInterfaceProps {
 }
 
 interface QuickAction {
+  code: string
   icon: React.ReactNode
   title: string
   desc: string
   query: string
-  colorTheme: 'emerald' | 'sky' | 'purple' | 'amber'
 }
 
 export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: ChatInterfaceProps) {
@@ -75,7 +75,18 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
-  const [reasoningEnabled, setReasoningEnabled] = useState(true)
+  const [reasoningEnabled, setReasoningEnabled] = useState(() => {
+    const saved = localStorage.getItem('vajra_reasoning_enabled')
+    return saved !== null ? saved === 'true' : true
+  })
+
+  const toggleReasoning = () => {
+    setReasoningEnabled((prev) => {
+      const next = !prev
+      localStorage.setItem('vajra_reasoning_enabled', String(next))
+      return next
+    })
+  }
   const [isListening, setIsListening] = useState(false)
 
   const { mutateAsync: sendChat, isPending } = useChat()
@@ -84,32 +95,32 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
 
   const quickActions: QuickAction[] = [
     {
-      icon: <Gauge className="w-4 h-4 text-emerald-600 shrink-0" />,
+      code: 'PRT-01',
+      icon: <Gauge className="w-4 h-4 text-[#77BA99] shrink-0" />,
       title: 'Spindle Runout Limits',
-      desc: 'Dial indicator calibration & ISO tolerance thresholds',
+      desc: 'Dial indicator calibration & ISO 230-2 tolerance thresholds',
       query: `What is the acceptable spindle runout limit and dial indicator measurement procedure for ${currentMachineId}?`,
-      colorTheme: 'emerald',
     },
     {
-      icon: <Droplets className="w-4 h-4 text-sky-600 shrink-0" />,
-      title: 'Hydraulic Pressure Checks',
-      desc: 'Operating PSI thresholds & accumulator pre-charge limits',
+      code: 'PRT-02',
+      icon: <Droplets className="w-4 h-4 text-[#77BA99] shrink-0" />,
+      title: 'Hydraulic System Pressure',
+      desc: 'Operating bar thresholds & accumulator pre-charge limits',
       query: `What is the standard hydraulic operating pressure and check procedure for ${currentMachineId}?`,
-      colorTheme: 'sky',
     },
     {
-      icon: <AlertTriangle className="w-4 h-4 text-purple-600 shrink-0" />,
+      code: 'PRT-03',
+      icon: <AlertTriangle className="w-4 h-4 text-[#D33F49] shrink-0" />,
       title: 'Emergency E-Stop Protocol',
       desc: 'Thermal shutdown & interlock recovery steps',
       query: `What is the emergency shutdown procedure for spindle overheating above 85C on ${currentMachineId}?`,
-      colorTheme: 'purple',
     },
     {
-      icon: <Wrench className="w-4 h-4 text-amber-600 shrink-0" />,
+      code: 'PRT-04',
+      icon: <Wrench className="w-4 h-4 text-[#77BA99] shrink-0" />,
       title: 'Bearing Service Milestones',
       desc: 'Grease specifications & scheduled replacement guides',
       query: `What is the bearing replacement interval and grease specification for ${currentMachineId}?`,
-      colorTheme: 'amber',
     },
   ]
 
@@ -190,10 +201,17 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
     setInput('')
 
     try {
+      // Pass full conversation memory for this specific chat
+      const historyPayload = messages
+        .filter((m) => m.id !== 'welcome')
+        .map((m) => ({ role: m.role, content: m.content }))
+
       const res = await sendChat({
         question: queryText,
         machine_id: currentMachineId || undefined,
         session_id: activeSession.id,
+        reasoning: reasoningEnabled,
+        history: historyPayload,
       })
 
       const botMsg: ChatMessageType = {
@@ -223,15 +241,15 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
   const handleExportChat = () => {
     if (!activeSession || messages.length === 0) return
     const content = messages
-      .map((m) => `### ${m.role === 'user' ? 'Technician' : 'VAJRA Assistant'} (${new Date(m.timestamp).toLocaleString()}):\n\n${m.content}\n\n`)
+      .map((m) => `### ${m.role === 'user' ? 'Operator' : 'VAJRA Diagnostic System'} (${new Date(m.timestamp).toLocaleString()}):\n\n${m.content}\n\n`)
       .join('---\n\n')
-    const blob = new Blob([`# Technical Inquiry: ${activeSession.title}\nMachine: ${currentMachineId}\nExported: ${new Date().toLocaleString()}\n\n---\n\n${content}`], {
+    const blob = new Blob([`# Diagnostic Log: ${activeSession.title}\nMachine: ${currentMachineId}\nExported: ${new Date().toLocaleString()}\n\n---\n\n${content}`], {
       type: 'text/markdown',
     })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `vajra-chat-${activeSession.id.slice(0, 8)}.md`
+    a.download = `vajra-diagnostic-${activeSession.id.slice(0, 8)}.md`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -296,7 +314,7 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="relative flex h-full w-full min-w-0 bg-transparent rounded-none md:rounded-3xl border-0 md:border md:border-slate-200/70 md:shadow-soft overflow-hidden"
+      className="relative flex h-full w-full min-w-0 bg-[#0a0e17] rounded-none md:rounded-2xl border-0 md:border md:border-slate-800 md:shadow-xl overflow-hidden"
     >
       {/* Hidden file input */}
       <input
@@ -310,10 +328,10 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
 
       {/* Drag & Drop Visual Overlay */}
       {isDragging && (
-        <div className="absolute inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-6 border-2 border-dashed border-primary animate-in fade-in duration-150">
-          <UploadCloud className="w-12 h-12 text-primary animate-bounce mb-2" />
-          <h3 className="text-lg font-bold">Drop Technical Files Here</h3>
-          <p className="text-xs sm:text-sm text-slate-300 text-center">
+        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center text-white p-6 border-2 border-dashed border-sky-400 animate-in fade-in duration-150">
+          <UploadCloud className="w-10 h-10 text-sky-400 animate-bounce mb-2" />
+          <h3 className="text-base sm:text-lg font-bold">Drop Technical Files Here</h3>
+          <p className="text-xs text-slate-300 text-center">
             PDFs, Excel/CSV sheets, Word docs, Schematics, or TXT
           </p>
         </div>
@@ -326,25 +344,25 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
       />
 
       {/* Main Chat Workspace */}
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-white/75 backdrop-blur-md">
-        {/* Top Header Bar: Clean, Spacious, Zero Overlapping */}
-        <div className="px-3 sm:px-5 py-2.5 border-b border-slate-200/70 flex items-center justify-between gap-3 bg-white/90 backdrop-blur-md shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full bg-[#1d1e25]">
+        {/* Top Header Bar: Clean, Compact, Zero Overlapping */}
+        <div className="px-2.5 sm:px-4 py-1.5 sm:py-2 border-b border-[#3d3e4b] flex items-center justify-between gap-2 bg-[#262730]/95 backdrop-blur-md shrink-0">
           {/* Left: Thread Drawer Toggle */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all shrink-0 shadow-2xs',
+                'flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold transition-all shrink-0 shadow-xs',
                 isSidebarOpen
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-700 border-slate-200/80 hover:bg-slate-50'
+                  ? 'bg-[#77BA99]/20 text-[#77BA99] border-[#77BA99]/60 font-bold'
+                  : 'bg-[#1d1e25] text-[#EFF0D1] border-[#3d3e4b] hover:bg-[#32333e] hover:text-white'
               )}
               title="Toggle Conversation Threads"
             >
               {isSidebarOpen ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">Threads</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px] font-mono font-bold text-slate-700">
+              <span className="px-1.5 py-0.2 rounded-full bg-[#262730] text-[10px] font-mono font-bold text-[#77BA99]">
                 {sessions.length}
               </span>
             </button>
@@ -361,16 +379,16 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
           </div>
 
           {/* Right: Actions (Export & Clear) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Export Chat Pill Button */}
             <button
               type="button"
               onClick={handleExportChat}
               disabled={messages.length === 0}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-full text-xs font-semibold transition-all shadow-2xs shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Export conversation history"
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#1d1e25] hover:bg-[#32333e] border border-[#3d3e4b] text-[#EFF0D1] rounded-full text-xs font-semibold transition-all shadow-xs shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Export diagnostic history"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <Download className="w-3.5 h-3.5 text-[#D7C0D0]" />
               <span className="hidden sm:inline">Export</span>
             </button>
 
@@ -379,7 +397,7 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
               type="button"
               onClick={() => activeSession && clearSessionMessages(activeSession.id)}
               disabled={messages.length === 0}
-              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors text-xs shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] rounded-full transition-colors text-xs shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
               title="Clear thread messages"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -388,85 +406,96 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
         </div>
 
         {/* Messages Stream & Welcoming Hero */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-5">
-          {/* Visual Quick Action Center (When starting or thread is empty) */}
+        <div className="flex-1 overflow-y-auto p-2.5 sm:p-4 space-y-3 sm:space-y-4">
+          {/* Equipment Console Action Center (When starting or thread is empty) */}
           {messages.length === 0 && (
-            <div className="max-w-2xl mx-auto pt-2 sm:pt-6 pb-2 space-y-5">
-              {/* Centered Friendly 3D-styled Bot Orb */}
-              <div className="flex flex-col items-center justify-center text-center space-y-3">
-                <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-sky-400 via-primary to-blue-600 flex items-center justify-center text-white shadow-xl ring-8 ring-sky-100/70">
-                    <Bot className="w-9 h-9 sm:w-11 sm:h-11 text-white animate-pulse" />
+            <div className="max-w-2xl mx-auto pt-1 sm:pt-3 pb-2 space-y-3.5">
+              {/* Industrial Equipment Diagnostic Station Header */}
+              <div className="rounded-xl bg-[#262730] border border-[#3d3e4b] p-3 sm:p-4 shadow-md space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#3d3e4b] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#77BA99] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#77BA99]"></span>
+                    </span>
+                    <span className="text-xs font-mono font-bold tracking-wider text-[#EFF0D1] uppercase">
+                      DIAGNOSTIC STATION · UNIT {currentMachineId}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1d1e25] text-[#77BA99] border border-[#77BA99]/40 font-semibold">
+                      TELEMETRY LINKED
+                    </span>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center text-white">
-                    <Sparkles className="w-3 h-3" />
+                  <div className="flex items-center gap-2.5 text-[11px] font-mono text-[#D7C0D0]">
+                    <span>STD: <strong className="text-[#EFF0D1] font-semibold">ISO 230-2</strong></span>
+                    <span className="text-[#3d3e4b]">|</span>
+                    <span>TOL: <strong className="text-[#EFF0D1] font-semibold">DIN 8605</strong></span>
                   </div>
                 </div>
 
-                {/* Welcoming Header Typography */}
-                <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200/60 text-xs font-semibold">
-                    <span>VAJRA Sovereign Technical Assistant</span>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="p-2 rounded-lg bg-[#1d1e25] border border-[#3d3e4b]">
+                    <div className="text-[10px] text-[#D7C0D0] uppercase font-mono">Max Runout</div>
+                    <div className="text-xs sm:text-sm font-mono font-bold text-[#EFF0D1] mt-0.5">&le; 0.005 mm</div>
                   </div>
-                  <h1 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
-                    How Can I Assist Your Operations Today?
-                  </h1>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Select a diagnostic protocol below or ask any equipment tolerance inquiry:
-                  </p>
+                  <div className="p-2 rounded-lg bg-[#1d1e25] border border-[#3d3e4b]">
+                    <div className="text-[10px] text-[#D7C0D0] uppercase font-mono">Hydraulic Sys</div>
+                    <div className="text-xs sm:text-sm font-mono font-bold text-[#EFF0D1] mt-0.5">35 - 55 bar</div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#1d1e25] border border-[#3d3e4b]">
+                    <div className="text-[10px] text-[#D7C0D0] uppercase font-mono">Spindle Temp</div>
+                    <div className="text-xs sm:text-sm font-mono font-bold text-[#77BA99] mt-0.5">&lt; 65&deg;C (Norm)</div>
+                  </div>
                 </div>
               </div>
 
-              {/* 4 Pastel Quick Action Feature Cards (Clean, Punchy, Visual) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {quickActions.map((action, idx) => {
-                  const themeClasses = {
-                    emerald: 'bg-emerald-50/70 hover:bg-emerald-50/90 border-emerald-200/80 text-emerald-950',
-                    sky: 'bg-sky-50/70 hover:bg-sky-50/90 border-sky-200/80 text-sky-950',
-                    purple: 'bg-purple-50/70 hover:bg-purple-50/90 border-purple-200/80 text-purple-950',
-                    amber: 'bg-amber-50/70 hover:bg-amber-50/90 border-amber-200/80 text-amber-950',
-                  }[action.colorTheme]
+              {/* Standard Diagnostic Protocols Grid */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between px-0.5">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-[#D7C0D0] font-bold">
+                    Diagnostic Protocols
+                  </span>
+                  <span className="text-[10px] font-mono text-[#77BA99]">
+                    CLICK TO EXECUTE
+                  </span>
+                </div>
 
-                  const badgeClasses = {
-                    emerald: 'bg-emerald-200/80 text-emerald-800',
-                    sky: 'bg-sky-200/80 text-sky-800',
-                    purple: 'bg-purple-200/80 text-purple-800',
-                    amber: 'bg-amber-200/80 text-amber-800',
-                  }[action.colorTheme]
-
-                  return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {quickActions.map((action, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => submitQuestion(action.query)}
-                      className={cn(
-                        'p-4 rounded-2xl border text-left transition-all group flex flex-col justify-between shadow-2xs hover:shadow-xs active:scale-98',
-                        themeClasses
-                      )}
+                      className="p-3 rounded-lg border border-[#3d3e4b] bg-[#262730] hover:bg-[#32333e] hover:border-[#77BA99]/60 text-left transition-all group flex flex-col justify-between shadow-xs active:scale-98"
                     >
-                      <div className="flex items-center justify-between gap-2 w-full">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 rounded-xl bg-white/90 shadow-2xs border border-white shrink-0">
+                      <div className="flex items-start justify-between gap-2 w-full">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded bg-[#1d1e25] border border-[#3d3e4b] shrink-0">
                             {action.icon}
                           </div>
-                          <span className="text-xs sm:text-sm font-bold truncate">
-                            {action.title}
-                          </span>
+                          <div>
+                            <span className="text-[10px] font-mono text-[#77BA99] font-bold block">
+                              [{action.code}]
+                            </span>
+                            <span className="text-xs font-bold text-[#EFF0D1] group-hover:text-white transition-colors">
+                              {action.title}
+                            </span>
+                          </div>
                         </div>
-                        <span className={cn('w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0', badgeClasses)}>
-                          +
-                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-[#D7C0D0]/50 group-hover:text-[#77BA99] transition-colors shrink-0 mt-0.5" />
                       </div>
-                      <p className="text-[11px] opacity-85 leading-relaxed mt-2.5">
+                      <p className="text-[11px] text-[#D7C0D0] group-hover:text-[#EFF0D1] leading-tight mt-2 font-normal">
                         {action.desc}
                       </p>
                     </button>
-                  )
-                })}
+                  ))}
+                </div>
               </div>
 
-              {/* Horizontal Category Quick Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-1">
+              {/* Machine & Category Quick Presets */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar pt-0.5">
+                <span className="text-[10px] font-mono font-bold text-[#D7C0D0] uppercase tracking-wider shrink-0 mr-0.5">
+                  PRESETS:
+                </span>
                 {categoryPills.map((pill, i) => (
                   <button
                     key={i}
@@ -479,10 +508,10 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
                       }
                     }}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all shrink-0 shadow-2xs',
+                      'flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono font-semibold border transition-all shrink-0 shadow-xs',
                       pill.machineId && pill.machineId === currentMachineId
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white/90 hover:bg-slate-100/80 text-slate-700 border-slate-200/80'
+                        ? 'bg-[#77BA99]/25 text-[#77BA99] border-[#77BA99]/60 font-bold'
+                        : 'bg-[#262730] hover:bg-[#32333e] text-[#EFF0D1] border-[#3d3e4b]'
                     )}
                   >
                     <span>{pill.label}</span>
@@ -490,27 +519,20 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
                 ))}
               </div>
 
-              {/* Sovereign Fleet Status Banner */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-sky-50/80 via-white to-indigo-50/70 border border-sky-100 shadow-2xs flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-slate-900 truncate">
-                      Sovereign AI Engine Active
-                    </h4>
-                    <p className="text-[11px] text-slate-500 truncate">
-                      3 OEM machines connected. 100% on-premise multimodal RAG.
-                    </p>
-                  </div>
+              {/* OEM Archive Status Panel */}
+              <div className="p-2.5 rounded-lg bg-[#1d1e25] border border-[#3d3e4b] flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileText className="w-4 h-4 text-[#77BA99] shrink-0" />
+                  <span className="text-[#EFF0D1] text-[11px] truncate">
+                    OEM Service Manuals &amp; Technical Specs Loaded for <strong className="text-white font-mono">{currentMachineId}</strong>
+                  </span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => submitQuestion(`Run full diagnostic checklist for ${currentMachineId}.`)}
-                  className="px-3 py-1.5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-colors shadow-2xs shrink-0"
+                  onClick={() => submitQuestion(`Run full diagnostic verification checklist for ${currentMachineId}.`)}
+                  className="px-2.5 py-1 bg-[#77BA99] hover:bg-[#88caa9] active:bg-[#65a384] text-[#1d1e25] rounded text-xs font-mono font-bold transition-colors shadow-xs shrink-0"
                 >
-                  Diagnostics
+                  RUN CHECK
                 </button>
               </div>
             </div>
@@ -519,7 +541,7 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
           {/* Quick Filter Strip for Ongoing Conversations */}
           {messages.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">
+              <span className="text-[10px] font-bold text-[#D7C0D0] uppercase tracking-wider shrink-0 mr-0.5">
                 Quick:
               </span>
               {categoryPills.map((pill, i) => (
@@ -534,10 +556,10 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
                     }
                   }}
                   className={cn(
-                    'px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all shrink-0 shadow-2xs',
+                    'px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all shrink-0 shadow-xs',
                     pill.machineId && pill.machineId === currentMachineId
-                      ? 'bg-slate-900 text-white border-slate-900'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200/80'
+                      ? 'bg-[#77BA99]/25 text-[#77BA99] border-[#77BA99]/60 font-bold'
+                      : 'bg-[#262730] hover:bg-[#32333e] text-[#EFF0D1] border-[#3d3e4b]'
                   )}
                 >
                   {pill.label}
@@ -551,52 +573,54 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
             <ChatMessage key={msg.id} message={msg} />
           ))}
 
-          {/* Industrial Multi-Step Reasoning Stepper */}
+          {/* Industrial Multi-Step Reasoning Stepper or Direct Mode */}
           {isPending && (
-            <ThinkingProgress
-              machineId={currentMachineId}
-              hasFiles={attachedFiles.length > 0}
-            />
+            reasoningEnabled ? (
+              <ThinkingProgress
+                machineId={currentMachineId}
+                hasFiles={attachedFiles.length > 0}
+              />
+            ) : (
+              <div className="bg-[#262730] backdrop-blur-md rounded-xl border border-[#3d3e4b] p-2.5 sm:p-3 shadow-md max-w-xl mx-auto flex items-center gap-2.5">
+                <div className="w-4 h-4 rounded-full border-2 border-[#77BA99] border-t-transparent animate-spin shrink-0" />
+                <div className="text-xs">
+                  <span className="font-bold text-[#EFF0D1] block">Direct Specification Mode</span>
+                  <span className="text-[#D7C0D0] text-[11px]">Synthesizing immediate OEM specifications without chain-of-thought...</span>
+                </div>
+              </div>
+            )
           )}
 
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Floating Dock Input Bar */}
-        <div className="p-2.5 sm:p-4 shrink-0 max-w-3xl mx-auto w-full">
-          <div className="glass-dock rounded-2xl sm:rounded-3xl p-2.5 sm:p-3 space-y-2">
+        {/* Floating Dock Input Bar (Compact, High Information Density, Mobile-Optimized) */}
+        <div className="p-1.5 sm:p-3 shrink-0 max-w-3xl mx-auto w-full">
+          <div className="glass-dock rounded-xl sm:rounded-2xl p-2 sm:p-2.5 space-y-1.5">
             {/* Active Attached Files Chips */}
             {attachedFiles.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar px-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 hidden sm:inline">
-                  Attached:
-                </span>
-                {attachedFiles.map((file) => (
+              <div className="flex flex-wrap gap-1.5 pb-1 border-b border-[#3d3e4b]">
+                {attachedFiles.map((file, idx) => (
                   <div
-                    key={file.filename}
-                    className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-xl text-xs text-slate-700 shadow-2xs shrink-0"
+                    key={idx}
+                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#1d1e25] border border-[#3d3e4b] text-xs shadow-2xs group"
                   >
-                    {getFileIcon(file.filename)}
-                    <span className="font-semibold text-[11px] truncate max-w-[120px] sm:max-w-[160px]" title={file.filename}>
+                    {file.filename.endsWith('.pdf') ? (
+                      <FileText className="w-3.5 h-3.5 text-[#D33F49] shrink-0" />
+                    ) : file.filename.match(/\.(xlsx|xls|csv)$/i) ? (
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-[#77BA99] shrink-0" />
+                    ) : file.filename.match(/\.(png|jpg|jpeg|webp)$/i) ? (
+                      <ImageIcon className="w-3.5 h-3.5 text-[#D7C0D0] shrink-0" />
+                    ) : (
+                      <FileCode className="w-3.5 h-3.5 text-[#77BA99] shrink-0" />
+                    )}
+                    <span className="max-w-[120px] truncate text-[11px] font-medium text-[#EFF0D1]">
                       {file.filename}
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.2 bg-slate-200/70 rounded text-slate-600 font-mono font-medium">
-                      {file.total_chunks}c
-                    </span>
-                    {file.tables > 0 && (
-                      <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-semibold">
-                        {file.tables}T
-                      </span>
-                    )}
-                    {file.figures > 0 && (
-                      <span className="text-[9px] px-1 py-0.2 bg-amber-100 text-amber-800 rounded font-semibold">
-                        {file.figures}F
-                      </span>
-                    )}
                     <button
                       type="button"
                       onClick={() => activeSession && removeFileFromSession(activeSession.id, file.filename)}
-                      className="text-slate-400 hover:text-rose-600 p-0.5 ml-0.5 transition-colors"
+                      className="text-[#D7C0D0] hover:text-[#D33F49] p-0.5 ml-0.5 transition-colors"
                       title="Remove from thread"
                     >
                       <X className="w-3 h-3" />
@@ -610,49 +634,49 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
             {uploadStatus && (
               <div
                 className={cn(
-                  'flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl font-medium animate-in fade-in',
+                  'flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg font-medium animate-in fade-in',
                   uploadStatus.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                    ? 'bg-[#77BA99]/15 text-[#77BA99] border border-[#77BA99]/40'
+                    : 'bg-[#D33F49]/15 text-[#D33F49] border border-[#D33F49]/40'
                 )}
               >
                 {uploadStatus.type === 'success' ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#77BA99] shrink-0" />
                 ) : (
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <AlertCircle className="w-3.5 h-3.5 text-[#D33F49] shrink-0" />
                 )}
                 <span className="truncate">{uploadStatus.message}</span>
               </div>
             )}
 
             {/* Main Input Form */}
-            <form onSubmit={handleSend} className="space-y-2">
+            <form onSubmit={handleSend} className="space-y-1.5">
               <div className="relative flex items-center px-1">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask equipment question or initiate diagnosis..."
-                  className="w-full bg-transparent border-0 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 py-1.5 sm:py-2"
+                  placeholder="Enter diagnostic query or equipment parameter (e.g. Spindle runout check for HX-204)..."
+                  className="w-full bg-transparent border-0 text-xs sm:text-sm text-[#EFF0D1] placeholder:text-[#D7C0D0]/50 focus:outline-none focus:ring-0 py-1 sm:py-1.5 font-normal"
                 />
               </div>
 
               {/* Bottom Actions Row */}
-              <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100 px-1">
+              <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-[#3d3e4b] px-1">
                 {/* Left Action Pills */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                   {/* Attach File Pill */}
                   <button
                     type="button"
                     disabled={isUploading || isPending}
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap"
+                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#1d1e25] hover:bg-[#32333e] border border-[#3d3e4b] text-[#EFF0D1] text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap"
                     title="Attach technical files (PDF, Excel, Word, CSV, Images)"
                   >
                     {isUploading ? (
-                      <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                      <Loader2 className="w-3 h-3 animate-spin text-[#77BA99]" />
                     ) : (
-                      <Paperclip className="w-3 h-3" />
+                      <Paperclip className="w-3 h-3 text-[#D7C0D0]" />
                     )}
                     <span>Attach</span>
                   </button>
@@ -661,53 +685,64 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
                   <button
                     type="button"
                     onClick={() => submitQuestion(`Extract full engineering spec table for ${currentMachineId}.`)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100/80 hover:bg-slate-200/70 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap"
+                    className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#1d1e25] hover:bg-[#32333e] border border-[#3d3e4b] text-[#EFF0D1] text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap"
                     title="Quick Spec Table Lookup"
                   >
-                    <Table className="w-3 h-3" />
+                    <Table className="w-3 h-3 text-[#D7C0D0]" />
                     <span>Specs</span>
                   </button>
 
-                  {/* Reasoning Toggle Pill */}
+                  {/* Diagnostic Trace Toggle Pill */}
                   <button
                     type="button"
-                    onClick={() => setReasoningEnabled(!reasoningEnabled)}
+                    onClick={toggleReasoning}
                     className={cn(
-                      'flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap',
+                      'flex items-center gap-1 px-2.5 py-0.5 rounded-md border text-[11px] font-semibold transition-all shrink-0 whitespace-nowrap',
                       reasoningEnabled
-                        ? 'bg-sky-50 text-primary border-sky-200'
-                        : 'bg-slate-100/80 text-slate-500 border-slate-200/60 hover:bg-slate-200/70'
+                        ? 'bg-[#77BA99]/20 text-[#77BA99] border-[#77BA99]/60 shadow-xs font-bold'
+                        : 'bg-[#1d1e25] text-[#D7C0D0] border-[#3d3e4b] hover:bg-[#32333e] hover:text-[#EFF0D1]'
                     )}
-                    title="Toggle multi-step engineering reasoning"
+                    title={
+                      reasoningEnabled
+                        ? 'Multi-Step Diagnostic Verification Trace Active (Click to switch to Direct Mode)'
+                        : 'Direct Response Mode Active (Click to enable Diagnostic Verification Trace)'
+                    }
                   >
+                    <span
+                      className={cn(
+                        'w-1.5 h-1.5 rounded-full transition-colors',
+                        reasoningEnabled ? 'bg-[#77BA99] animate-pulse' : 'bg-[#D7C0D0]/40'
+                      )}
+                    />
                     <Cpu className="w-3 h-3" />
-                    <span>Reasoning</span>
+                    <span>{reasoningEnabled ? 'Trace: ON' : 'Trace: OFF'}</span>
                   </button>
                 </div>
 
-                {/* Right Action Icons: Mic + Send Button */}
+                {/* Right Action Icons: Mic + Run Button */}
                 <div className="flex items-center gap-1.5 shrink-0">
                   {/* Voice Button */}
                   <button
                     type="button"
                     onClick={toggleSpeechInput}
                     className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors',
-                      isListening && 'text-rose-600 bg-rose-50 animate-pulse'
+                      'w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-md flex items-center justify-center text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] transition-colors',
+                      isListening && 'text-[#D33F49] bg-[#D33F49]/20 animate-pulse border border-[#D33F49]/60'
                     )}
-                    title={isListening ? 'Stop listening' : 'Voice input'}
+                    title={isListening ? 'Stop voice recording' : 'Voice input'}
                   >
                     {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                   </button>
 
-                  {/* Primary Circular Send Button */}
+                  {/* Primary Industrial Execute Button */}
                   <button
                     type="submit"
                     disabled={isPending || !input.trim()}
-                    className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-gradient-to-tr from-sky-500 via-primary to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:opacity-35 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-xs transition-transform active:scale-95 shrink-0"
-                    title="Send Inquiry"
+                    className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md bg-[#77BA99] hover:bg-[#88caa9] active:bg-[#64a384] disabled:opacity-30 disabled:cursor-not-allowed text-[#1d1e25] flex items-center gap-1 text-xs font-bold font-mono transition-all shrink-0 shadow-xs"
+                    title="Run Diagnostic Command"
                   >
-                    <Send className="w-3.5 h-3.5 ml-0.5" />
+                    <span>RUN</span>
+                    <Send className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -718,3 +753,4 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
     </div>
   )
 }
+

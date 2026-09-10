@@ -32,23 +32,23 @@ export function AgentUpload({ onSuccessRun }: AgentUploadProps) {
   }
 
   return (
-    <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-card space-y-4">
-      <h3 className="font-bold text-slate-900 text-sm">Upload Equipment Inspection Document</h3>
+    <div className="p-6 bg-[#111927] border border-[#23334d] rounded-2xl shadow-card space-y-4">
+      <h3 className="font-bold text-white text-base">Upload Equipment Inspection Document</h3>
 
-      <label className="border-2 border-dashed border-slate-200 hover:border-primary-400 bg-slate-50 hover:bg-slate-100/50 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all">
-        <Upload className="w-8 h-8 text-slate-400 mb-2" />
-        <span className="text-sm font-semibold text-slate-700">Click or drag &amp; drop document (PDF / DOCX)</span>
-        <span className="text-xs text-slate-400 mt-1">Supports mechanical measurements &amp; CAD reports</span>
+      <label className="border-2 border-dashed border-[#23334d] hover:border-sky-500/60 bg-[#0c1220] hover:bg-[#152236] rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition-all">
+        <Upload className="w-8 h-8 text-sky-400 mb-2" />
+        <span className="text-sm font-semibold text-slate-100">Click or drag &amp; drop document (PDF / DOCX)</span>
+        <span className="text-xs text-slate-300 mt-1">Supports mechanical measurements &amp; CAD reports</span>
         <input type="file" accept=".pdf,.docx,.txt" onChange={handleFileChange} className="hidden" />
       </label>
 
       {file && (
-        <div className="flex items-center justify-between p-3 bg-primary-50 border border-primary-200 rounded-xl text-xs font-semibold text-primary-800">
+        <div className="flex items-center justify-between p-3 bg-sky-950/40 border border-sky-500/40 rounded-xl text-xs font-semibold text-sky-200">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" />
+            <FileText className="w-4 h-4 text-sky-400" />
             <span>{file.name} ({(file.size / 1024).toFixed(1)} KB)</span>
           </div>
-          <button onClick={() => setFile(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+          <button onClick={() => setFile(null)} className="text-slate-400 hover:text-white">✕</button>
         </div>
       )}
 

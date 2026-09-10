@@ -21,56 +21,67 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-14 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-3 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-      <div className="flex items-center gap-2.5">
+    <header className="h-11 sm:h-12 bg-[#262730]/95 backdrop-blur-md border-b border-[#3d3e4b] px-2.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
+      <div className="flex items-center gap-2 sm:gap-2.5">
         <button
           type="button"
           onClick={toggleSidebar}
-          className="p-1.5 text-slate-600 hover:bg-slate-100/80 active:bg-slate-200 rounded-xl lg:hidden transition-colors"
+          className="p-1 text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] active:bg-[#1d1e25] rounded-lg lg:hidden transition-colors"
           title="Toggle Navigation"
         >
           <Menu className="w-4 h-4" />
         </button>
 
         {/* Brand Logo & Pill Indicator */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 via-primary to-blue-500 text-white flex items-center justify-center font-black text-xs shadow-xs tracking-wider ring-2 ring-sky-100">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-[#77BA99] text-[#1d1e25] flex items-center justify-center font-black text-xs shadow-xs tracking-wider border border-[#77BA99]">
             V
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-900 text-sm tracking-tight flex items-center gap-1.5">
-              VAJRA <span className="text-[11px] font-semibold text-primary">AI</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-extrabold text-[#EFF0D1] text-xs sm:text-sm tracking-tight flex items-center gap-1.5">
+              VAJRA <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#1d1e25] border border-[#3d3e4b] text-[#77BA99]">MACHINERY</span>
             </span>
 
-            {/* Model Selector Pill (matching the image) */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-100/70 cursor-pointer transition-colors">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Qwen 3.0 Pro</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+            {/* System Status Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-[#1d1e25] border border-[#3d3e4b] rounded-full text-[10px] font-semibold text-[#EFF0D1] shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#77BA99]" />
+              <span className="text-[#EFF0D1] font-mono">OEM Specs: Active</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Prominent Role Selector Tabs & User Profile */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2.5">
         {/* Role pills */}
-        <div className="flex items-center bg-slate-100/80 p-0.5 rounded-full border border-slate-200/60 shadow-2xs">
+        <div className="flex items-center bg-[#1d1e25] p-0.5 rounded-full border border-[#3d3e4b] shadow-2xs">
           {roles.map((r) => {
             const Icon = r.icon
             const active = role === r.id
+            const activeStyles = {
+              worker: 'bg-[#77BA99]/25 text-[#77BA99] border border-[#77BA99]/60 font-bold shadow-xs',
+              reviewer: 'bg-[#D7C0D0]/25 text-[#D7C0D0] border border-[#D7C0D0]/60 font-bold shadow-xs',
+              admin: 'bg-[#D33F49]/25 text-[#D33F49] border border-[#D33F49]/60 font-bold shadow-xs',
+            }[r.id]
+
+            const iconColors = {
+              worker: active ? 'text-[#77BA99]' : 'text-[#D7C0D0]/70',
+              reviewer: active ? 'text-[#D7C0D0]' : 'text-[#D7C0D0]/70',
+              admin: active ? 'text-[#D33F49]' : 'text-[#D7C0D0]/70',
+            }[r.id]
+
             return (
               <button
                 key={r.id}
                 type="button"
                 onClick={() => handleRoleSelect(r.id, r.defaultRoute)}
-                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all ${
                   active
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60 font-bold'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? activeStyles
+                    : 'text-[#D7C0D0]/80 hover:text-[#EFF0D1]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${active ? 'text-primary' : 'text-slate-400'}`} />
+                <Icon className={`w-3 h-3 ${iconColors}`} />
                 <span className="hidden sm:inline">{r.label}</span>
               </button>
             )
@@ -78,14 +89,14 @@ export function TopBar() {
         </div>
 
         {/* User Avatar Circle */}
-        <div className="flex items-center gap-2 pl-2 sm:border-l border-slate-200">
+        <div className="flex items-center gap-1.5 pl-1.5 sm:border-l border-[#3d3e4b]">
           <div className="relative">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white font-bold text-[11px] ring-2 ring-white shadow-2xs">
+            <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#262730] border border-[#3d3e4b] flex items-center justify-center text-[#EFF0D1] font-bold text-[10px] shadow-2xs">
               {userName?.charAt(0)?.toUpperCase() || 'T'}
             </div>
-            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-1.5 ring-white" />
+            <span className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-[#77BA99] ring-1 ring-[#1d1e25]" />
           </div>
-          <span className="hidden md:inline font-sans text-xs text-slate-700 font-semibold">{userName}</span>
+          <span className="hidden md:inline font-sans text-xs text-[#EFF0D1] font-semibold">{userName}</span>
         </div>
       </div>
     </header>

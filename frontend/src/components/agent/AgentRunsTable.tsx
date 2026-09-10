@@ -10,16 +10,16 @@ export interface AgentRunsTableProps {
 export function AgentRunsTable({ runs }: AgentRunsTableProps) {
   if (runs.length === 0) {
     return (
-      <div className="p-8 text-center text-slate-400 text-xs bg-white border border-slate-200 rounded-2xl">
+      <div className="p-8 text-center text-slate-300 text-xs bg-[#111927] border border-[#23334d] rounded-2xl">
         No document verification records logged yet. Uploaded compliance documents will appear here.
       </div>
     )
   }
 
   return (
-    <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-xs">
-      <table className="w-full text-left text-xs text-slate-700">
-        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+    <div className="overflow-x-auto border border-[#23334d] rounded-2xl bg-[#111927] shadow-md">
+      <table className="w-full text-left text-xs text-slate-200">
+        <thead className="bg-[#18233a] border-b border-[#23334d] text-sky-200 font-bold uppercase tracking-wider">
           <tr>
             <th className="p-3">Record ID</th>
             <th className="p-3">Source Document</th>
@@ -28,18 +28,18 @@ export function AgentRunsTable({ runs }: AgentRunsTableProps) {
             <th className="p-3">Timestamp</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-[#23334d]">
           {runs.map((r) => (
-            <tr key={r.id} className="hover:bg-slate-50/50">
-              <td className="p-3 font-mono font-bold text-slate-900">#{r.id}</td>
-              <td className="p-3 font-mono">{r.input_file_path.split('/').pop()}</td>
+            <tr key={r.id} className="hover:bg-[#152236] transition-colors">
+              <td className="p-3 font-mono font-bold text-white">#{r.id}</td>
+              <td className="p-3 font-mono text-slate-200">{r.input_file_path.split('/').pop()}</td>
               <td className="p-3">
                 <Badge variant={r.status === 'completed' ? 'success' : 'warning'}>
                   {r.status}
                 </Badge>
               </td>
-              <td className="p-3 font-mono text-[11px] text-slate-500">{r.tools_used || 'N/A'}</td>
-              <td className="p-3 text-slate-400">{formatDate(r.created_at)}</td>
+              <td className="p-3 font-mono text-[11px] text-slate-300">{r.tools_used || 'N/A'}</td>
+              <td className="p-3 text-slate-400 font-mono">{formatDate(r.created_at)}</td>
             </tr>
           ))}
         </tbody>

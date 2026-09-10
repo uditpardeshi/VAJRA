@@ -10,9 +10,9 @@ export function RoleSelectPage() {
 
   const handleSelectRole = (r: UserRole) => {
     setRole(r)
-    if (r === 'worker') navigate('/inspect')
+    if (r === 'worker') navigate('/worker-dashboard')
     else if (r === 'reviewer') navigate('/dashboard')
-    else navigate('/settings')
+    else navigate('/admin-dashboard')
   }
 
   return (

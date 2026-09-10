@@ -6,21 +6,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        palette: {
+          raspberry: '#D33F49',
+          thistle: '#D7C0D0',
+          beige: '#EFF0D1',
+          teal: '#77BA99',
+          shadow: '#262730',
+          'shadow-dark': '#1d1e25',
+          'shadow-surface': '#262730',
+          'shadow-elevated': '#32333e',
+          'shadow-border': '#3d3e4b',
+        },
         primary: {
           50: '#eef2f7', 100: '#dce4ed', 200: '#bccddb', 300: '#8b9fc2',
-          400: '#5f7aa3', 500: '#3e5a80', 600: '#2d4567', 700: '#1e314a',
-          800: '#142133', 900: '#0f1924', 950: '#080d14',
-          DEFAULT: '#3e5a80'
+          400: '#77BA99', 500: '#77BA99', 600: '#64a384', 700: '#528a6f',
+          800: '#262730', 900: '#1d1e25', 950: '#14151a',
+          DEFAULT: '#77BA99'
         },
         accent: {
           50: '#fef0f1', 100: '#fee0e2', 200: '#fccfc7', 300: '#faa89a',
-          400: '#f7745d', 500: '#e94560', 600: '#d62d4a', 700: '#b81f3a',
-          800: '#941b33', 900: '#771a2f', 950: '#400815',
-          DEFAULT: '#e94560'
+          400: '#e25861', 500: '#D33F49', 600: '#bd333d', 700: '#a32831',
+          800: '#802128', 900: '#5c171c', 950: '#380c10',
+          DEFAULT: '#D33F49'
         },
-        success: { 50: '#ecfdf5', 500: '#27ae60', 600: '#1e8a49', DEFAULT: '#27ae60' },
+        success: { 50: '#ecfdf5', 500: '#77BA99', 600: '#64a384', DEFAULT: '#77BA99' },
         warning: { 50: '#fffbeb', 500: '#f39c12', 600: '#d4870e', DEFAULT: '#f39c12' },
-        surface: { 100: '#ffffff', 200: '#f8fafc', 300: '#f1f5f9', 400: '#e2e8f0', DEFAULT: '#ffffff' },
+        surface: { 100: '#ffffff', 200: '#EFF0D1', 300: '#D7C0D0', 400: '#32333e', DEFAULT: '#262730' },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

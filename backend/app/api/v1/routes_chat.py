@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.services.chat_service import chat_with_rag
 from app.core.rag_multimodal import multimodal_rag
-from app.schemas.chat import ChatRequest, ChatResponse, SessionFileItem, UploadFilesResponse
+from app.schemas.chat import (
+    ChatRequest, ChatResponse, SessionFileItem, UploadFilesResponse, ChatMessageItemResponse
+)
 
 router = APIRouter(prefix="/api/v1", tags=["chat"])
 
@@ -97,3 +99,51 @@ async def list_session_files(session_id: str):
         )
         for f in files
     ]
+
+@router.get("/chat/sessions/{session_id}/messages", response_model=List[ChatMessageItemResponse])
+async def get_session_messages(
+    session_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """Retrieve full chronological conversation memory for a specific chat thread."""
+    from sqlalchemy import select
+    from app.models.tables import ChatMessageRecord
+    import json
+
+    res = await db.execute(
+        select(ChatMessageRecord)
+        .where(ChatMessageRecord.session_id == session_id)
+        .order_by(ChatMessageRecord.created_at.asc())
+    )
+    records = res.scalars().all()
+    out = []
+    for r in records:
+        cits = None
+        if r.citations_json:
+            try:
+                cits = json.loads(r.citations_json)
+            except Exception:
+                cits = None
+        out.append(ChatMessageItemResponse(
+            id=r.id,
+            session_id=r.session_id,
+            role=r.role,
+            content=r.content,
+            citations=cits,
+            confidence=r.confidence,
+            created_at=r.created_at
+        ))
+    return out
+
+@router.delete("/chat/sessions/{session_id}/messages", status_code=status.HTTP_204_NO_CONTENT)
+async def clear_session_messages(
+    session_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """Wipe stored messages for a specific chat thread."""
+    from sqlalchemy import delete
+    from app.models.tables import ChatMessageRecord
+
+    await db.execute(delete(ChatMessageRecord).where(ChatMessageRecord.session_id == session_id))
+    await db.commit()
+    return None

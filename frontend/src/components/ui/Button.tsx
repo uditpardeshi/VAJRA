@@ -9,15 +9,15 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
+    const baseStyles = 'inline-flex items-center justify-center font-medium transition-all rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0a0e17] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95'
     
     const variants = {
-      primary: 'bg-primary text-white hover:bg-primary-600 focus:ring-primary-500 shadow-md shadow-primary/20',
-      secondary: 'bg-slate-200 text-slate-800 hover:bg-slate-300 focus:ring-slate-400',
-      accent: 'bg-accent text-white hover:bg-accent-600 focus:ring-accent-500 shadow-md shadow-accent/20',
-      outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-primary-500',
-      ghost: 'text-slate-600 hover:bg-slate-100 focus:ring-slate-400',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md shadow-red-500/20',
+      primary: 'bg-[#77BA99] text-[#1d1e25] font-bold hover:bg-[#88caa9] focus:ring-[#77BA99] shadow-md shadow-[#77BA99]/20',
+      secondary: 'bg-[#262730] text-[#EFF0D1] hover:bg-[#32333e] border border-[#3d3e4b] focus:ring-[#77BA99]',
+      accent: 'bg-[#D33F49] text-white hover:bg-[#bd333d] focus:ring-[#D33F49] shadow-md shadow-[#D33F49]/20',
+      outline: 'border border-[#3d3e4b] bg-[#1d1e25] text-[#EFF0D1] hover:bg-[#262730] hover:text-white focus:ring-[#77BA99]',
+      ghost: 'text-[#D7C0D0] hover:bg-[#262730] hover:text-[#EFF0D1] focus:ring-[#77BA99]',
+      danger: 'bg-[#D33F49] text-white hover:bg-[#bd333d] focus:ring-[#D33F49] shadow-md shadow-[#D33F49]/20',
     }
 
     const sizes = {

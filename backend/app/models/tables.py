@@ -126,8 +126,19 @@ class AgentRun(Base):
     user = relationship("User")
     machine = relationship("Machine")
 
+class ChatMessageRecord(Base):
+    __tablename__ = "chat_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), nullable=False, index=True)
+    role = Column(String(20), nullable=False)  # "user" | "assistant"
+    content = Column(Text, nullable=False)
+    citations_json = Column(Text, nullable=True)  # JSON string of citations
+    confidence = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
 # Indexes for common queries
 Index("ix_inspections_machine_created", Inspection.machine_id, Inspection.created_at)
 Index("ix_tickets_status_created", Ticket.status, Ticket.created_at)
 Index("ix_audit_log_user_created", AuditLog.user_id, AuditLog.created_at)
 Index("ix_agent_runs_user_created", AgentRun.user_id, AgentRun.created_at)
+Index("ix_chat_messages_session_created", ChatMessageRecord.session_id, ChatMessageRecord.created_at)

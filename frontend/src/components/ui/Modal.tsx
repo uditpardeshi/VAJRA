@@ -33,7 +33,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
           />
           <motion.div
             className={cn(
-              'relative w-full max-w-lg bg-white rounded-2xl shadow-elevated border border-slate-100 overflow-hidden z-10',
+              'relative w-full max-w-lg bg-[#111927] rounded-2xl shadow-2xl border border-[#23334d] text-slate-100 overflow-hidden z-10',
               className
             )}
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -41,9 +41,9 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
           >
             {title && (
-              <div className="flex items-center justify-between p-4 border-b border-slate-100">
-                <h3 className="font-semibold text-slate-900">{title}</h3>
-                <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+              <div className="flex items-center justify-between p-4 border-b border-[#23334d]">
+                <h3 className="font-bold text-white text-base">{title}</h3>
+                <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-[#18233a]">
                   <X className="w-5 h-5" />
                 </button>
               </div>

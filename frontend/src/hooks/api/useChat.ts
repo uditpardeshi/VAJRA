@@ -22,15 +22,27 @@ export function useChat() {
       const targetModelUrl = (modelUrl || DEFAULT_MODEL_URL).replace(/\/$/, '')
       const key = apiKey || DEFAULT_API_KEY
 
+      const isReasoning = req.reasoning !== false
+      const directMessages: Array<{ role: string; content: string }> = [
+        {
+          role: 'system',
+          content: isReasoning
+            ? 'You are VAJRA, an expert industrial AI engineering reasoning engine. Perform a structured multi-step engineering analysis with exact tolerances, safety protocols, and step-by-step resolution.'
+            : 'You are VAJRA, an expert industrial maintenance assistant. Provide a direct, concise, and immediately actionable answer with exact specifications without verbose preliminary reasoning.',
+        },
+      ]
+
+      if (req.history && req.history.length > 0) {
+        req.history.slice(-8).forEach((h) => {
+          directMessages.push({ role: h.role, content: h.content })
+        })
+      }
+      directMessages.push({ role: 'user', content: req.question })
+
       const payload = {
-        messages: [
-          {
-            role: 'user',
-            content: req.question,
-          },
-        ],
-        max_tokens: 1024,
-        temperature: 0.7,
+        messages: directMessages,
+        max_tokens: isReasoning ? 1536 : 768,
+        temperature: isReasoning ? 0.4 : 0.2,
       }
 
       const directRes = await axios.post(

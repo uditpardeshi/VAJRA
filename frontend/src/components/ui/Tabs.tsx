@@ -16,7 +16,7 @@ export interface TabsProps {
 
 export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn('flex space-x-1 bg-slate-100 p-1 rounded-xl', className)}>
+    <div className={cn('flex space-x-1 bg-[#0c1220] border border-[#23334d] p-1 rounded-xl', className)}>
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab
         return (
@@ -26,8 +26,8 @@ export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
             className={cn(
               'flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all',
               isActive
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                ? 'bg-sky-500/25 text-sky-200 border border-sky-400/50 shadow-xs font-bold'
+                : 'text-slate-300 hover:text-white hover:bg-[#18233a]'
             )}
           >
             {tab.icon}

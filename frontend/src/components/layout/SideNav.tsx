@@ -55,16 +55,16 @@ export function SideNav() {
   return (
     <aside
       className={cn(
-        'fixed lg:sticky top-14 z-20 h-[calc(100vh-3.5rem)] bg-white border-r border-slate-200 w-60 transition-all duration-200 flex flex-col justify-between p-3 shrink-0',
+        'fixed lg:sticky top-11 sm:top-12 z-20 h-[calc(100vh-2.75rem)] sm:h-[calc(100vh-3rem)] bg-[#262730] border-r border-[#3d3e4b] w-56 transition-all duration-200 flex flex-col justify-between p-2 shrink-0 select-none shadow-lg lg:shadow-none',
         !sidebarOpen && 'hidden lg:flex'
       )}
     >
       <div className="space-y-1">
-        <div className="px-2.5 py-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+        <div className="px-2.5 py-1 flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D7C0D0] font-mono">
             {roleMeta.title}
           </span>
-          <span className="text-[9px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+          <span className="text-[9px] font-mono font-bold text-[#77BA99] bg-[#77BA99]/20 border border-[#77BA99]/40 px-1.5 py-0.5 rounded">
             {roleMeta.badge}
           </span>
         </div>
@@ -77,29 +77,29 @@ export function SideNav() {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all',
+                  'flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all',
                   isActive
-                    ? 'bg-primary-50 text-primary-700 font-bold border border-primary-100/80 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-[#77BA99]/20 text-[#77BA99] font-bold border border-[#77BA99]/50 shadow-xs'
+                    : 'text-[#EFF0D1]/80 hover:bg-[#32333e] hover:text-[#EFF0D1]'
                 )
               }
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{item.label}</span>
             </NavLink>
           )
         })}
       </div>
 
-      <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
-        <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-          <span className="flex items-center gap-1.5 text-[11px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Inference Engine
+      <div className="p-2 bg-[#1d1e25] border border-[#3d3e4b] rounded-lg space-y-0.5">
+        <div className="flex items-center justify-between text-xs font-semibold text-[#EFF0D1]">
+          <span className="flex items-center gap-1.5 text-[11px] font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#77BA99]" />
+            Shop Floor Station
           </span>
-          <span className="text-emerald-700 bg-emerald-100/70 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold">READY</span>
+          <span className="text-[#77BA99] bg-[#77BA99]/20 border border-[#77BA99]/40 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold">ONLINE</span>
         </div>
-        <p className="text-[10px] text-slate-500 font-mono truncate">Local &amp; Tunnel Online</p>
+        <p className="text-[10px] text-[#D7C0D0] font-mono truncate">Bay PMU-2 · Shift A</p>
       </div>
     </aside>
   )

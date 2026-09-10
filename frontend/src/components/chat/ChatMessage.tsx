@@ -7,8 +7,6 @@ import {
   Cpu,
   ChevronDown,
   ChevronUp,
-  Sparkles,
-  Bot,
 } from 'lucide-react'
 import type { ChatMessage as ChatMessageType } from '@/types/api'
 import { CitationCard } from './CitationCard'
@@ -48,53 +46,53 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const thinkWordCount = thinkContent ? thinkContent.split(/\s+/).length : 0
 
   return (
-    <div className={cn('flex gap-2.5 sm:gap-3.5 max-w-[94%] sm:max-w-3xl w-full', isUser ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
+    <div className={cn('flex gap-2 sm:gap-3 max-w-[96%] sm:max-w-3xl w-full', isUser ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
       {/* Role Avatar */}
       <div
         className={cn(
-          'w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xs shadow-2xs mt-1',
+          'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs shadow-xs mt-0.5',
           isUser
-            ? 'bg-slate-900 ring-2 ring-slate-150'
-            : 'bg-gradient-to-tr from-sky-400 via-primary to-blue-600 ring-2 ring-sky-100'
+            ? 'bg-[#262730] border border-[#3d3e4b] text-[#EFF0D1]'
+            : 'bg-[#1d1e25] border border-[#3d3e4b] text-[#77BA99]'
         )}
       >
-        {isUser ? <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+        {isUser ? <User className="w-3.5 h-3.5" /> : <Cpu className="w-3.5 h-3.5" />}
       </div>
 
-      <div className="space-y-1.5 max-w-full flex-1">
+      <div className="space-y-1 max-w-full flex-1">
         {/* Role label & timestamp */}
-        <div className={cn('flex items-center gap-2 text-[10px] sm:text-[11px]', isUser ? 'justify-end' : 'justify-start')}>
-          <span className="font-bold text-slate-700">
-            {isUser ? 'You' : 'VAJRA Technical Assistant'}
+        <div className={cn('flex items-center gap-1.5 text-[10px] sm:text-[11px]', isUser ? 'justify-end' : 'justify-start')}>
+          <span className="font-bold text-[#EFF0D1]">
+            {isUser ? 'Operator' : 'VAJRA Diagnostic System'}
           </span>
-          <span className="text-slate-400 font-mono">
+          <span className="text-[#D7C0D0]/70 font-mono">
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
 
         {/* Collapsible Model Reasoning Drawer */}
         {!isUser && thinkContent && (
-          <div className="rounded-xl border border-sky-100/90 overflow-hidden bg-sky-50/30 shadow-2xs">
+          <div className="rounded-lg border border-[#3d3e4b] overflow-hidden bg-[#1d1e25] shadow-xs">
             <button
               type="button"
               onClick={() => setShowThinking(!showThinking)}
-              className="w-full px-3 py-1.5 flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-slate-900 bg-sky-50/60 hover:bg-sky-100/50 transition-colors"
+              className="w-full px-2.5 py-1.5 flex items-center justify-between text-xs font-semibold text-[#EFF0D1] hover:text-white bg-[#262730] hover:bg-[#32333e] transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <Cpu className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[11px] font-semibold text-slate-800">Engineering Reasoning</span>
-                <span className="px-1.5 py-0.2 bg-white/90 text-primary border border-sky-200/60 rounded-full text-[9px] font-mono font-bold">
+              <div className="flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-[#77BA99]" />
+                <span className="text-[11px] font-semibold text-[#EFF0D1]">Diagnostic Verification Trace</span>
+                <span className="px-1.5 py-0.2 bg-[#1d1e25] text-[#77BA99] border border-[#77BA99]/30 rounded-md text-[9px] font-mono font-bold">
                   {thinkWordCount} words
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-primary font-medium">
+              <div className="flex items-center gap-1 text-[11px] text-[#77BA99] font-medium">
                 <span>{showThinking ? 'Hide' : 'Trace'}</span>
                 {showThinking ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </div>
             </button>
 
             {showThinking && (
-              <div className="p-3 text-xs text-slate-700 bg-white/95 whitespace-pre-wrap leading-relaxed border-t border-sky-100 max-h-56 overflow-y-auto font-sans">
+              <div className="p-2.5 text-xs text-[#D7C0D0] bg-[#191a22] whitespace-pre-wrap leading-relaxed border-t border-[#3d3e4b] max-h-56 overflow-y-auto font-sans">
                 {thinkContent}
               </div>
             )}
@@ -104,14 +102,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {/* Main Answer Bubble with Rich Markdown Formatting */}
         <div
           className={cn(
-            'p-3.5 sm:p-4.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-2xs relative group font-sans',
+            'p-3 sm:p-3.5 rounded-xl text-xs sm:text-sm leading-relaxed shadow-md relative group font-sans',
             isUser
-              ? 'bg-gradient-to-r from-sky-600 via-primary to-blue-600 text-white rounded-tr-xs'
-              : 'bg-white border border-slate-200/90 text-slate-800 rounded-tl-xs shadow-[0_2px_12px_rgba(0,0,0,0.03)]'
+              ? 'bg-[#77BA99] text-[#1d1e25] font-medium rounded-tr-xs border border-[#64a384]'
+              : 'bg-[#262730] border border-[#3d3e4b] text-[#EFF0D1] rounded-tl-xs shadow-md'
           )}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap">{mainContent}</p>
+            <p className="whitespace-pre-wrap text-[#1d1e25] font-medium">{mainContent}</p>
           ) : (
             <FormattedMessage content={mainContent} />
           )}
@@ -119,22 +117,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {!isUser && (
             <button
               onClick={handleCopy}
-              className="absolute top-2.5 right-2.5 p-1 text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-2xs"
+              className="absolute top-2 right-2 p-1 text-[#D7C0D0] hover:text-[#EFF0D1] bg-[#1d1e25] hover:bg-[#32333e] border border-[#3d3e4b] rounded-md opacity-0 group-hover:opacity-100 transition-all shadow-xs"
               title="Copy answer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-[#77BA99]" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           )}
         </div>
 
         {/* Citations & Schematics */}
         {message.citations && message.citations.length > 0 && (
-          <div className="space-y-1.5 pt-1">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <BookOpen className="w-3 h-3 text-primary" />
+          <div className="space-y-1 pt-0.5">
+            <p className="text-[10px] font-bold text-[#D7C0D0] uppercase tracking-wider flex items-center gap-1">
+              <BookOpen className="w-3 h-3 text-[#77BA99]" />
               Verified Document Citations ({message.citations.length})
             </p>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {message.citations.map((c, i) => (
                 <CitationCard key={i} citation={c} />
               ))}

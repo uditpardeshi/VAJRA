@@ -21,24 +21,24 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
   const flushTable = (key: string) => {
     if (tableHeader.length > 0 || tableRows.length > 0) {
       elements.push(
-        <div key={key} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200/80 shadow-2xs bg-white">
+        <div key={key} className="my-2 overflow-x-auto rounded-xl border border-[#23334d] shadow-md bg-[#111927]">
           <table className="w-full text-left text-xs">
             {tableHeader.length > 0 && (
-              <thead className="bg-slate-50/90 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-[#18233a] border-b border-[#23334d] text-sky-200 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   {tableHeader.map((th, i) => (
-                    <th key={i} className="px-3 py-2">
+                    <th key={i} className="px-2.5 py-1.5 font-bold">
                       {parseInlineFormatting(th.trim())}
                     </th>
                   ))}
                 </tr>
               </thead>
             )}
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#23334d]">
               {tableRows.map((row, rIdx) => (
-                <tr key={rIdx} className={rIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}>
+                <tr key={rIdx} className={rIdx % 2 === 0 ? 'bg-[#111927]' : 'bg-[#0e1625]'}>
                   {row.map((cell, cIdx) => (
-                    <td key={cIdx} className="px-3 py-2 font-mono text-[11px] text-slate-800">
+                    <td key={cIdx} className="px-2.5 py-1.5 font-mono text-[11px] text-slate-100">
                       {parseInlineFormatting(cell.trim())}
                     </td>
                   ))}
@@ -57,7 +57,7 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
   const flushCode = (key: string) => {
     if (codeBlockContent.length > 0) {
       elements.push(
-        <div key={key} className="my-2 p-3 bg-slate-900 text-slate-100 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner">
+        <div key={key} className="my-1.5 p-2.5 bg-[#0a0e17] text-sky-300 rounded-xl font-mono text-xs overflow-x-auto border border-[#23334d] shadow-inner">
           <pre>{codeBlockContent.join('\n')}</pre>
         </div>
       )
@@ -110,13 +110,13 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
 
     // Empty lines
     if (!trimmed) {
-      elements.push(<div key={`spacer-${index}`} className="h-1.5" />)
+      elements.push(<div key={`spacer-${index}`} className="h-1" />)
       return
     }
 
     // Horizontal rules (--- or ***)
     if (/^[-*_]{3,}$/.test(trimmed)) {
-      elements.push(<hr key={`hr-${index}`} className="my-2.5 border-slate-200/80" />)
+      elements.push(<hr key={`hr-${index}`} className="my-2 border-slate-800" />)
       return
     }
 
@@ -124,9 +124,9 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
     if (trimmed.startsWith('### ') || trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
       const headingText = trimmed.replace(/^#+\s*/, '')
       elements.push(
-        <div key={`h-${index}`} className="pt-2 pb-1 flex items-center gap-2">
-          <div className="w-1.5 h-4 bg-primary rounded-full shrink-0" />
-          <h4 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight">
+        <div key={`h-${index}`} className="pt-1.5 pb-0.5 flex items-center gap-1.5">
+          <div className="w-1 h-3.5 bg-sky-400 rounded-full shrink-0" />
+          <h4 className="text-xs sm:text-sm font-bold text-slate-100 tracking-tight">
             {parseInlineFormatting(headingText)}
           </h4>
         </div>
@@ -140,11 +140,11 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
       const stepNum = stepMatch[1]
       const stepText = stepMatch[2]
       elements.push(
-        <div key={`step-${index}`} className="flex items-start gap-2.5 my-1.5 p-2 rounded-xl bg-slate-50/70 border border-slate-200/60 text-xs">
-          <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+        <div key={`step-${index}`} className="flex items-start gap-2 my-1 p-2 rounded-lg bg-[#141d2f] border border-[#23334d] text-xs">
+          <span className="w-4.5 h-4.5 rounded-full bg-sky-500/25 text-sky-300 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 border border-sky-400/40">
             {stepNum}
           </span>
-          <div className="flex-1 text-slate-800 leading-relaxed font-sans">
+          <div className="flex-1 text-slate-100 leading-relaxed font-sans">
             {parseInlineFormatting(stepText)}
           </div>
         </div>
@@ -156,8 +156,8 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
     if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
       const bulletText = trimmed.replace(/^[-*•]\s*/, '')
       elements.push(
-        <div key={`bullet-${index}`} className="flex items-start gap-2 my-1 text-xs text-slate-700 leading-relaxed pl-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 mt-1.5" />
+        <div key={`bullet-${index}`} className="flex items-start gap-2 my-0.5 text-xs text-slate-200 leading-relaxed pl-1">
+          <div className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0 mt-1.5" />
           <div className="flex-1 font-sans">
             {parseInlineFormatting(bulletText)}
           </div>
@@ -168,7 +168,7 @@ export function FormattedMessage({ content }: FormattedMessageProps) {
 
     // Regular paragraphs
     elements.push(
-      <p key={`p-${index}`} className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans my-1">
+      <p key={`p-${index}`} className="text-xs sm:text-sm text-slate-100 leading-relaxed font-sans my-0.5 font-normal">
         {parseInlineFormatting(trimmed)}
       </p>
     )
@@ -195,7 +195,7 @@ function parseInlineFormatting(text: string): React.ReactNode[] {
     if (part.startsWith('**') && part.endsWith('**')) {
       const boldText = part.slice(2, -2)
       return (
-        <strong key={i} className="font-bold text-slate-900 font-sans">
+        <strong key={i} className="font-bold text-white font-sans">
           {boldText}
         </strong>
       )
@@ -205,7 +205,7 @@ function parseInlineFormatting(text: string): React.ReactNode[] {
     if (part.startsWith('`') && part.endsWith('`')) {
       const codeText = part.slice(1, -1)
       return (
-        <code key={i} className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-800 font-mono text-[11px] border border-slate-200/60">
+        <code key={i} className="px-1.5 py-0.2 rounded bg-slate-800 text-sky-300 font-mono text-[11px] border border-slate-700">
           {codeText}
         </code>
       )

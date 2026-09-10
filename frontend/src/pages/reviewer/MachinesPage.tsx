@@ -16,18 +16,18 @@ export function MachinesPage() {
         {machines?.map((m) => (
           <Card key={m.id} className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-primary-50 text-primary rounded-xl">
+              <div className="p-2 bg-sky-500/20 text-sky-300 border border-sky-500/30 rounded-xl">
                 <Cpu className="w-6 h-6" />
               </div>
               <Badge variant="success">ONLINE</Badge>
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 text-base">{m.name}</h4>
-              <span className="text-xs font-mono text-slate-400">{m.machine_id} · {m.type}</span>
+              <h4 className="font-bold text-white text-base">{m.name}</h4>
+              <span className="text-xs font-mono text-slate-300">{m.machine_id} · {m.type}</span>
             </div>
-            <div className="text-xs text-slate-600 space-y-1 border-t border-slate-100 pt-2">
-              <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {m.location}</div>
-              <div className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-slate-400" /> {m.manual_path}</div>
+            <div className="text-xs text-slate-200 space-y-1 border-t border-[#23334d] pt-2">
+              <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-sky-400" /> {m.location}</div>
+              <div className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-sky-400" /> {m.manual_path}</div>
             </div>
           </Card>
         ))}

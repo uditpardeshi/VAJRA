@@ -107,10 +107,10 @@ export function SettingsPage() {
 
       <Card className="space-y-5">
         <div>
-          <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-            <Globe className="w-4 h-4 text-primary" /> Backend API Configuration
+          <h3 className="font-bold text-white text-base flex items-center gap-2">
+            <Globe className="w-4 h-4 text-sky-400" /> Backend API Configuration
           </h3>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-300 mt-1">
             FastAPI on-premise backend for inspection records, RAG manuals, and audit logs.
           </p>
         </div>
@@ -132,10 +132,10 @@ export function SettingsPage() {
 
       <Card className="space-y-5">
         <div>
-          <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-            <Key className="w-4 h-4 text-accent" /> Model Access & Tunnel (VAJRA)
+          <h3 className="font-bold text-white text-base flex items-center gap-2">
+            <Key className="w-4 h-4 text-amber-400" /> Model Access & Tunnel (VAJRA)
           </h3>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-300 mt-1">
             Ngrok tunnel URL and API Key for direct sovereign model inference referenced from backend/api.py.
           </p>
         </div>
@@ -158,27 +158,27 @@ export function SettingsPage() {
 
       {/* Connectivity Status Display */}
       {testResult && (
-        <Card className="bg-slate-50 border-slate-200">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Connection Status</h4>
+        <Card className="bg-[#111927] border border-[#23334d]">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3">Connection Status</h4>
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-700">
-                <Activity className="w-4 h-4" /> FastAPI Backend ({localApiBase})
+              <span className="flex items-center gap-2 text-slate-200">
+                <Activity className="w-4 h-4 text-sky-400" /> FastAPI Backend ({localApiBase})
               </span>
               {testResult.backend ? (
-                <span className="flex items-center gap-1 text-emerald-600 font-semibold text-xs bg-emerald-50 px-2 py-1 rounded">
-                  <CheckCircle className="w-3.5 h-3.5" /> Connected
+                <span className="flex items-center gap-1 text-emerald-300 font-semibold text-xs bg-emerald-500/20 border border-emerald-500/30 px-2 py-1 rounded">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Connected
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-amber-600 font-semibold text-xs bg-amber-50 px-2 py-1 rounded">
-                  <AlertCircle className="w-3.5 h-3.5" /> Offline / Unreachable
+                <span className="flex items-center gap-1 text-amber-300 font-semibold text-xs bg-amber-500/20 border border-amber-500/30 px-2 py-1 rounded">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" /> Offline / Unreachable
                 </span>
               )}
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-700">
-                <Radio className="w-4 h-4" /> Ngrok Model ({localModelUrl})
+              <span className="flex items-center gap-2 text-slate-200">
+                <Radio className="w-4 h-4 text-sky-400" /> Ngrok Model ({localModelUrl})
               </span>
               {testResult.model ? (
                 <span className="flex items-center gap-1 text-emerald-600 font-semibold text-xs bg-emerald-50 px-2 py-1 rounded">

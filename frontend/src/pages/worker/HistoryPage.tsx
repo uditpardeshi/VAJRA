@@ -25,15 +25,15 @@ export function HistoryPage() {
                 {item.status === 'pass' ? <CheckCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
               </div>
               <div>
-                <h4 className="font-bold text-slate-900 text-sm">{item.machine} Inspection</h4>
-                <p className="text-xs text-slate-500">{item.finding}</p>
+                <h4 className="font-bold text-white text-sm">{item.machine} Inspection</h4>
+                <p className="text-xs text-slate-300 mt-0.5">{item.finding}</p>
               </div>
             </div>
             <div className="text-right">
               <Badge variant={item.status === 'pass' ? 'success' : 'accent'}>
                 {Math.round(item.confidence * 100)}% Confidence
               </Badge>
-              <span className="block text-[11px] text-slate-400 mt-1">{item.date}</span>
+              <span className="block text-[11px] text-slate-300 font-mono mt-1">{item.date}</span>
             </div>
           </Card>
         ))}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FileSearch, Cpu, CheckCircle2, ShieldCheck, Gauge, Sparkles } from 'lucide-react'
+import { FileSearch, Cpu, CheckCircle2, ShieldCheck, Gauge } from 'lucide-react'
 
 export interface ThinkingProgressProps {
   machineId?: string
@@ -26,28 +26,28 @@ export function ThinkingProgress({ machineId = 'HX-204', hasFiles = false }: Thi
   const steps: Step[] = [
     {
       id: 1,
-      title: 'Scanning Technical Manuals',
+      title: 'OEM Technical Manual Lookup',
       subtitle: hasFiles
-        ? `Cross-referencing ${machineId} manual & session documents...`
-        : `Searching OEM technical documentation for ${machineId}...`,
+        ? `Cross-referencing ${machineId} operating manual & attached shop files...`
+        : `Scanning OEM technical documentation catalog for ${machineId}...`,
       icon: <FileSearch className="w-4 h-4" />,
     },
     {
       id: 2,
-      title: 'Extracting Tolerances & Schematics',
-      subtitle: 'Isolating operating limits, pressure ratings, and diagrams...',
+      title: 'Tolerance & Pressure Isolation',
+      subtitle: 'Extracting operating limits, hydraulic thresholds, and schematics...',
       icon: <Gauge className="w-4 h-4" />,
     },
     {
       id: 3,
-      title: 'Reasoning & Verification',
-      subtitle: 'Evaluating engineering constraints with Qwen neural core...',
+      title: 'Engineering Constraint Verification',
+      subtitle: 'Evaluating mechanical parameters against ISO/DIN tolerance envelopes...',
       icon: <Cpu className="w-4 h-4" />,
     },
     {
       id: 4,
-      title: 'Formulating Actionable Steps',
-      subtitle: 'Compiling verifiable procedure with source citations...',
+      title: 'Compiling Action Procedure',
+      subtitle: 'Generating verified step-by-step maintenance protocol with citations...',
       icon: <ShieldCheck className="w-4 h-4" />,
     },
   ]
@@ -78,44 +78,41 @@ export function ThinkingProgress({ machineId = 'HX-204', hasFiles = false }: Thi
 
   return (
     <div className="mr-auto max-w-2xl w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="bg-white/95 backdrop-blur-xl text-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200/90 space-y-3">
+      <div className="bg-[#262730] text-[#EFF0D1] rounded-xl p-3 sm:p-3.5 shadow-md border border-[#3d3e4b] space-y-2.5">
         {/* Top bar: Status + Timer */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+        <div className="flex items-center justify-between border-b border-[#3d3e4b] pb-2">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+            <span className="w-2 h-2 rounded-full bg-[#77BA99]" />
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#EFF0D1]">
+              Diagnostic Tolerance Verification
             </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              VAJRA Engineering Reasoning
-            </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-primary border border-sky-100 font-mono font-semibold">
-              Live RAG
+            <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-[#1d1e25] text-[#77BA99] border border-[#3d3e4b] font-mono font-bold">
+              {machineId}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-xs text-primary bg-sky-50/80 px-2.5 py-0.5 rounded-full border border-sky-100 font-semibold">
-            <span>T+</span>
+          <div className="flex items-center gap-1 font-mono text-[11px] text-[#EFF0D1] bg-[#1d1e25] px-2 py-0.5 rounded-md border border-[#3d3e4b] font-semibold">
+            <span className="text-[#D7C0D0]">Elapsed:</span>
             <span>{formatTimer(seconds)}</span>
           </div>
         </div>
 
         {/* Progress bar */}
         <div className="space-y-1">
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-[#1d1e25] rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-sky-500 via-primary to-blue-600 h-1.5 rounded-full transition-all duration-500 ease-out shadow-xs"
+              className="bg-[#77BA99] h-1.5 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${Math.min(98, progressPercent)}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>{steps[activeStep - 1].title}</span>
-            <span className="font-semibold">{Math.round(progressPercent)}%</span>
+          <div className="flex justify-between text-[10px] text-[#D7C0D0] font-mono">
+            <span className="font-semibold text-[#EFF0D1]">{steps[activeStep - 1].title}</span>
+            <span className="font-bold text-[#77BA99]">{Math.round(progressPercent)}%</span>
           </div>
         </div>
 
         {/* Stepper list */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
           {steps.map((step) => {
             const isDone = step.id < activeStep
             const isCurrent = step.id === activeStep
@@ -123,36 +120,36 @@ export function ThinkingProgress({ machineId = 'HX-204', hasFiles = false }: Thi
             return (
               <div
                 key={step.id}
-                className={`p-2.5 rounded-xl border transition-all text-left flex items-start gap-2.5 ${
+                className={`p-2 rounded-lg border transition-all text-left flex items-start gap-2 ${
                   isCurrent
-                    ? 'bg-sky-50/80 border-sky-300/80 shadow-2xs'
+                    ? 'bg-[#1d1e25] border-[#77BA99] text-[#EFF0D1]'
                     : isDone
-                    ? 'bg-emerald-50/60 border-emerald-200/60 text-slate-700'
-                    : 'bg-slate-50/50 border-slate-200/50 opacity-60 text-slate-400'
+                    ? 'bg-[#1d1e25] border-[#77BA99]/40 text-[#EFF0D1]'
+                    : 'bg-[#1d1e25]/60 border-[#3d3e4b] text-[#D7C0D0]/60'
                 }`}
               >
                 <div
-                  className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                  className={`p-1.5 rounded-md shrink-0 mt-0.5 ${
                     isCurrent
-                      ? 'bg-primary text-white shadow-2xs animate-pulse'
+                      ? 'bg-[#77BA99] text-[#1d1e25] shadow-xs'
                       : isDone
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-slate-100 text-slate-400'
+                      ? 'bg-[#77BA99]/20 text-[#77BA99] border border-[#77BA99]/40'
+                      : 'bg-[#262730] text-[#D7C0D0]/60'
                   }`}
                 >
-                  {isDone ? <CheckCircle2 className="w-4 h-4" /> : step.icon}
+                  {isDone ? <CheckCircle2 className="w-3.5 h-3.5 text-[#77BA99]" /> : step.icon}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`text-xs font-semibold truncate ${
-                      isCurrent ? 'text-primary font-bold' : isDone ? 'text-slate-800' : 'text-slate-500'
+                    className={`text-[11px] font-bold truncate ${
+                      isCurrent ? 'text-[#77BA99]' : isDone ? 'text-[#EFF0D1]' : 'text-[#D7C0D0]'
                     }`}
                   >
                     {step.title}
                   </p>
-                  <p className="text-[10px] text-slate-500 leading-tight line-clamp-2 mt-0.5">
-                    {isCurrent ? step.subtitle : isDone ? 'Verified in manuals' : 'Queued'}
+                  <p className="text-[10px] text-[#D7C0D0] leading-tight line-clamp-2 mt-0.5 font-normal">
+                    {isCurrent ? step.subtitle : isDone ? 'Verified against specifications' : 'Queued'}
                   </p>
                 </div>
               </div>
@@ -161,8 +158,8 @@ export function ThinkingProgress({ machineId = 'HX-204', hasFiles = false }: Thi
         </div>
 
         {/* Footer tip */}
-        <p className="text-[10px] text-slate-400 text-center italic pt-1 border-t border-slate-100">
-          Reasoning over manufacturing specifications and verifying engineering tolerances...
+        <p className="text-[10px] text-[#D7C0D0]/70 text-center pt-1 border-t border-[#3d3e4b]">
+          Cross-referencing machine parameters against OEM technical documentation and ISO standards.
         </p>
       </div>
     </div>

@@ -30,7 +30,7 @@ export function BottomNav() {
   const items = role === 'worker' ? workerNav : role === 'reviewer' ? reviewerNav : adminNav
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-slate-200 z-40 flex items-center justify-around px-1 shadow-lg">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 h-12 bg-[#262730]/95 backdrop-blur-lg border-t border-[#3d3e4b] z-40 flex items-center justify-around px-1 shadow-[0_-4px_16px_rgba(0,0,0,0.5)]">
       {items.map((item) => {
         const Icon = item.icon
         return (
@@ -38,13 +38,15 @@ export function BottomNav() {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-2.5 py-1 rounded-xl text-[10px] font-semibold transition-all ${
-                isActive ? 'text-primary font-bold' : 'text-slate-500 hover:text-slate-900'
+              `flex flex-col items-center justify-center gap-0.5 px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-all ${
+                isActive
+                  ? 'text-[#77BA99] font-bold drop-shadow-[0_0_8px_rgba(119,186,153,0.5)]'
+                  : 'text-[#D7C0D0]/75 hover:text-[#EFF0D1]'
               }`
             }
           >
             <Icon className="w-4 h-4" />
-            <span className="truncate max-w-[64px]">{item.label}</span>
+            <span className="truncate max-w-[64px] tracking-tight">{item.label}</span>
           </NavLink>
         )
       })}

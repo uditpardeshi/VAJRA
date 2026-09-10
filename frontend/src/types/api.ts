@@ -86,6 +86,8 @@ export interface ChatRequest {
   machine_id?: string;
   session_id?: string;
   top_k?: number;
+  reasoning?: boolean;
+  history?: Array<{ role: string; content: string }>;
 }
 
 export interface ChatResponse {
@@ -229,6 +231,32 @@ export interface TrendPoint { date: string; value: number; label?: string }
 export interface MachineHealth { machine_id: string; health_score: number; last_inspection: string; open_issues: number }
 export interface ConfidenceBucket { range: string; count: number; percentage: number }
 export interface EscalationHeatmapCell { machine_id: string; date: string; count: number }
+
+export interface ShiftActivityItem {
+  id: number;
+  type: 'pass' | 'warn';
+  machine: string;
+  test: string;
+  result: string;
+  time: string;
+}
+
+export interface AuditTrailItem {
+  id: number;
+  action: string;
+  detail: string;
+  user: string;
+  time: string;
+  status: string;
+}
+
+export interface SystemMetrics {
+  db_status: string;
+  db_size_kb: number;
+  machines_registered: number;
+  indexed_sessions: number;
+  timestamp: string;
+}
 
 // ==================== WEBSOCKET ====================
 export type WSMessageType = 'escalation_created' | 'escalation_acknowledged' | 'escalation_resolved' | 'inspection_completed' | 'agent_completed' | 'pong' | 'error';

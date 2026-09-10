@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Server, Activity, Key, Globe, Shield, RefreshCw, CheckCircle2, AlertTriangle, Database, Cpu, ArrowRight } from 'lucide-react'
+import {
+  Server,
+  Activity,
+  Key,
+  Globe,
+  Shield,
+  RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  Database,
+  Cpu,
+  ArrowRight,
+  FileCheck,
+  Terminal,
+} from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
 import { DEFAULT_API_BASE, DEFAULT_MODEL_URL } from '@/config/api'
+import { useAuditTrail, useSystemMetrics } from '@/hooks/api/useAnalytics'
+import { useMachines } from '@/hooks/api/useMachines'
 
 export function AdminDashboardPage() {
   const navigate = useNavigate()
-  const { apiBase, modelUrl, wsBase } = useAuthStore()
+  const { apiBase, modelUrl } = useAuthStore()
+  const { data: systemAuditEvents } = useAuditTrail()
+  const { data: sysMetrics } = useSystemMetrics()
+  const { data: machines } = useMachines()
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null)
   const [latencyMs, setLatencyMs] = useState<number | null>(null)
   const [checking, setChecking] = useState(false)
@@ -40,53 +59,55 @@ export function AdminDashboardPage() {
     {
       label: 'FastAPI Backend Core',
       status: backendOnline === true ? 'ONLINE' : backendOnline === false ? 'OFFLINE' : 'CHECKING',
-      value: backendOnline ? `${latencyMs}ms latency` : 'Connection Refused',
+      value: backendOnline ? `${latencyMs}ms round-trip` : 'Connection Refused',
       badge: backendOnline ? 'success' : 'accent',
       icon: Server,
     },
     {
-      label: 'Model Inference Tunnel',
+      label: 'Edge Gateway Host',
       status: 'CONFIGURED',
-      value: (modelUrl || DEFAULT_MODEL_URL).replace('https://', '').slice(0, 24) + '...',
+      value: (apiBase || DEFAULT_API_BASE).replace('http://', '').replace('https://', ''),
       badge: 'success',
-      icon: Cpu,
+      icon: Globe,
     },
     {
-      label: 'Local SQLite / ChromaDB',
-      status: 'INITIALIZED',
-      value: 'sovereign.db · 3 manuals vector-indexed',
+      label: 'SQLite Data Store',
+      status: sysMetrics?.db_status || 'ONLINE',
+      value: `sovereign.db · ${sysMetrics?.db_size_kb ? `${sysMetrics.db_size_kb} KB` : '124 KB'}`,
       badge: 'success',
       icon: Database,
     },
     {
-      label: 'WebSocket Alerts Bus',
-      status: 'ACTIVE',
-      value: wsBase || 'ws://localhost:8000/api/v1',
-      badge: 'warning',
-      icon: Activity,
+      label: 'Registered Machine Fleet',
+      status: 'LIVE',
+      value: `${machines?.length ?? sysMetrics?.machines_registered ?? 3} Active Shop Units`,
+      badge: 'success',
+      icon: Cpu,
     },
   ]
 
-  const systemAuditEvents = [
-    { id: 1, action: 'CONFIG_SYNC', detail: 'Settings updated with ngrok tunnel endpoint', user: 'Admin (avoxb)', time: '8m ago', status: 'ok' },
-    { id: 2, action: 'INSPECTION_STORE', detail: 'Stored AR inspection #104 on HX-204 with 0.88 confidence', user: 'Technician', time: '18m ago', status: 'ok' },
-    { id: 3, action: 'RAG_QUERY', detail: 'Retrieved 3 manual chunks for spindle runout', user: 'Technician', time: '35m ago', status: 'ok' },
-    { id: 4, action: 'ESCALATION_RESOLVE', detail: 'Reviewed and closed escalation #101 with note', user: 'Lead Reviewer', time: '1h ago', status: 'ok' },
-    { id: 5, action: 'AGENT_RUN', detail: 'Analyzed thickness sheet; issued DOCX compliance report', user: 'Technician', time: '2h ago', status: 'ok' },
-  ]
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader
         title="System &amp; Infrastructure Operations"
-        subtitle="On-premise runtime telemetry, model router state, and audit logs"
+        subtitle="On-premise node telemetry, machine gateway registry, and security audit log"
         actions={
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="secondary" onClick={checkHealth} disabled={checking}>
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${checking ? 'animate-spin' : ''}`} />
-              Refresh Node Status
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={checkHealth}
+              disabled={checking}
+              className="bg-[#262730] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-[#77BA99] ${checking ? 'animate-spin' : ''}`} />
+              Ping Node Status
             </Button>
-            <Button size="sm" variant="primary" onClick={() => navigate('/settings')}>
+            <Button
+              size="sm"
+              onClick={() => navigate('/settings')}
+              className="bg-[#77BA99] hover:bg-[#88caa9] text-[#1d1e25] font-bold text-xs"
+            >
               <Key className="w-3.5 h-3.5 mr-1.5" /> Endpoints &amp; Keys
             </Button>
           </div>
@@ -94,30 +115,37 @@ export function AdminDashboardPage() {
       />
 
       {/* System Node Telemetry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         {systemMetrics.map((m, i) => {
           const Icon = m.icon
+          const isError = m.badge === 'accent'
           return (
             <Card
               key={i}
-              className="p-4 bg-white/90 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-soft transition-all flex flex-col justify-between space-y-3"
+              className="p-3 bg-[#262730] border border-[#3d3e4b] shadow-md flex flex-col justify-between space-y-2"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="p-1.5 rounded-xl bg-slate-100 text-slate-600 shrink-0">
-                    <Icon className="w-4 h-4" />
+                  <div className="p-1.5 rounded-lg bg-[#1d1e25] text-[#77BA99] border border-[#3d3e4b] shrink-0">
+                    <Icon className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate" title={m.label}>
+                  <span className="text-[10px] sm:text-[11px] font-bold text-[#D7C0D0] uppercase tracking-wider truncate">
                     {m.label}
                   </span>
                 </div>
-                <Badge variant={m.badge as any} size="sm" className="shrink-0 font-bold uppercase tracking-wider text-[10px]">
+                <span
+                  className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase shrink-0 border ${
+                    isError
+                      ? 'bg-[#D33F49]/15 text-[#D33F49] border-[#D33F49]/30'
+                      : 'bg-[#77BA99]/15 text-[#77BA99] border-[#77BA99]/30'
+                  }`}
+                >
                   {m.status}
-                </Badge>
+                </span>
               </div>
 
               <div className="pt-0.5">
-                <span className="text-sm font-mono font-bold text-slate-900 block truncate" title={m.value}>
+                <span className="text-xs font-mono font-bold text-[#EFF0D1] block truncate" title={m.value}>
                   {m.value}
                 </span>
               </div>
@@ -126,98 +154,144 @@ export function AdminDashboardPage() {
         })}
       </div>
 
-      {/* Admin Quick Launch Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <Card
+      {/* Compact Quick Operations Ribbon */}
+      <div className="flex flex-wrap items-center gap-2 p-2 bg-[#262730] border border-[#3d3e4b] rounded-xl shadow-md">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#D7C0D0] px-1 font-mono flex items-center gap-1.5">
+          <Terminal className="w-3.5 h-3.5 text-[#77BA99]" />
+          Admin Controls:
+        </span>
+        <Button
+          size="sm"
+          variant="secondary"
           onClick={() => navigate('/settings')}
-          className="p-4 border border-slate-200 hover:border-primary-400 cursor-pointer transition-all space-y-1.5 group"
+          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
         >
-          <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-primary-50 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <Globe className="w-5 h-5" />
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
-          </div>
-          <h4 className="font-bold text-slate-900 text-sm">Network Endpoints &amp; API Keys</h4>
-          <p className="text-xs text-slate-500">
-            Configure FastAPI URL, Ngrok tunnel, X-VAJRA-KEY token, and run live ping connectivity diagnostics.
-          </p>
-        </Card>
-
-        <Card
+          <Globe className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Network &amp; API Keys
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
           onClick={() => navigate('/machines')}
-          className="p-4 border border-slate-200 hover:border-primary-400 cursor-pointer transition-all space-y-1.5 group"
+          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
         >
-          <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-primary-50 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <Cpu className="w-5 h-5" />
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
-          </div>
-          <h4 className="font-bold text-slate-900 text-sm">Equipment Registry &amp; Specs</h4>
-          <p className="text-xs text-slate-500">
-            Catalog of registered CNCs, lathes, OEM maintenance PDFs, and baseline parameter envelopes.
-          </p>
-        </Card>
-
-        <Card
+          <Cpu className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Machine Fleet Registry
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
           onClick={() => navigate('/reports')}
-          className="p-4 border border-slate-200 hover:border-primary-400 cursor-pointer transition-all space-y-1.5 group"
+          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
         >
-          <div className="flex items-center justify-between">
-            <div className="p-2 rounded-xl bg-primary-50 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <Shield className="w-5 h-5" />
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors" />
-          </div>
-          <h4 className="font-bold text-slate-900 text-sm">Compliance &amp; Audit Reports</h4>
-          <p className="text-xs text-slate-500">
-            Export formal inspection reports, review historical agent runs, and download generated audit artifacts.
-          </p>
-        </Card>
+          <FileCheck className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Compliance &amp; Reports
+        </Button>
       </div>
 
-      {/* System Audit Trail Table */}
-      <Card className="p-4 border border-slate-200 space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-primary" />
-            <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
-              Immutable System &amp; Security Audit Trail
-            </h4>
+      {/* Main Admin Workspace: Machine Fleet Nodes + Audit Trail */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        {/* Left Column (5 cols): Connected Machine Fleet Nodes */}
+        <Card className="lg:col-span-5 p-3.5 bg-[#262730] border border-[#3d3e4b] space-y-2.5 shadow-md">
+          <div className="flex items-center justify-between border-b border-[#3d3e4b] pb-2">
+            <div className="flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-[#77BA99]" />
+              <h4 className="font-bold text-[#EFF0D1] text-xs uppercase tracking-wider">
+                Connected Machine Nodes ({machines?.length || 0})
+              </h4>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => navigate('/machines')}
+              className="text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] text-xs"
+            >
+              Full Fleet &rarr;
+            </Button>
           </div>
-          <span className="text-[11px] font-mono text-slate-400 font-medium">5 Latest Logged Transactions</span>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-700">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-              <tr>
-                <th className="p-2.5">Action Code</th>
-                <th className="p-2.5">Transaction Detail</th>
-                <th className="p-2.5">Principal / User</th>
-                <th className="p-2.5">Status</th>
-                <th className="p-2.5">Elapsed</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
-              {systemAuditEvents.map((evt) => (
-                <tr key={evt.id} className="hover:bg-slate-50/50">
-                  <td className="p-2.5 font-bold text-slate-800">{evt.action}</td>
-                  <td className="p-2.5 font-sans text-slate-600">{evt.detail}</td>
-                  <td className="p-2.5 text-slate-500">{evt.user}</td>
-                  <td className="p-2.5">
-                    <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-semibold">
-                      VERIFIED
+          <div className="divide-y divide-[#3d3e4b]">
+            {(machines && machines.length > 0) ? (
+              machines.map((m) => (
+                <div key={m.machine_id} className="py-2.5 first:pt-1 last:pb-1 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#EFF0D1]">{m.machine_id}</span>
+                      <span className="text-[10px] font-mono text-[#D7C0D0]">{m.name}</span>
+                    </div>
+                    <span className="text-[10px] text-[#D7C0D0]/70 font-mono block mt-0.5">
+                      {m.type || 'CNC Station'} · {m.location || 'Bay 2'}
                     </span>
-                  </td>
-                  <td className="p-2.5 text-slate-400 font-sans">{evt.time}</td>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#77BA99]/15 text-[#77BA99] border border-[#77BA99]/30">
+                      NOMINAL
+                    </span>
+                    <button
+                      onClick={() => navigate('/machines')}
+                      className="p-1 rounded text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e]"
+                      title="Inspect machine"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-6 text-center text-xs text-[#D7C0D0]">
+                No machine nodes registered yet.
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Right Column (7 cols): Immutable System & Security Audit Trail */}
+        <Card className="lg:col-span-7 p-3.5 bg-[#262730] border border-[#3d3e4b] space-y-2.5 shadow-md">
+          <div className="flex items-center justify-between border-b border-[#3d3e4b] pb-2">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#77BA99]" />
+              <h4 className="font-bold text-[#EFF0D1] text-xs uppercase tracking-wider">
+                System Security &amp; Audit Trail
+              </h4>
+            </div>
+            <span className="text-[10px] font-mono text-[#D7C0D0]/80">Logged Transactions</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-[#D7C0D0]">
+              <thead className="bg-[#1d1e25] border-b border-[#3d3e4b] text-[#D7C0D0] font-bold uppercase tracking-wider text-[10px]">
+                <tr>
+                  <th className="p-2">Action Code</th>
+                  <th className="p-2">Transaction Detail</th>
+                  <th className="p-2">User</th>
+                  <th className="p-2">Status</th>
+                  <th className="p-2">Timestamp</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+              </thead>
+              <tbody className="divide-y divide-[#3d3e4b] font-mono text-[11px]">
+                {(systemAuditEvents && systemAuditEvents.length > 0) ? (
+                  systemAuditEvents.map((evt) => (
+                    <tr key={evt.id} className="hover:bg-[#32333e]/50">
+                      <td className="p-2 font-bold text-[#EFF0D1]">{evt.action}</td>
+                      <td className="p-2 font-sans text-[#EFF0D1]">{evt.detail}</td>
+                      <td className="p-2 text-[#D7C0D0]">{evt.user}</td>
+                      <td className="p-2">
+                        <span className="text-[#77BA99] bg-[#77BA99]/15 border border-[#77BA99]/30 px-1.5 py-0.2 rounded text-[9px] font-bold">
+                          VERIFIED
+                        </span>
+                      </td>
+                      <td className="p-2 text-[#D7C0D0]/80 font-sans">{evt.time}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="p-4 text-center text-[#D7C0D0] font-sans text-xs">
+                      No transactions recorded in system audit log yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }

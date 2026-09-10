@@ -79,7 +79,7 @@ export function FileAttachmentBar({ sessionId }: FileAttachmentBarProps) {
   }
 
   return (
-    <div className="border-t border-slate-100 bg-slate-50/60 p-2.5 space-y-2">
+    <div className="border-t border-[#23334d] bg-[#0c1220] p-2.5 space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <input
@@ -96,33 +96,33 @@ export function FileAttachmentBar({ sessionId }: FileAttachmentBarProps) {
             disabled={isUploading}
             onClick={() => fileInputRef.current?.click()}
             className={cn(
-              'flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold shadow-2xs transition-all',
+              'flex items-center gap-1.5 px-2.5 py-1 bg-[#18233a] hover:bg-[#23334d] text-slate-200 hover:text-white border border-[#2d4163] rounded-lg text-xs font-semibold shadow-2xs transition-all',
               isUploading && 'opacity-60 cursor-not-allowed'
             )}
           >
             {isUploading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-400" />
             ) : (
-              <UploadCloud className="w-3.5 h-3.5 text-primary" />
+              <UploadCloud className="w-3.5 h-3.5 text-sky-400" />
             )}
             <span>{isUploading ? 'Parsing & Indexing...' : 'Attach Documents'}</span>
           </button>
 
-          <span className="text-[10px] text-slate-400 hidden sm:inline">
+          <span className="text-[10px] text-slate-300 hidden sm:inline">
             PDF, DOCX, Excel/CSV tables, Schematics, TXT, JSON
           </span>
         </div>
 
         {uploadSuccess && (
-          <span className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium animate-in fade-in">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-medium animate-in fade-in">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             {uploadSuccess}
           </span>
         )}
 
         {uploadError && (
-          <span className="flex items-center gap-1 text-[11px] text-rose-600 font-medium animate-in fade-in">
-            <AlertCircle className="w-3.5 h-3.5" />
+          <span className="flex items-center gap-1 text-[11px] text-rose-300 font-medium animate-in fade-in">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
             {uploadError}
           </span>
         )}
@@ -134,29 +134,29 @@ export function FileAttachmentBar({ sessionId }: FileAttachmentBarProps) {
           {files.map((file) => (
             <div
               key={file.filename}
-              className="group flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 shadow-2xs"
+              className="group flex items-center gap-1.5 px-2.5 py-1 bg-[#18233a] border border-[#2d4163] rounded-lg text-xs text-slate-100 shadow-2xs"
             >
               {getFileIcon(file.filename)}
-              <span className="font-medium truncate max-w-[140px]" title={file.filename}>
+              <span className="font-medium text-slate-100 truncate max-w-[140px]" title={file.filename}>
                 {file.filename}
               </span>
-              <span className="text-[9px] px-1 py-0.2 bg-slate-100 rounded text-slate-500 font-mono">
+              <span className="text-[9px] px-1 py-0.2 bg-[#23334d] rounded text-slate-200 font-mono">
                 {file.total_chunks} {file.total_chunks === 1 ? 'chunk' : 'chunks'}
               </span>
               {file.tables > 0 && (
-                <span className="text-[9px] px-1 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded font-semibold">
+                <span className="text-[9px] px-1 py-0.2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded font-semibold">
                   {file.tables}T
                 </span>
               )}
               {file.figures > 0 && (
-                <span className="text-[9px] px-1 py-0.2 bg-amber-50 text-amber-700 border border-amber-200 rounded font-semibold">
+                <span className="text-[9px] px-1 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded font-semibold">
                   {file.figures}F
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => removeFileFromSession(sessionId, file.filename)}
-                className="text-slate-400 hover:text-rose-600 p-0.5 ml-0.5 transition-colors"
+                className="text-slate-400 hover:text-rose-400 p-0.5 ml-0.5 transition-colors"
                 title="Remove attached document from thread"
               >
                 <X className="w-3 h-3" />

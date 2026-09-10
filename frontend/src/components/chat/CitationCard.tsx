@@ -16,34 +16,34 @@ export function CitationCard({ citation }: CitationCardProps) {
 
   return (
     <>
-      <div className="p-3 bg-slate-50 hover:bg-slate-100/70 transition-colors border border-slate-200/90 rounded-xl space-y-2 text-xs">
+      <div className="p-2.5 bg-[#111927] hover:bg-[#152236] transition-colors border border-[#23334d] rounded-lg space-y-1.5 text-xs">
         {/* Header bar */}
-        <div className="flex items-center justify-between font-semibold text-slate-700">
+        <div className="flex items-center justify-between font-semibold text-slate-100">
           <div className="flex items-center gap-1.5 min-w-0">
             {isFigure ? (
-              <ImageIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <ImageIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             ) : isTable ? (
-              <TableIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <TableIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             ) : (
-              <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 text-sky-400 shrink-0" />
             )}
-            <span className="truncate max-w-[200px]" title={citation.source_file || citation.machine_id}>
+            <span className="truncate max-w-[200px] text-white font-bold" title={citation.source_file || citation.machine_id}>
               {citation.source_file || `${citation.machine_id} Manual`}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {isFigure && (
-              <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-200 rounded text-[9px] font-semibold tracking-wider uppercase">
+              <span className="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded text-[9px] font-bold tracking-wider uppercase">
                 Schematic
               </span>
             )}
             {isTable && (
-              <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded text-[9px] font-semibold tracking-wider uppercase">
+              <span className="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded text-[9px] font-bold tracking-wider uppercase">
                 Spec Table
               </span>
             )}
-            <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 rounded text-[10px] font-medium">
+            <span className="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 border border-sky-500/40 rounded text-[10px] font-mono font-bold">
               p. {citation.source_page}
             </span>
           </div>
@@ -51,32 +51,31 @@ export function CitationCard({ citation }: CitationCardProps) {
 
         {/* Visual diagram / schematic preview if available */}
         {isFigure && imageUrl && (
-          <div className="relative group rounded-lg overflow-hidden border border-slate-200 bg-white">
+          <div className="relative group rounded-lg overflow-hidden border border-[#23334d] bg-[#080d14]">
             <div
-              className="cursor-pointer relative overflow-hidden max-h-44 flex items-center justify-center bg-slate-900/5"
+              className="cursor-pointer relative overflow-hidden max-h-40 flex items-center justify-center bg-black/40"
               onClick={() => setIsImageModalOpen(true)}
             >
               <img
                 src={imageUrl}
                 alt={`Schematic diagram from page ${citation.source_page}`}
-                className="w-full h-auto object-contain max-h-44 transition-transform duration-200 group-hover:scale-105"
+                className="w-full h-auto object-contain max-h-40 transition-transform duration-200 group-hover:scale-105"
                 onError={(e) => {
-                  // If image fails to load gracefully hide
                   const target = e.currentTarget.parentElement
                   if (target) target.style.display = 'none'
                 }}
               />
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-white text-[11px] font-medium backdrop-blur-[1px]">
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 text-white text-[11px] font-medium backdrop-blur-xs">
                 <ZoomIn className="w-4 h-4" />
                 <span>Expand Schematic</span>
               </div>
             </div>
-            <div className="px-2 py-1 bg-slate-100/90 border-t border-slate-200 text-[10px] text-slate-500 flex justify-between items-center">
+            <div className="px-2 py-1 bg-[#0d1424] border-t border-[#23334d] text-[10px] text-slate-300 flex justify-between items-center">
               <span>Multimodal Diagram Extract</span>
               <button
                 type="button"
                 onClick={() => setIsImageModalOpen(true)}
-                className="text-primary hover:underline flex items-center gap-0.5 font-medium"
+                className="text-sky-300 hover:text-white flex items-center gap-0.5 font-semibold"
               >
                 <Maximize2 className="w-2.5 h-2.5" /> Full view
               </button>
@@ -86,8 +85,8 @@ export function CitationCard({ citation }: CitationCardProps) {
 
         {/* Structured table preview if present */}
         {isTable && citation.table_data && (
-          <div className="rounded-lg border border-slate-200 bg-white p-2 overflow-x-auto">
-            <pre className="font-mono text-[10px] text-slate-700 leading-tight whitespace-pre-wrap">
+          <div className="rounded-lg border border-[#23334d] bg-[#080d14] p-2 overflow-x-auto">
+            <pre className="font-mono text-[10px] text-slate-200 leading-tight whitespace-pre-wrap">
               {citation.table_data}
             </pre>
           </div>
@@ -95,7 +94,7 @@ export function CitationCard({ citation }: CitationCardProps) {
 
         {/* Text snippet */}
         {citation.text_snippet && (
-          <p className="text-slate-600 italic font-mono text-[11px] leading-relaxed">
+          <p className="text-slate-200 italic font-mono text-[10px] leading-relaxed">
             &ldquo;{citation.text_snippet}&rdquo;
           </p>
         )}
@@ -104,36 +103,36 @@ export function CitationCard({ citation }: CitationCardProps) {
       {/* Fullscreen Lightbox Modal for Diagram */}
       {isImageModalOpen && imageUrl && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-xs p-2 sm:p-4 animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-2 sm:p-4 animate-in fade-in"
           onClick={() => setIsImageModalOpen(false)}
         >
           <div
-            className="relative bg-white rounded-xl sm:rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col border border-slate-300"
+            className="relative bg-[#0d131f] rounded-xl w-full max-w-4xl max-h-[92vh] overflow-hidden shadow-2xl flex flex-col border border-slate-700"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200 bg-slate-50">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-slate-800 bg-slate-900">
               <div className="flex items-center gap-2 min-w-0">
-                <ImageIcon className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="font-semibold text-xs sm:text-sm text-slate-800 truncate">
+                <ImageIcon className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="font-semibold text-xs sm:text-sm text-slate-200 truncate">
                   {citation.source_file || `${citation.machine_id} Manual`} &bull; p.{citation.source_page}
                 </span>
               </div>
               <button
                 onClick={() => setIsImageModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors shrink-0"
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-2 sm:p-4 overflow-auto flex items-center justify-center bg-slate-900/5">
+            <div className="p-2 sm:p-4 overflow-auto flex items-center justify-center bg-black/60">
               <img
                 src={imageUrl}
                 alt={`Full schematic ${citation.machine_id} page ${citation.source_page}`}
-                className="max-h-[65vh] sm:max-h-[75vh] w-auto object-contain rounded shadow-xs"
+                className="max-h-[65vh] sm:max-h-[75vh] w-auto object-contain rounded shadow-md"
               />
             </div>
             {citation.text_snippet && (
-              <div className="p-3 border-t border-slate-200 bg-slate-50 text-xs text-slate-600 font-mono">
+              <div className="p-2.5 border-t border-slate-800 bg-slate-900 text-xs text-slate-300 font-mono">
                 {citation.text_snippet}
               </div>
             )}
