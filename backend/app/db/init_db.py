@@ -22,6 +22,18 @@ async def init_database():
             await conn.execute(text("ALTER TABLE inspections ADD COLUMN model_status VARCHAR(20) DEFAULT 'success'"))
         except Exception:
             pass
+        try:
+            await conn.execute(text("ALTER TABLE audit_log ADD COLUMN voice_source VARCHAR(20)"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE audit_log ADD COLUMN voice_confidence FLOAT"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE audit_log ADD COLUMN voice_language VARCHAR(10)"))
+        except Exception:
+            pass
 
     async with AsyncSessionLocal() as session:
         await seed_data(session)

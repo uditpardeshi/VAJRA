@@ -13,6 +13,9 @@ class AnalyzeDocumentRequest(BaseModel):
     file_path: str
     machine_id: Optional[str] = None
     analysis_type: str = "general"
+    source: Optional[str] = Field(None)
+    voice_command: Optional[str] = Field(None)
+    voice_confidence: Optional[float] = Field(None)
 
 class ToolCall(BaseModel):
     tool: str

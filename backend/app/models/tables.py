@@ -106,6 +106,9 @@ class AuditLog(Base):
     resource_type = Column(String(50))  # "inspection", "ticket", "machine"
     resource_id = Column(Integer)
     details = Column(Text)  # JSON
+    voice_source = Column(String(20), nullable=True)  # 'voice' | 'text'
+    voice_confidence = Column(Float, nullable=True)
+    voice_language = Column(String(10), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     user = relationship("User")

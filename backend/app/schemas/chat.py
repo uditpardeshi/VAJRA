@@ -32,6 +32,11 @@ class ChatRequest(BaseModel):
     top_k: int = Field(5, ge=1, le=10)
     reasoning: bool = True
     history: Optional[List[ChatHistoryItem]] = None
+    source: Optional[str] = Field(None, description="Origin: 'voice' | 'text' | 'camera'")
+    voice_confidence: Optional[float] = Field(None, ge=0, le=1, description="ASR confidence from frontend")
+    voice_transcript: Optional[str] = Field(None, description="Raw transcript if different from question")
+    audio_duration_ms: Optional[int] = Field(None, description="Audio duration in milliseconds")
+    language: Optional[str] = Field("en-US", description="Language code (en-US, hi-IN, ta-IN, etc.)")
 
 class ChatResponse(BaseModel):
     model_config = ConfigDict(json_schema_extra={

@@ -19,6 +19,9 @@ class InspectRequest(BaseModel):
     machine_id: str = Field(..., description="Machine identifier (e.g., HX-204)")
     image_base64: str = Field(..., description="Base64-encoded JPEG/PNG image")
     prompt_override: Optional[str] = Field(None, description="Optional custom prompt addition")
+    source: Optional[str] = Field(None, description="'voice' | 'manual'")
+    voice_command: Optional[str] = Field(None, description="Voice transcript that triggered inspection")
+    voice_confidence: Optional[float] = Field(None, ge=0, le=1)
 
 from app.models.tables import ModelStatus
 

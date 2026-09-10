@@ -179,9 +179,15 @@ async def chat_with_rag(
                 "machine_id": request.machine_id,
                 "session_id": session_id,
                 "reasoning": request.reasoning,
+                "source": request.source,
+                "voice_confidence": request.voice_confidence,
+                "voice_language": request.language,
                 "citations_count": len(citations),
                 "confidence": confidence
             }),
+            voice_source=request.source,
+            voice_confidence=request.voice_confidence,
+            voice_language=request.language,
             created_at=now
         )
         db.add(audit)

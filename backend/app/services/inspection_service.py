@@ -142,8 +142,13 @@ Return ONLY valid JSON with these exact keys:
             "machine_id": request.machine_id,
             "confidence": confidence,
             "needs_escalation": needs_escalation_flag,
-            "ticket_created": ticket is not None
-        })
+            "ticket_created": ticket is not None,
+            "source": request.source,
+            "voice_command": request.voice_command,
+            "voice_confidence": request.voice_confidence
+        }),
+        voice_source=request.source,
+        voice_confidence=request.voice_confidence
     )
     db.add(audit)
 
