@@ -41,7 +41,7 @@ export function useSpeechRecognition({
   const [confidence, setConfidence] = useState(0);
   const recognitionRef = useRef<any>(null);
   const isListeningRef = useRef(false);
-  const restartTimeoutRef = useRef<NodeJS.Timeout>();
+  const restartTimeoutRef = useRef<any>();
 
   // Initialize SpeechRecognition
   useEffect(() => {

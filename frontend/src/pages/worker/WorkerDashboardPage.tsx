@@ -17,6 +17,8 @@ import { useAuthStore } from '@/store/authStore'
 import { useMachines } from '@/hooks/api/useMachines'
 import { useDashboardMetrics, useShiftActivity, useMachineHealth } from '@/hooks/api/useAnalytics'
 
+import { ShiftHandoverButton } from '@/components/handover/ShiftHandoverButton'
+
 export function WorkerDashboardPage() {
   const navigate = useNavigate()
   const { userName, currentMachine } = useAuthStore()
@@ -108,6 +110,7 @@ export function WorkerDashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ShiftHandoverButton />
           <Button
             size="sm"
             onClick={() => navigate('/inspect')}

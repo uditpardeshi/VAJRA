@@ -14,6 +14,7 @@ import { CameraControls } from '@/components/camera/CameraControls'
 import { CapturePreview } from '@/components/camera/CapturePreview'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useToast } from '@/hooks/useToast'
+import { ShiftHandoverButton } from '@/components/handover/ShiftHandoverButton'
 
 export function InspectPage() {
   const { currentMachine, setCurrentMachine } = useAuthStore()
@@ -42,7 +43,6 @@ export function InspectPage() {
   const handleCapture = async () => {
     const base64 = takePhoto(0.85)
     if (!base64) {
-      // Fallback mock image for testing/development when webcam is occupied
       toast.info('Processing test frame for defect inspection...')
       const res = await inspect({ machine_id: selectedMachineId, image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' })
       return
@@ -58,24 +58,26 @@ export function InspectPage() {
           {
             id: 'defect-1',
             type: 'box',
-            ...res.defect_location,
-            color: res.confidence > 0.8 ? '#27ae60' : res.confidence > 0.6 ? '#f39c12' : '#e94560',
-            label: 'Defect Detected',
-            confidence: res.confidence,
-            animated: true,
+            x: 0.3,
+            y: 0.4,
+            w: 0.2,
+            h: 0.2,
+            label: `Defect (${Math.round(res.confidence * 100)}%)`,
+            color: res.confidence > 0.7 ? '#ef4444' : '#f59e0b',
           },
         ])
       }
-    } catch (e) {
-      toast.error('Inspection analysis failed')
+    } catch {
+      toast.error('Failed to run component defect analysis')
     }
   }
 
   const handleRetake = () => {
     setShowPreview(false)
     setCapturedBase64(null)
-    reset()
     setARObjects([])
+    setCaptureMode('live')
+    reset()
   }
 
   const handleSave = () => {
@@ -89,12 +91,15 @@ export function InspectPage() {
         title="AR Equipment Inspection"
         subtitle={`Live camera inspection — ${currentMachine?.name || selectedMachineId}`}
         actions={
-          <MachineSelector
-            machines={allMachines || []}
-            value={selectedMachineId}
-            onChange={setSelectedMachineId}
-            className="w-64"
-          />
+          <div className="flex items-center gap-2">
+            <ShiftHandoverButton />
+            <MachineSelector
+              machines={allMachines || []}
+              value={selectedMachineId}
+              onChange={setSelectedMachineId}
+              className="w-64"
+            />
+          </div>
         }
       />
 
