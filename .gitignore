@@ -5,3 +5,5 @@ dist/
 dev-dist/
 build/
 .output/
+/venv
+/.venv
