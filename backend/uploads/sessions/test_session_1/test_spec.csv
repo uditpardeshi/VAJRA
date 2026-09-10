@@ -1,0 +1,4 @@
+Parameter,Standard,Measured,Status
+Spindle Runout,0.005mm,0.003mm,Pass
+Coolant Pressure,4.5 bar,4.2 bar,Pass
+Vibration Peak,1.8 mm/s,2.9 mm/s,Warning

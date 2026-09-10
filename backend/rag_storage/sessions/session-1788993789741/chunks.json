@@ -1,0 +1,2042 @@
+[
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 1 \nSOFTWARE REQUIREMENTS SPECIFICATION \nMilestone 2 \u2014 Swipe System & Job Discovery \nSwipeX \nSwipe-Based Intelligent Job Discovery and Career Assistance Platform \nField \nDetail \nDocument Type \nSoftware Requirements Specification (SRS) \u2014 Milestone 2 \nMilestone Duration \n7 Working Days \nTeam Size \n5 Interns, working in parallel across five domains \nTeam Composition \nFrontend & User Experience; Backend & Identity Management; Job & Data Intelligence; \nAI/ML Career Intel",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ment; Job & Data Intelligence; \nAI/ML Career Intelligence; Platform, Testing & Deployment \nBuilds On \nMilestone 1 increment: repository/architecture, Auth + RBAC, finalized DB schema, seeded \nprofile/job data, ATS heuristic stub, local Docker Compose environment \nDeployment Scope \nExcluded from Milestone 2. Production deployment occurs only after Milestone 4. \nTooling Policy \nEvery tool used must be free / open-source \u2014 no paid subscriptions required anywhere in \nthis milestone \nPrimary Referenc",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ired anywhere in \nthis milestone \nPrimary Reference \nSwipeX Project Charter (provided PDF), Sections 3\u20135, and the SwipeX Milestone 1 SRS \nbaseline \nPrepared For \nEducator / Mentor supervising the intern cohort \n \n1. Introduction \n1.1 Purpose \nThis Software Requirements Specification (SRS) defines the scope, tasks, responsibilities, dependencies, and \nintegration requirements for Milestone 2 of the SwipeX platform. It builds directly on the Milestone 1 increment \u2014 \nthe finalized database schema,",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "one 1 increment \u2014 \nthe finalized database schema, working Authentication/RBAC, seeded profile and job data, and the heuristic ATS stub \n\u2014 and translates the project charter's Swipe-Based Job Discovery and Smart Job Search & Filtering modules into a \ncoordinated, day-wise execution plan for five interns working in parallel, so that their individual deliverables converge \ninto a single, functioning system increment by the end of Day 7. \n1.2 Scope of Milestone 2 \nMilestone 2 covers the Swipe System",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "f Milestone 2 \nMilestone 2 covers the Swipe System and Job Discovery experience. By the end of Day 7 the team must deliver a \nworking increment consisting of: a live Job Service exposing a searchable, filterable catalog of seeded job listings \nacross MNCs, startups, and newly founded companies; a Swipe Service that records apply/save/skip actions per user; \nCompany & Startup listing pages backed by real data; job freshness and competition-level indicators computed from \nseeded data; a heuristic",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ndicators computed from \nseeded data; a heuristic Matching Engine that ranks the swipe feed per user using profile fit and swipe history (a rule-\nbased placeholder ahead of the real NLP/ML-driven, ATS-aware ranking scheduled for Milestone 3); a connected \nfrontend with a working swipe deck, filters/search UI, and company pages consuming live backend APIs; and a \nvalidated, tested integration of all of the above inside the shared local/dev Docker Compose environment. \nExplicitly out of scope for",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Compose environment. \nExplicitly out of scope for Milestone 2: full NLP/ML-based resume-aware ranking and ATS scoring logic (Milestone 3); \napplication-tracking dashboards, notifications, and analytics (later milestones); and production/cloud deployment, \nwhich remains reserved for Milestone 4. \n1.3 Definitions & Abbreviations",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 2 \n\u2022 SRS \u2014 Software Requirements Specification \n\u2022 RBAC \u2014 Role-Based Access Control \n\u2022 JWT \u2014 JSON Web Token, used for stateless authentication \n\u2022 API Gateway \u2014 Single entry point that routes requests to backend services \n\u2022 Swipe Action \u2014 A user's right-swipe (apply/save) or left-swipe (skip) response to a job card, recorded by the \nSwipe Service \n\u2022 Matching Engine \u2014 The service that ranks jobs for a user using rule-based, heuristic scoring (profile fit + swipe \nhist",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ased, heuristic scoring (profile fit + swipe \nhistory); a placeholder for the trained AI/ML recommendation model scheduled for Milestone 3 \n\u2022 Competition Level \u2014 A Low/Medium/High indicator computed from applicant-count thresholds for a job listing \n\u2022 M1\u2013M4 \u2014 Milestone 1 through Milestone 4, as defined in the project charter \n\u2022 Intern 1\u20135 \u2014 Shorthand for the five domain owners defined in Section 4 \n1.4 Reference Documents \n\u2022 SwipeX: Swipe-Based Intelligent Job Discovery and Career Assistance Pla",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ntelligent Job Discovery and Career Assistance Platform \u2014 Project Charter (source PDF), \nSection 3 (Architecture Diagram) and Section 4, Modules 3\u20134 (Swipe-Based Job Discovery; Smart Job Search & \nFiltering) \n\u2022 SwipeX Project Charter (source PDF), Section 5 \u2014 Milestone 2: Week 3 & 4 (Swipe System & Job Discovery) \n\u2022 SwipeX Milestone 1 SRS \u2014 baseline architecture, database schema, Auth/RBAC, and repository structure this \nmilestone builds on \n\u2022 Prior mentor/team discussions establishing the five-",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ior mentor/team discussions establishing the five-domain team split and the deployment exclusion through \nMilestone 4 \n1.5 Golden Rule for This Milestone \nEvery tool used in Milestone 2 must be free. No intern should need to pay for anything \u2014 free code editors, free \nversion control, free API-testing tools, free local container tooling, free CI minutes, free linting/security tools, and free \nUI/search libraries are sufficient to complete everything described in this document. \n2. Free Tools Che",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ing described in this document. \n2. Free Tools Checklist \nBefore Day 1 begins, make sure every intern has access to the free tools below that are relevant to their domain, in \naddition to the Milestone 1 toolset already in use. No paid tool is required anywhere in this milestone. \nWhat It's Needed For \nFree Tool Option(s) \nWriting code \nVS Code (completely free) \nSaving & sharing code \nGit + GitHub (free for public/private small repos) \nTesting APIs manually \nPostman (free plan) or the Thunder C",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "PIs manually \nPostman (free plan) or the Thunder Client extension in VS \nCode (free) \nBackend framework \nPython + Django REST Framework (free, open-source) or \nFastAPI (free) \nFrontend framework \nReact.js (free, open-source) with Tailwind CSS (free) \nSwipe-gesture UI \nreact-tinder-card (free, open-source) or a custom Framer \nMotion drag/gesture implementation (free) \nDatabase \nPostgreSQL (free, open-source) for structured data; Redis \n(free, open-source) for caching \nKeyword/full-text search & f",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "-source) for caching \nKeyword/full-text search & filtering \nPostgreSQL built-in trigram/GIN indexes (pg_trgm, free) \u2014 \nsufficient for Milestone 2 scale; no paid search service \nrequired",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 3 \nWhat It's Needed For \nFree Tool Option(s) \nAutomated backend tests \npytest (Python, free) or Jest (Node.js, free) \nAutomated local integration tests \nDocker Compose (free) running the whole stack on a laptop \n\u2014 no live server needed \nCI checks on every PR (lint/build/test only) \nGitHub Actions (free tier for public/small private repos) \u2014 no \ndeployment stage configured \nCode quality / linting \nESLint (frontend, free), Flake8 / Black (backend, free) \nAPI document",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ree), Flake8 / Black (backend, free) \nAPI documentation \nSwagger UI / OpenAPI (free, built into DRF/FastAPI) \nHeuristic Matching Engine environment \nPython, pandas, NumPy (all free) \u2014 sufficient for rule-based \nscoring in Milestone 2 \nDiagrams (architecture, ER diagram) \ndraw.io / dbdiagram.io (free) \nDefect tracking / task board \nGitHub Issues & Projects (free) or Trello (free tier) \nUI charts / animations (if needed) \nRecharts / Chart.js (free, open-source); Framer Motion (free) \nNone of the t",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "open-source); Framer Motion (free) \nNone of the tools above require a paid plan to complete Milestone 2. If a paid tier is ever tempting (e.g., a hosted \nsearch service), the local/free alternative listed here is sufficient for this milestone's scope. \n3. Overall Introduction \nMilestone 2 extends the Milestone 1 foundation with the two backend services that make SwipeX feel like SwipeX: \nthe Job Service (job listings, company/startup profiles, search and filtering) and the Swipe Service (record",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "earch and filtering) and the Swipe Service (recording \napply/save/skip actions). Per the project charter's architecture diagram, these sit behind the same API Gateway as the \nAuthentication Service, are backed by the same PostgreSQL/Redis data layer, and are consumed by the React.js \nfrontend's Swipe Interface and Filters & Search components. A first version of the Matching Engine (labelled 'AI \nRecommendation Service' in the architecture diagram) is also introduced in this milestone as a rule-b",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": ") is also introduced in this milestone as a rule-based, heuristic \nranking layer \u2014 using profile fit and swipe history rather than a trained model \u2014 so the personalized swipe feed can \nbe demonstrated end-to-end ahead of the real NLP/ML-driven recommendation and ATS-aware ranking work \nscheduled for Milestone 3. \nBy the end of this milestone, a Job Seeker will be able to log in (Milestone 1), open the swipe deck, see a personalized \nfeed of real seeded jobs, swipe right to apply/save or left to",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "seeded jobs, swipe right to apply/save or left to skip, use filters and search to narrow the catalog, and \nbrowse company/startup listing pages \u2014 all against live backend data running inside the shared Docker Compose \nenvironment. \n4. Team Structure & Domain Ownership \nIntern \nDomain \nPrimary Architecture Ownership (Milestone 2) \nIntern 1 \nFrontend & User Experience \nSwipe deck UI, Job Card component, swipe gestures, Filters & \nSearch UI, Company/Startup listing pages, personalized feed hook-\nup",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "/Startup listing pages, personalized feed hook-\nup \nIntern 2 \nBackend & Identity Management \nJob Service, Swipe Service, Search API, Company API, Gateway \nextension, RBAC on new endpoints \nIntern 3 \nJob & Data Intelligence \nJob/Company/Swipe schema extension, seeded job & company \ndataset, search indexing, freshness & competition-level \ncomputation \nIntern 4 \nAI/ML Career Intelligence \nMatching Engine (heuristic recommendation/scoring), swipe-based \npreference learning v0, Milestone 3 roadmap",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ed \npreference learning v0, Milestone 3 roadmap",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 4 \nIntern \nDomain \nPrimary Architecture Ownership (Milestone 2) \nIntern 5 \nPlatform, Testing & Deployment \nCI/CD extension for new services, local Docker Compose update, \ntest automation, defect tracking, integration validation \nDeployment (packaging for production, cloud release, AWS/Azure hosting) remains excluded from Intern 5's scope in \nthis milestone. It is scheduled after Milestone 4 is complete. \n5. Milestone 2 Objectives \n\u2022 Design and finalize the producti",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "e 2 Objectives \n\u2022 Design and finalize the production-ready Job, Company, SavedJob, and Swipe database schema, extending the \nMilestone 1 baseline. \n\u2022 Implement the Job Service: paginated job listings, job detail, and job search/filter APIs (keyword, location, job \ntype, salary range, experience level, skills). \n\u2022 Implement the Swipe Service: record apply/save/skip actions per user, enforced by RBAC for the Job Seeker role. \n\u2022 Implement Company & Startup listing and profile APIs backed by seeded",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Startup listing and profile APIs backed by seeded data. \n\u2022 Compute and expose job freshness (posted-time) and competition-level (applicant-count-based) indicators. \n\u2022 Stand up a heuristic Matching Engine that ranks the swipe feed per user from profile fit and swipe history, ahead \nof the trained AI/ML model scheduled for Milestone 3. \n\u2022 Deliver a connected frontend: a working swipe deck, filters/search UI, and company/startup pages consuming live \nbackend APIs, with the swipe feed personalized b",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "backend APIs, with the swipe feed personalized by the Matching Engine. \n\u2022 Validate the full increment through integration testing, automated checks, and a defect-tracked QA cycle \u2014 \nwithout production deployment. \n6. Functional Requirements \u2014 Milestone 2 Scope \nReq ID \nRequirement \nOwner \nPriority \nFR-01 \nUsers can browse a paginated list of live job listings and view individual \njob details \nIntern 2 \nHigh \nFR-02 \nUsers can swipe right (apply/save) or left (skip) on a job card, and the \nactio",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "save) or left (skip) on a job card, and the \naction is recorded \nIntern 1 / Intern 2 High \nFR-03 \nSystem exposes a job search/filter API supporting keyword, location, job \ntype, salary range, experience level, and skills \nIntern 2 / Intern 3 High \nFR-04 \nSystem exposes Company/Startup listing and profile data backed by \nseeded records \nIntern 2 / Intern 3 Medium \nFR-05 \nSystem computes and exposes job freshness and competition-level \nindicators per listing \nIntern 3 \nMedium \nFR-06 \nSystem expose",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "er listing \nIntern 3 \nMedium \nFR-06 \nSystem exposes a heuristic Matching Engine that ranks/recommends jobs \nper user from profile fit and swipe history \nIntern 4 \nHigh \nFR-07 \nThe frontend swipe deck consumes the personalized recommendation \nfeed instead of a static/chronological list \nIntern 1 \nHigh \nFR-08 \nThe frontend exposes a filters/search UI and Company/Startup listing \npages wired to live APIs \nIntern 1 \nHigh \nFR-09 \nRBAC restricts swipe/apply actions to the Job Seeker role and \njob/comp",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "apply actions to the Job Seeker role and \njob/company-management actions to the Recruiter role \nIntern 2 \nHigh \nFR-10 \nAll Milestone 2 services run together in the local Docker Compose \nintegration environment and pass CI checks \nIntern 5 \nHigh",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 5 \n7. Cross-Team Dependency Matrix \nThis matrix makes explicit which artifact each domain must hand off, to whom, and by which day, so that no intern is \nidle or blocked waiting on an undefined interface. \nConsumer \nDepends On \nArtifact Needed \nNeeded By \nIntern 2 \nIntern 3 \nExtended Job/Company/Swipe schema + seed dataset \nDay 2 \nIntern 4 \nIntern 3 \nSeeded job dataset + schema fields for scoring \nDay 1\u20132 \nIntern 1 \nIntern 2 \nLive GET /jobs and POST /swipes APIs \nD",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Intern 2 \nLive GET /jobs and POST /swipes APIs \nDay 3 \nIntern 4 \nIntern 2 \nLive Swipe API (interaction history) \nDay 3 \nIntern 1 \nIntern 2 / Intern 3 \nLive Search API + Company API + competition/freshness \nfields \nDay 4 \nIntern 1 \nIntern 4 \nRecommendation (Matching Engine) API \nDay 5 \nIntern 2 \nIntern 4 \nMatching Engine routes to register in the API Gateway \nDay 4\u20135 \nIntern 5 \nIntern 1 / 2 / 3 / 4 \nDev-deployed endpoints/UI for each service as they land Days 2\u20135",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "hey land Days 2\u20135",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 6 \n8. Master 7-Day Execution Timeline \nAll five interns work in parallel every day, each building directly on the previous day's output so no one is left waiting idle. The table below is the single-glance view; \nSection 9 gives the full detail (task/output/dependency/hand-off) per intern. \nDay \nIntern 1 Frontend \nIntern 2 Backend/Identity \nIntern 3 Job & Data \nIntern 4 AI/ML \nIntern 5 QA/DevOps \n1 \nWireframes + swipe-library \nevaluation \nJob/Swipe API contracts +",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "e-library \nevaluation \nJob/Swipe API contracts + \nGateway plan \nJob/Company/Swipe schema \nextension + seed dataset design \nMatching Engine feature set + \nscoring v0 design \nCI/docker-compose extension + \nM2 test plan \n2 \nJob Card + swipe gesture (mock \ndata) \nGET /jobs, GET /jobs/{id}, POST \n/swipes live \nSeed data loaded + filter indexes \nbuilt \nMatching Engine skeleton + \nstub /recommendations \nTest cases + automated suite \nscaffold \n3 \nSwipe UI wired to live \nJob/Swipe APIs \n/jobs/search + /c",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "I wired to live \nJob/Swipe APIs \n/jobs/search + /companies APIs + \nRBAC \nCompany schema/seed + query \noptimization \nMatching Engine uses live \nswipe history \nFunctional tests on \nJob/Swipe/Search; CI runs suite \n4 \nFilters/Search UI + Company \npages live \nFreshness/competition fields + \nGateway route for Matching \nEngine \nCompetition-level & applicant-\ncount computation \nTune scoring + reason tags + \nunit tests \nIntegration round 1 across all \nservices \n5 \nPersonalized feed hook-up + \nRBAC views",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "rvices \n5 \nPersonalized feed hook-up + \nRBAC views \nFull Gateway integration of all M2 \nservices \nSupport integration + \nbackup/restore update \nFinalize Matching Engine \nintegration + M3 roadmap \nFull M2 integration test cycle \n6 \nUI polish, responsiveness, \ndefect fixes \nEnd-to-end backend integration + \nSwagger docs \nUnit tests + query optimization + \ndefect fixes \nUnit tests for scoring + defect \nfixes \nRegression testing + code-\nquality report \n7 \nFinal UI fixes + demo \nwalkthrough prep \nCod",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "t \n7 \nFinal UI fixes + demo \nwalkthrough prep \nCode freeze + sign-off summary \nFinal validation + M3 handoff \nnotes \nFinal review + M3 handoff doc \nFinal QA sign-off report + M2 \ntest summary",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 7 \n9. Detailed Intern-Wise Task Breakdown \nEach table below lists, for every day, the task, the concrete expected output, what the intern depends on to start that \ntask, and what they hand off to the rest of the team. Every day's task is designed to produce a usable artifact for at \nleast one other intern, so no one is left without work while waiting on a dependency. \n9.1 Intern 1 \u2014 Frontend & User Experience \nDay Task Description \nExpected Output / \nDeliverable \nD",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ask Description \nExpected Output / \nDeliverable \nDepends On \nProvides To \n1 \nReview Intern 2's draft Job/Swipe API \ncontracts and Intern 3's schema notes; \nproduce wireframes for the swipe deck, \njob card, filters panel, and \ncompany/startup listing pages; evaluate \nand select a swipe-gesture library (e.g., \nreact-tinder-card) or plan a custom \nFramer Motion implementation. \nWireframes for swipe \ndeck, filters, and company \npages; swipe-library \ndecision documented \nIntern 2's draft API \ncontrac",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "decision documented \nIntern 2's draft API \ncontracts; Intern 3's \nschema notes \nSelf (Day 2 build) \n2 \nBuild the reusable Job Card component \n(logo, title, company, salary, location, \ntags) and implement swipe gesture \ninteractions (right = apply/save, left = skip) \nagainst mocked data; scaffold the Filters \npanel UI \n(MNC/Startup/Remote/Salary/Experience \ncontrols). \nJob Card + swipe gesture \nworking on mock data; \nFilters panel scaffolded \nOwn wireframes \nSelf (Day 3 live \nintegration) \n3 \nWir",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "wireframes \nSelf (Day 3 live \nintegration) \n3 \nWire the swipe deck to Intern 2's live GET \n/jobs API and POST /swipes API; \nimplement optimistic UI updates and an \nundo-last-swipe control. \nSwipe deck functioning \nagainst live Job/Swipe \nAPIs \nIntern 2's Job listing & \nSwipe APIs \nIntern 5 (swipe-\nflow test target) \n4 \nWire the Filters & Search UI to Intern 2's \nlive /jobs/search API; build \nCompany/Startup listing pages consuming \n/companies; add Advanced Filter chips \n(fresher-friendly, low co",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "d Advanced Filter chips \n(fresher-friendly, low competition, \nrecently posted). \nFilters/Search and \nCompany pages \nfunctioning against live \nAPIs \nIntern 2's Search & \nCompany APIs; Intern \n3's \ncompetition/freshness \nfields \nIntern 5 \n(filters/company \ntest target) \n5 \nReplace the chronological swipe queue \nwith Intern 4's personalized \nrecommendation feed; implement RBAC-\naware views (Job Seeker swipe deck vs \nRecruiter job-posting form); polish \nloading/error states for filters and search.",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "sh \nloading/error states for filters and search. \nPersonalized, RBAC-aware \nswipe experience \nIntern 4's \nRecommendation API; \nIntern 2's RBAC claims \nIntern 5 (full UI \ntest target) \n6 \nUI polish across swipe deck, filters, and \ncompany pages; responsiveness fixes; \nempty-state and error handling; fix \ndefects reported by QA. \nStable, tested frontend \nbuild \nIntern 5's defect log \nIntern 5 \n(regression build) \n7 \nFinal UI fixes from QA feedback; rehearse \nthe Milestone 2 demo walkthrough (swipe",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "rehearse \nthe Milestone 2 demo walkthrough (swipe \n\u2192 filter \u2192 company page \u2192 personalized \nfeed); document frontend module notes. \nDemo-ready frontend + \nmodule documentation \nPassed regression \nMilestone 2 demo",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 8 \n9.2 Intern 2 \u2014 Backend & Identity Management \nDay Task Description \nExpected Output / \nDeliverable \nDepends On \nProvides To \n1 \nDraft the OpenAPI contract for the Job \nService and Swipe Service (GET /jobs, \nGET /jobs/{id}, POST /swipes, GET \n/jobs/search, GET /companies); extend \nthe API Gateway routing plan for the \nnew services; review the \nJob/Company/Swipe schema draft with \nIntern 3. \nDraft OpenAPI contracts for \nJob/Swipe/Search/Company \nendpoints; Gateway",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "for \nJob/Swipe/Search/Company \nendpoints; Gateway routing \nplan updated \nIntern 3's schema \ndraft \nIntern 1 & Intern \n4 (contracts to \nbuild against) \n2 \nImplement GET /api/v1/jobs (paginated \nlist) and GET /api/v1/jobs/{id} backed \nby Intern 3's seed data; implement \nPOST /api/v1/swipes (records \napply/save/skip) with RBAC restricting \nthe action to the Job Seeker role; \nregister the new routes in the API \nGateway. \nWorking Job listing & Swipe \nendpoints, RBAC-protected \nand registered \nIntern",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "endpoints, RBAC-protected \nand registered \nIntern 3's seeded, \nmigrated schema; \nIntern 5's updated dev \nenvironment \nIntern 1 (live data \nto build against), \nIntern 4 (swipe \nhistory source), \nIntern 5 (test \ntarget) \n3 \nImplement GET /api/v1/jobs/search \n(keyword, location, job type, salary \nrange, experience level, skills) and GET \n/api/v1/companies, GET \n/api/v1/companies/{id}; enforce RBAC \nso Recruiters can manage company/job \ndata while Job Seekers can only \nbrowse. \nWorking Search and",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ob Seekers can only \nbrowse. \nWorking Search and \nCompany endpoints, RBAC \nenforced \nIntern 3's indexed \nschema and \ncompany/startup seed \ndata \nIntern 1 (filters & \ncompany pages), \nIntern 5 (test \ntarget) \n4 \nExpose job freshness and competition-\nlevel fields (posted_time, \napplicant_count, competition_level) \ncomputed by Intern 3 in job responses; \nregister Intern 4's Matching Engine \nroute behind the Gateway; add a \nminimal Recruiter job-posting CRUD \nstub to seed realistic flow. \nFreshness/",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ing CRUD \nstub to seed realistic flow. \nFreshness/competition data \nexposed via API; Matching \nEngine reachable through \nthe Gateway; Recruiter job-\nposting stub live \nIntern 3's \nfreshness/competition \ncomputation; Intern \n4's Matching Engine \nskeleton \nIntern 1 \n(advanced filters \n& personalized \nfeed), Intern 5 \n(integration \nround 1) \n5 \nIntegrate all Milestone-2 services (Job, \nSwipe, Search, Company, Matching \nEngine) fully behind the API Gateway; \nupdate the shared Postman collection; \npa",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ateway; \nupdate the shared Postman collection; \npair with Intern 5 on the full integration \nsession. \nUnified backend for \nMilestone 2 behind one \nGateway \nIntern 3 & Intern 4's \ncompleted endpoints \nIntern 1 & Intern \n5 (single \nintegrated \nbackend to \nconsume/test) \n6 \nRun an end-to-end backend integration \npass; triage and fix defects raised by \nQA; finalize Swagger/OpenAPI \ndocumentation for all Milestone 2 \nendpoints. \nStable integrated backend; \npublished API docs \nIntern 5's defect log \nI",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "end; \npublished API docs \nIntern 5's defect log \nIntern 5 (fixed \nbuild for \nregression) \n7 \nCode freeze for the Milestone 2 \nbackend; support the final demo; write \na backend architecture & integration \nsummary for sign-off. \nBackend Milestone 2 sign-off \nreport \nPassed QA regression \nMilestone 2 demo \n/ mentor review",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 9 \n9.3 Intern 3 \u2014 Job & Data Intelligence \nDay Task Description \nExpected Output / \nDeliverable \nDepends On \nProvides To \n1 \nExtend the Milestone 1 schema into \nproduction-ready Job, Company, \nSavedJob, and Swipe tables; design a \nrealistic seed dataset (100+ listings) \nspanning MNCs, startups, and newly \nfounded companies with salary, location, \nskills, experience, and posted_at fields; \nplan search indexing (PostgreSQL \ntrigram/GIN). \nExtended schema design + \nse",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "reSQL \ntrigram/GIN). \nExtended schema design + \nseed dataset plan; indexing \nstrategy documented \nIntern 2's \nMilestone 1 \nschema baseline \nIntern 2 (schema \nto build APIs \nagainst), Intern 4 \n(fields for scoring) \n2 \nRun migrations for the extended schema; \nload the seed dataset into the dev \ndatabase; build indexes on filterable fields \n(location, job_type, salary_range, skills). \nMigrated, seeded database \nwith filter-ready indexes \nOwn schema \ndesign; Intern 5's \nDB container \nIntern 2 (data",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "design; Intern 5's \nDB container \nIntern 2 (data to \nserve via APIs), \nIntern 4 (data for \nscoring) \n3 \nAdd the Company/Startup profile table \nwith seed data (name, about, size, \nindustry, 'newly founded' flag); optimize \nDB queries for the search/filter \ncombinations Intern 2 flags. \nCompany/startup data live; \noptimized query layer \nIntern 2's \nsearch/filter usage \npatterns \nIntern 2 (company \ndata to serve), \nIntern 1 (company \npage content) \n4 \nImplement rule-based computation of job \nfres",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "4 \nImplement rule-based computation of job \nfreshness (posted_time-based) and \ncompetition level (applicant-count \nthresholds \u2192 Low/Medium/High); migrate \nthese fields into the Job table; validate \nindex performance under combined \nfilter+search load. \nFreshness/competition fields \nlive and performant \nOwn schema; \nIntern 2's API \nusage \nIntern 2 (fields to \nexpose), Intern 1 \n(advanced filters) \n5 \nSupport the full cross-team integration \nsession; validate data integrity under \nconcurrent swi",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ion; validate data integrity under \nconcurrent swipe writes; update the DB \nbackup/restore script to cover the new \nMilestone 2 tables. \nVerified data layer under \nintegration load; updated \nbackup/restore script \nIntern 2's gateway \nintegration \nIntern 5 (stable \ndata layer for \nintegration tests) \n6 \nWrite unit tests for the repository/query \nlayer (job listing, search, swipe history); \noptimize any slow queries flagged during \nintegration testing; fix defects from QA. \nTested, optimized data",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ing; fix defects from QA. \nTested, optimized data \nservice \nIntern 5's defect \nlog \nIntern 5 \n(regression build) \n7 \nFinal validation of the data module; \nfinalize schema documentation and data \ndictionary updates; write handoff notes \nfor Milestone 3 (what the Resume/ATS \nEngine will need from Job data). \nModule sign-off + Milestone \n3 handoff notes \nPassed regression \nMilestone 2 demo",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 10 \n9.4 Intern 4 \u2014 AI/ML Career Intelligence \nDay Task Description \nExpected Output / \nDeliverable \nDepends On \nProvides To \n1 \nDefine the feature set for the Matching \nEngine (skills overlap, location match, \nexperience fit, swipe-history signals); \ndesign a rule-based weighted scoring \nformula v0; review with Intern 3 which \nJob schema fields are needed. \nFeature list + scoring \nformula v0 documented \nIntern 3's schema \ndraft \nSelf (Day 2 build) \n2 \nScaffold the",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "chema \ndraft \nSelf (Day 2 build) \n2 \nScaffold the Matching Engine \nmicroservice (FastAPI) with a stub GET \n/api/v1/recommendations?user_id= \nendpoint returning a heuristic-ranked job \nlist computed against the seed dataset. \nMatching Engine skeleton \nwith a working stub \nrecommendation endpoint \nIntern 3's seeded \ndataset \nIntern 2 (route to \nregister), Intern 1 \n(contract to build \nagainst) \n3 \nIntegrate the Matching Engine with \nIntern 2's live Swipe API so subsequent \nrecommendations adjust b",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Swipe API so subsequent \nrecommendations adjust based on \nlike/skip history; finalize the response \nschema (job_id, match_score, \nreason_tags). \nMatching Engine \nresponding to live swipe \nhistory \nIntern 2's Swipe API \nIntern 1 \n(personalized feed \ndata), Intern 2 \n(integration) \n4 \nTune scoring weights using the seeded \nswipe interaction data; add human-\nreadable 'reason tags' (e.g., 'Matches \nyour skills', 'Low competition'); write unit \ntests for the scoring function. \nTuned scoring with rea",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "for the scoring function. \nTuned scoring with reason \ntags; unit tests passing \nIntern 3's \ncompetition/freshness \nfields \nIntern 1 (richer \nrecommendation \ndisplay) \n5 \nFinalize Matching Engine integration \nbehind the API Gateway with Intern 2; \ndocument the scoring methodology and \na Milestone 3 roadmap note describing \nhow this heuristic evolves into full AI/ML-\ndriven, ATS-aware ranking. \nMatching Engine fully \nintegrated; M3 roadmap \ndoc \nIntern 2's gateway \nIntern 1 (display \ncontract), M",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ntern 2's gateway \nIntern 1 (display \ncontract), Mentor \n(M3 plan) \n6 \nWrite additional unit tests for the \nscoring/reason-tag logic; fix defects \nsurfaced during QA's integration cycle. \nTested Matching Engine \nIntern 5's defect log \nIntern 5 \n(regression build) \n7 \nFinal review of the Matching Engine \nmodule; document the Milestone 2 \nscope boundary (heuristic \npersonalization only) and the handoff \nplan for full AI/ML recommendation and \nATS-aware ranking in Milestone 3. \nModule sign-off + \nM",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ware ranking in Milestone 3. \nModule sign-off + \nMilestone 3 handoff \ndocument \nPassed regression \nMilestone 2 demo",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 11 \n9.5 Intern 5 \u2014 Platform, Testing & Deployment \nScope note: Intern 5's Milestone 2 work remains limited to QA, integration validation, code-quality tooling, test \nautomation, and defect tracking, plus updates to the local Docker Compose environment. No production packaging or \ndeployment activity is performed in Milestone 2; that work resumes only after Milestone 4. \nDay Task Description \nExpected Output / \nDeliverable \nDepends On \nProvides To \n1 \nExtend CI to c",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "erable \nDepends On \nProvides To \n1 \nExtend CI to cover the new \nJob/Swipe/Company/Matching-Engine \nservice folders; extend docker-\ncompose.dev.yml to add the new services; \nupdate the Milestone 2 test plan and \ndefect-tracking board. \nCI/docker-compose updated \nfor Milestone 2 scope; test \nplan & defect board ready \nIntern 2's service \nfolder structure \nAll interns \n(updated shared \ndev environment) \n2 \nWrite test cases for Job listing and Swipe \nendpoints; scaffold an automated test \nsuite (pyt",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "endpoints; scaffold an automated test \nsuite (pytest/Postman) for the new \nservices; confirm CI runs build/lint on the \nnew service code. \nTest case document; \nautomated suite scaffolded \nfor Job/Swipe \nIntern 2's draft API \ncontracts \nSelf (Day 3 \nexecution) \n3 \nExecute functional tests against the live \nJob, Swipe, and Search APIs as they land; \nlog defects with severity/priority; extend \nCI to run the new automated suite on \nevery PR. \nDay-3 test execution report; \nlogged defects; CI running",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "test execution report; \nlogged defects; CI running \nthe new suite \nIntern 2's live \nendpoints \nIntern 2 & 3 \n(defect list to fix) \n4 \nRun integration round 1 across Frontend + \nJob/Swipe/Search/Company + Matching \nEngine inside docker-compose.dev.yml; \nlog and prioritize defects. \nIntegration round 1 report; \nprioritized defect list \nAll four other \ninterns' Day-4 \nendpoints/UI \nAll interns (defect \nbacklog for Day 5) \n5 \nRun the first full Milestone 2 integration \ntest cycle end-to-end (Job dis",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tone 2 integration \ntest cycle end-to-end (Job discovery + \nSwipe + Search/Filter + Recommendation \nfeed + Company pages); verify RBAC \nbehavior; log and prioritize defects for Day \n6. \nFull integration test report; \nprioritized defect list \nAll four other \ninterns' Day-5 \nintegrated build \nAll interns (defect \nbacklog for Day 6) \n6 \nRun regression tests after fixes; check \nautomated test coverage; run static code-\nquality analysis; support interns closing \nout integration bugs. \nRegression repo",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ns closing \nout integration bugs. \nRegression report; code-\nquality report \nFixes from Interns \n1\u20134 \nAll interns (go/no-\ngo signal) \n7 \nRun the final Milestone 2 validation cycle \n(smoke + integration + RBAC + UI checks); \ncompile the QA sign-off report and test \nsummary for the demo. No deployment \nactivity is performed. \nMilestone 2 QA sign-off \nreport + test summary \nClean regression \nbuild \nMentor / \nMilestone 2 \nreview",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 12 \n10. Day-Wise Work Plan (Plain Language + Tick-Box Checklist) \nEvery day starts with a 15-minute stand-up. Tick each checkpoint box only when that item is actually working, not just \nattempted. No deployment tasks appear anywhere in this plan \u2014 everything runs locally via Docker Compose or \nagainst the shared dev environment. \n10.1 Intern 1 \u2014 Frontend & User Experience \nOwns: Swipe Deck UI, Filters & Search, Company/Startup Pages \nDay What To Do (Explained Simpl",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "any/Startup Pages \nDay What To Do (Explained Simply) \nCheckpoints \u2014 Tick When Done \n1 \nLook at the plans for the Job and Swipe APIs, and \nsketch out simple designs for the swipe cards, filters, \nand company pages \u2014 like designing the 'look and feel' \nbefore building. Also pick a tool that makes cards \nswipeable. \n\u2022 Wireframes made for swipe deck, filters, and \ncompany pages \n\u2022 Swipe-gesture library chosen (or custom plan made) \n\u2022 Plan shared with the team \n2 \nBuild the actual job card (with phot",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "the team \n2 \nBuild the actual job card (with photo/logo, title, salary) \nand make it swipeable left/right using fake/mock data; \nstart building the filters panel. \n\u2022 Job Card built and swipeable (mock data) \n\u2022 Filters panel scaffolded \n\u2022 Ready to connect to real APIs \n3 \nConnect the swipe deck to Intern 2's real job/swipe \nAPIs, so swiping right/left actually does something; add \nan 'undo my last swipe' button. \n\u2022 Swipe deck connected to live Job & Swipe APIs \n\u2022 Undo-last-swipe working \n\u2022 Teste",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "b & Swipe APIs \n\u2022 Undo-last-swipe working \n\u2022 Tested swiping right and left \n4 \nConnect the filters and search bar to the real search \nAPI, and build pages where users can browse \ncompanies and startups. \n\u2022 Filters/Search connected to live API \n\u2022 Company/Startup pages built and showing real data \n\u2022 Advanced filter chips added (fresher-friendly, low \ncompetition, recently posted) \n5 \nReplace the plain job list with Intern 4's personalized \nrecommendation feed, so users see jobs picked for \nthem; m",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "dation feed, so users see jobs picked for \nthem; make sure Job Seekers and Recruiters see \ndifferent screens. \n\u2022 Personalized feed connected and working \n\u2022 Role-based views working (Job Seeker vs Recruiter) \n\u2022 Loading/error messages added \n6 \nPolish the app \u2014 fix rough edges, make sure it works \nwell on phones/tablets, and show friendly messages if \nsomething breaks. \n\u2022 Responsive design checked \n\u2022 Friendly error/empty states added \n\u2022 Bugs reported by QA fixed \n7 \nFinal Integration Day \u2014 fix any",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ed by QA fixed \n7 \nFinal Integration Day \u2014 fix any last issues and rehearse \na simple walkthrough of swipe \u2192 filter \u2192 company \npage \u2192 personalized feed. \n\u2022 Final test with full team done \n\u2022 Demo walkthrough rehearsed \n\u2022 Frontend notes documented",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 13 \n10.2 Intern 2 \u2014 Backend & Identity Management \nOwns: Job Service, Swipe Service, Search & Company APIs, Gateway Extension \nDay What To Do (Explained Simply) \nCheckpoints \u2014 Tick When Done \n1 \nSketch out, in simple terms, what the Job and Swipe \nAPIs will look like, and plan how the Gateway will route \nto these new services. Check in with Intern 3 about the \ndata shape. \n\u2022 Draft API contract for Job/Swipe/Search/Company \nwritten \n\u2022 Gateway routing plan updated \n\u2022",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ompany \nwritten \n\u2022 Gateway routing plan updated \n\u2022 Reviewed schema plan with Intern 3 \n2 \nBuild the actual API that lists jobs and shows job \ndetails, and the API that records when someone \nswipes right or left. Make sure only Job Seekers can \nswipe. \n\u2022 Job listing & job detail API working \n\u2022 Swipe API working and recording actions \n\u2022 Role rule added (only Job Seekers can swipe) \n3 \nBuild the search/filter API (so people can search by \nkeyword, location, salary, etc.) and the API that shows \ncom",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ocation, salary, etc.) and the API that shows \ncompany/startup info. Make sure Recruiters can \nmanage jobs but Job Seekers can only browse. \n\u2022 Search/filter API working \n\u2022 Company API working \n\u2022 Role rules tested (Recruiter vs Job Seeker) \n4 \nShow how 'new' or 'competitive' a job is on the API, \nand connect Intern 4's recommendation service to the \nsame Gateway so it's reachable. Add a simple way for \nRecruiters to post a job. \n\u2022 Freshness/competition info showing in job data \n\u2022 Matching Engine",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ition info showing in job data \n\u2022 Matching Engine reachable through the Gateway \n\u2022 Basic 'post a job' option for Recruiters \n5 \nConnect everything (jobs, swipes, search, companies, \nrecommendations) behind one single Gateway, and \nupdate the shared testing collection. \n\u2022 All Milestone 2 services reachable through one \nGateway \n\u2022 Shared Postman collection updated \n\u2022 Joint test done with Intern 5 \n6 \nRun the whole backend together, fix anything QA finds \nbroken, and write simple documentation of w",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "finds \nbroken, and write simple documentation of what each \nAPI does. \n\u2022 End-to-end backend test done \n\u2022 Bugs reported by QA fixed \n\u2022 API documentation updated \n7 \nFinal Integration Day \u2014 freeze the backend code, help \ndemo everything, and write a short summary of what \nwas built. \n\u2022 Backend code frozen \n\u2022 Took part in full team demo \n\u2022 Short summary document written",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 14 \n10.3 Intern 3 \u2014 Job & Data Intelligence \nOwns: Job/Company/Swipe Schema, Seed Data, Search Indexing \nDay What To Do (Explained Simply) \nCheckpoints \u2014 Tick When Done \n1 \nPlan out exactly how job, company, and swipe \ninformation will be stored, and design a big sample list \nof realistic jobs (from big companies, startups, and \nnew companies). \n\u2022 Job/Company/Swipe table design finalized \n\u2022 Sample job dataset planned (100+ listings) \n\u2022 Search strategy planned \n2 \nA",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "d (100+ listings) \n\u2022 Search strategy planned \n2 \nActually create those database tables and load in the \nsample job data; build 'shortcuts' (indexes) so filtering \nby location/salary/skills is fast. \n\u2022 Tables created and migrated \n\u2022 Sample job data loaded \n\u2022 Filter indexes built \n3 \nAdd company/startup profile information (name, \nabout, size, industry) with sample data, and speed up \nany slow searches Intern 2 points out. \n\u2022 Company/startup data loaded \n\u2022 Slow queries optimized \n\u2022 Data shared wit",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "oaded \n\u2022 Slow queries optimized \n\u2022 Data shared with Intern 2 \n4 \nAdd simple rules to mark a job as 'new' (recently \nposted) or show its 'competition level' \n(low/medium/high based on how many people \napplied). \n\u2022 Freshness rule working \n\u2022 Competition-level rule working \n\u2022 Performance checked under filters+search together \n5 \nJoin the team's full test session, make sure the data \nstays correct even when lots of swipes happen at once, \nand update the backup script to cover the new tables. \n\u2022 Data",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "he backup script to cover the new tables. \n\u2022 Data verified correct under test load \n\u2022 Backup/restore script updated \n\u2022 Joint test done with Intern 2 \n6 \nWrite simple automated tests for your job/search \ndata, and fix any slow queries or bugs QA finds. \n\u2022 Automated tests written \n\u2022 Slow queries fixed \n\u2022 Bugs reported by QA fixed \n7 \nFinal Integration Day \u2014 confirm everything works with \nthe rest of the team, and write handoff notes for what \nMilestone 3 (the AI Resume Engine) will need from this",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tone 3 (the AI Resume Engine) will need from this \ndata. \n\u2022 Final test with full team done \n\u2022 Schema documentation finalized \n\u2022 Handover notes for Milestone 3 written",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 15 \n10.4 Intern 4 \u2014 AI/ML Career Intelligence \nOwns: Matching Engine (Heuristic Recommendation) \nDay What To Do (Explained Simply) \nCheckpoints \u2014 Tick When Done \n1 \nThink through what makes a job a 'good match' for \nsomeone (matching skills, location, experience) and \nwrite a simple scoring formula plan. Check with Intern \n3 what data fields you'll have to work with. \n\u2022 List of matching factors written down \n\u2022 Simple scoring formula v0 planned \n\u2022 Reviewed available",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "e scoring formula v0 planned \n\u2022 Reviewed available data fields with Intern 3 \n2 \nBuild a very simple 'Matching Engine' service with one \nendpoint that returns a ranked list of jobs using your \nscoring formula on the sample data. \n\u2022 Matching Engine service created \n\u2022 /recommendations endpoint working \n\u2022 Returns a ranked sample list \n3 \nConnect your Matching Engine to real swipe data, so \nrecommendations start changing based on what a \nperson likes/skips. \n\u2022 Connected to live swipe history \n\u2022 Reco",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "/skips. \n\u2022 Connected to live swipe history \n\u2022 Recommendations respond to likes/skips \n\u2022 Response format finalized \n4 \nFine-tune your scoring so it feels smarter, and add \nshort reasons next to each job (like 'Matches your \nskills' or 'Low competition'). \n\u2022 Scoring tuned using real swipe data \n\u2022 Reason tags added \n\u2022 Tests written for the scoring logic \n5 \nConnect your service to the shared Gateway with \nIntern 2, and write a short plan for how this will \nbecome a real AI model in Milestone 3. \n\u2022",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "s will \nbecome a real AI model in Milestone 3. \n\u2022 Matching Engine integrated behind the Gateway \n\u2022 Milestone 3 roadmap document written \n\u2022 Joint test done with Intern 1 \n6 \nWrite more tests for your scoring logic, and fix \nanything QA finds broken. \n\u2022 Additional tests written \n\u2022 Bugs reported by QA fixed \n\u2022 Service confirmed stable \n7 \nFinal Integration Day \u2014 join the team test, and clearly \nwrite down that this is still simple rule-based \nmatching, not a trained AI model yet. \n\u2022 Final test with",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ng, not a trained AI model yet. \n\u2022 Final test with full team done \n\u2022 Scope clearly documented (heuristic only \u2014 real AI \nmodel comes in Milestone 3) \n\u2022 Handover notes written",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 16 \n10.5 Intern 5 \u2014 Platform, Testing & Deployment \nOwns: CI/CD Extension, Test Automation, Integration Validation (No Deployment) \nDay What To Do (Explained Simply) \nCheckpoints \u2014 Tick When Done \n1 \nUpdate the automatic checks (CI) and the shared local \nenvironment (Docker Compose) so they now include \nthe new job/swipe/matching services; update the test \nplan and bug tracker for this milestone. \n\u2022 CI updated for new services \n\u2022 docker-compose updated for new serv",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ew services \n\u2022 docker-compose updated for new services \n\u2022 Test plan & bug tracker updated \n2 \nWrite down what needs testing for the job listing and \nswipe features, and set up a tool to test those \nautomatically. \n\u2022 Test cases written for Job & Swipe APIs \n\u2022 Automated test tool set up \n\u2022 CI running lint/build on new code \n3 \nActually run tests against the real job/search APIs as \nthey go live, and note down anything broken. \n\u2022 Job/Swipe/Search APIs tested \n\u2022 Bugs logged with priority \n\u2022 CI now r",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Is tested \n\u2022 Bugs logged with priority \n\u2022 CI now running the new automated tests \n4 \nBring the frontend and all the new backend services \ntogether and test the whole flow once, noting down \nanything that doesn't work. \n\u2022 First full integration test run done \n\u2022 Issues logged and prioritized \n\u2022 Shared with the team for Day 5 fixes \n5 \nRun one big, full test of the whole journey \u2014 swiping, \nfiltering, seeing companies, and getting \nrecommendations \u2014 and check that role permissions \nwork correctly.",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "and check that role permissions \nwork correctly. \n\u2022 Full journey tested end-to-end \n\u2022 Role-based access tested \n\u2022 All issues logged for Day 6 \n6 \nRe-test everything after the team's fixes, and run a \nquality check on the code to catch anything messy. \n\u2022 Regression testing done \n\u2022 Code-quality report generated \n\u2022 System confirmed stable \n7 \nFinal Integration Day \u2014 run one last full check, write a \nsummary of what was tested, and confirm no \ndeployment work was done. \n\u2022 Final full test cycle comp",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "yment work was done. \n\u2022 Final full test cycle completed \n\u2022 QA sign-off report written \n\u2022 Confirmed: no deployment activity performed this \nmilestone",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 17 \n11. Daily Coordination & Integration Sync Protocol \n11.1 Daily Standup (15 minutes, start of day) \n\u2022 Each intern states: what was completed yesterday, what is planned today, and any blocker relative to the \nDependency Matrix (Section 7). \n\u2022 Intern 2 (Backend & Identity Management) tracks blockers and re-sequences work if a dependency is late. \n11.2 Integration Checkpoints \nCheckpoint \nDay \nPurpose \nContract Freeze \nDay 2 (EOD) \nJob, Swipe, Search, and Company A",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ze \nDay 2 (EOD) \nJob, Swipe, Search, and Company API contracts are frozen; no breaking changes \nwithout team sign-off \nFirst Vertical Slice \nDay 3\u20134 \nSwipe deck + Filters/Search reachable end-to-end from the frontend through \nthe Gateway \nFull Integration \nDay 5 \nAll Milestone 2 services (Job, Swipe, Search, Company, Matching Engine, \nFrontend) run together in docker-compose.dev.yml and pass smoke tests \nRegression & Sign-off \nDay 7 \nFinal validation cycle passes; Milestone 2 increment is signed",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tion cycle passes; Milestone 2 increment is signed off by QA and the \nmentor \n11.3 Change Control \nAny change to a frozen interface contract after Day 2 must be raised by the owning intern in standup, agreed by all \nconsumers listed in Section 7, and reflected the same day in the shared Postman/pytest collection maintained by \nIntern 5. \n12. Milestone 2 Deliverables Checklist \nDeliverable \nOwner \nDue \nExtended Job/Company/Swipe schema + seed dataset \nIntern 3 \nDay 2 \nFrozen API contracts (Job, S",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "set \nIntern 3 \nDay 2 \nFrozen API contracts (Job, Swipe, Search, Company) \nIntern 2 / 3 \nDay 2 \nWorking Job Service + Swipe Service (RBAC enforced) \nIntern 2 \nDay 2\u20133 \nWorking Search API + Company/Startup API \nIntern 2 / 3 \nDay 3\u20134 \nJob freshness & competition-level indicators \nIntern 3 \nDay 4 \nHeuristic Matching Engine (recommendation feed) \nIntern 4 \nDay 2\u20135 \nSwipe deck UI + Filters/Search UI + Company pages (frontend) \nIntern 1 \nDay 2\u20135 \nPersonalized, RBAC-aware swipe experience \nIntern 1 / In",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "alized, RBAC-aware swipe experience \nIntern 1 / Intern 4 \nDay 5 \nCI/docker-compose updated for Milestone 2 services \nIntern 5 \nDay 1\u20132 \nTest plan, test cases, defect log \nIntern 5 \nDay 1\u20137 (continuous) \nFull integration inside local Docker Compose \nAll (led by Intern 2 & 5) \nDay 5 \nRegression report + code-quality report \nIntern 5 \nDay 6 \nMilestone 2 sign-off report + demo \nAll \nDay 7",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 18 \n13. Milestone 2 Acceptance Criteria \n\u2022 The Job Service exposes a paginated, searchable, filterable catalog of live seeded job listings across MNCs, \nstartups, and newly founded companies. \n\u2022 The Swipe Service correctly records apply/save/skip actions per user, restricted to the Job Seeker role via RBAC. \n\u2022 Company & Startup listing and profile pages are backed by live seeded data. \n\u2022 Job freshness and competition-level indicators are computed correctly and expo",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "n-level indicators are computed correctly and exposed on job listings. \n\u2022 The heuristic Matching Engine ranks jobs per user from profile fit and swipe history and is reachable end-to-end \nthrough the Gateway. \n\u2022 The frontend swipe deck consumes the personalized recommendation feed instead of a static/chronological list. \n\u2022 The Filters/Search UI and Company/Startup pages are wired to live backend APIs. \n\u2022 All Milestone 2 services run together and pass integration/smoke tests inside the local Dock",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "pass integration/smoke tests inside the local Docker Compose \nenvironment. \n\u2022 CI enforces lint, build, and automated test checks on every pull request. \n\u2022 Every tool used across the milestone was free/open-source \u2014 no paid subscriptions were required. \n\u2022 No production deployment activity has occurred; deployment remains explicitly scheduled for after Milestone 4. \n14. Risks & Mitigations \nRisk \nImpact \nMitigation \nInterface contracts \n(Job/Swipe/Search/Company) change after \nDay 2, breaking down",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Search/Company) change after \nDay 2, breaking downstream work \nHigh \nContract freeze checkpoint (Section 11.2) + change-control \nprocess (Section 11.3) \nSeed job/company dataset too small or \nunrealistic, limiting filter/search/matching \ndemo value \nMedium \nIntern 3 targets 100+ realistic listings across all company \ntypes by Day 2; Intern 4 flags gaps early \nMatching Engine scoring feels arbitrary \nwithout real user behavior data \nMedium \nIntern 4 tunes weights against seeded swipe interactions",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "4 tunes weights against seeded swipe interactions \nfrom Day 3 onward rather than only at the end \nSwipe-gesture library integration issues \n(mobile/touch vs desktop/mouse) \nMedium \nIntern 1 evaluates the library on Day 1 before committing; \nfalls back to a custom Framer Motion implementation if \nneeded \nLocal integration environment differs from \nteammates' machines \nMedium \nSingle shared docker-compose.dev.yml maintained by Intern \n5; all integration testing happens inside it \nLate defect disc",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ration testing happens inside it \nLate defect discovery on Day 6\u20137 with no \nbuffer \nMedium \nContinuous QA involvement from Day 3 onward, with two \nfull integration rounds on Day 4 and Day 5, rather than \ntesting only at the end \nTeam accidentally starts deployment work \nLow \nReminder in every stand-up that deployment is out of scope \nfor Milestone 2 and reserved for Milestone 4 \n15. Non-Functional Requirements \u2014 Milestone 2 Scope \nNFR ID \nRequirement \nCategory \nNFR-01 \nJob listing and search API",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ment \nCategory \nNFR-01 \nJob listing and search APIs respond within acceptable dev-environment latency for \nthe seeded dataset (target: under 500ms for typical filter/search queries) \nPerformance \nNFR-02 \nSwipe actions are recorded reliably even under rapid, repeated swiping (no \ndropped or duplicated writes) \nReliability",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 18,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Milestone 2 SRS \nPage 19 \nNFR ID \nRequirement \nCategory \nNFR-03 \nRBAC is enforced consistently across all new Job/Swipe/Company endpoints; \nunauthorized roles receive a clear 403 response \nSecurity \nNFR-04 \nThe swipe deck UI remains responsive and usable on both desktop and mobile-\nwidth viewports \nUsability \nNFR-05 \nFilter and search indexes scale to at least the Milestone 2 seed volume (100+ \nlistings) without noticeable query degradation \nScalability \nNFR-06 \nAll Milestone 2 services",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 19,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ion \nScalability \nNFR-06 \nAll Milestone 2 services and their dependencies run entirely within the shared \ndocker-compose.dev.yml with no external paid services \nPortability / Cost \n16. Sign-Off \nRole \nName \nSignature / Approval \nDate \nEducator / Mentor \n \n \nIntern 1 \u2014 Frontend & User Experience \n \n \nIntern 2 \u2014 Backend & Identity Management \n \n \nIntern 3 \u2014 Job & Data Intelligence \n \n \nIntern 4 \u2014 AI/ML Career Intelligence \n \n \nIntern 5 \u2014 Platform, Testing & Deployment",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 19,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Testing & Deployment",
+    "source_file": "SwipeX_Milestone2_SRS_v4.pdf",
+    "source_page": 19,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SOFTWARE REQUIREMENTS SPECIFICATION \nMilestone 1 \u2014 Project Initialization, Architecture & Core Setup \nSwipeX \nSwipe-Based Intelligent Job Discovery and Career Assistance Platform \nField \nDetail \nDocument Type \nSoftware Requirements Specification (SRS) \u2014 Milestone 1 \nMilestone Duration \n7 Working Days \nTeam Size \n5 Interns, working in parallel across five domains \nTeam Composition \nTeam Lead / Backend & Identity Management; Job & Data Intelligence; AI/ML Career \nIntelligence; Frontend & User Expe",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "; AI/ML Career \nIntelligence; Frontend & User Experience; Platform, Testing & Deployment \nDeployment Scope \nExcluded from Milestone 1. Production deployment occurs only after Milestone 4. \nTooling Policy \nEvery tool used must be free / open-source \u2014 no paid subscriptions required \nanywhere in this milestone \nPrimary Reference \nSwipeX Project Charter (provided PDF) and supervising discussions \nPrepared For \nEducator / Mentor supervising the intern cohort",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "cohort",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "1. Introduction \n1.1 Purpose \nThis Software Requirements Specification (SRS) defines the scope, tasks, responsibilities, dependencies, and integration \nrequirements for Milestone 1 of the SwipeX platform. It translates the project charter into a coordinated, day-wise \nexecution plan for five interns working in parallel, each owning a distinct technical domain, so that their individual \ndeliverables converge into a single, functioning system increment by the end of Day 7. \n1.2 Scope of Milestone",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ment by the end of Day 7. \n1.2 Scope of Milestone 1 \nMilestone 1 covers project initialization, system architecture, and core setup. By the end of Day 7 the team must deliver \na working increment consisting of: an initialized multi-service repository with an agreed architecture; a functioning \nauthentication and role-based access control (RBAC) system supporting Job Seeker, Recruiter, and Admin roles; a \njob/company data schema with a live Job & Swipe Service; a resume-upload flow backed by a he",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Swipe Service; a resume-upload flow backed by a heuristic ATS-scoring and \nrecommendation stub that unblocks downstream integration ahead of real NLP/ML model training in Milestone 2; a \nconnected frontend exposing login, swipe-based job discovery, and a dashboard shell; and a validated, tested integration \nof all of the above inside a local/dev Docker Compose environment. Production deployment is explicitly out of scope for \nMilestone 1 and is deferred until all four milestones are complete. \n1",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "eferred until all four milestones are complete. \n1.3 Definitions & Abbreviations \n\u25cf \nSRS \u2014 Software Requirements Specification \n\u25cf \nRBAC \u2014 Role-Based Access Control \n\u25cf \nJWT \u2014 JSON Web Token, used for stateless authentication \n\u25cf \nATS \u2014 Applicant Tracking System (resume/job compatibility scoring) \n\u25cf \nAPI Gateway \u2014 Single entry point that routes requests to backend services \n\u25cf \nStub / Heuristic Service \u2014 A simplified, rule-based placeholder for a component (e.g., ATS scoring, \nrecommendations) whose",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ponent (e.g., ATS scoring, \nrecommendations) whose full implementation is scheduled for a later milestone \n\u25cf \nM1\u2013M4 \u2014 Milestone 1 through Milestone 4, as defined in the project charter \n\u25cf \nIntern 1\u20135 \u2014 Shorthand for the five domain owners defined in Section 4 \n1.4 Reference Documents \n\u25cf \nSwipeX: Swipe-Based Intelligent Job Discovery and Career Assistance Platform \u2014 Project Charter (source PDF), \nSections 1\u20139 \n\u25cf \nArchitecture Diagram \u2014 SwipeX System Architecture (source PDF, Section 3) \n\u25cf \nPrior",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "em Architecture (source PDF, Section 3) \n\u25cf \nPrior mentor/team discussions establishing the five-domain team split and the deployment exclusion for \nMilestone 1 \n1.5 Golden Rule for This Milestone \nEvery tool used in Milestone 1 must be free. No intern should need to pay for anything \u2014 free code editors, free version \ncontrol, free API-testing tools, free local container tooling, free CI minutes, free linting/security tools, and free ML/NLP \nlibraries are sufficient to complete everything describ",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ries are sufficient to complete everything described in this document. \n2. Free Tools Checklist (No Paid Tool Required Anywhere) \nBefore Day 1 begins, make sure every intern has access to the free tools below that are relevant to their domain. \nWhat It's Needed For \nFree Tool Option(s) \nWriting code \nVS Code (completely free)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "What It's Needed For \nFree Tool Option(s) \nSaving & sharing code \nGit + GitHub (free for public / small private repos) \nTesting APIs manually \nPostman (free plan) or Thunder Client extension in VS Code (free) \nBackend framework \nPython + FastAPI (free) or Django REST Framework (free) \nFrontend framework \nReact.js (free) with Tailwind CSS (free) \nAuthentication (JWT / OAuth2) \nPyJWT / python-jose (free); Authlib for OAuth2 (free) \nDatabase \nPostgreSQL (free) for structured data; Redis (free) for",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "eSQL (free) for structured data; Redis (free) for caching / sessions \nAutomated backend tests \nPytest (free) or Django Test Client (free) \nAutomated frontend tests \nJest + React Testing Library (free) \nAutomated local integration tests \nDocker Compose (free) \u2014 full stack on one laptop, no live server needed \nCI checks on every PR (lint / build / test \nonly) \nGitHub Actions (free tier) \u2014 no deployment stage configured \nCode quality / linting \nESLint (frontend, free), Flake8 / Black (backend, free",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "nt (frontend, free), Flake8 / Black (backend, free) \nAPI documentation \nSwagger UI / OpenAPI (free, built into FastAPI / DRF) \nResume parsing & NLP experimentation \n(heuristic stub only in M1) \nPython, pdfplumber / PyPDF2, spaCy, scikit-learn (all free); Google Colab \nfor extra free compute \nDiagrams (architecture, ER diagram) \ndraw.io / diagrams.net (free) \nWireframing / UI design \nFigma (free tier) \nDefect tracking / task board \nGitHub Issues & Projects (free) or Trello (free tier) \nNone of th",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Projects (free) or Trello (free tier) \nNone of the tools above require a paid plan to complete Milestone 1. If a paid tier is ever tempting (e.g., a hosted DB \nadd-on), the local/free alternative listed here is sufficient for this milestone's scope. \n3. Overall Description \nSwipeX is a centralized platform that helps job seekers discover and apply for relevant jobs through an intuitive swipe-\nbased interface, backed by AI-powered resume analysis, ATS scoring, personalized recommendations, and r",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": ", ATS scoring, personalized recommendations, and real-time \nopportunity tracking across MNCs, startups, and newly founded companies. The architecture follows five layers: \nFrontend, API Gateway, Backend Services (Job, Swipe, Matching, Resume, ATS Scoring, AI Recommendation, Application, \nNotification, Analytics), AI/NLP Services, and the Database & Storage layer (PostgreSQL, Redis, file storage, vector \ndatabase), sitting on top of a containerized infrastructure. Milestone 1 establishes the foun",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "d infrastructure. Milestone 1 establishes the foundation of this stack \u2014 the \nentry points, the data backbone, and the first three backend services (Authentication, Job/Swipe, and a heuristic \nResume/ATS/Recommendation stub) \u2014 while stubbing the deeper AI logic so all layers can be integrated end-to-end \nwithout waiting for full model development. \n4. Team Structure & Domain Ownership \nIntern \nDomain \nPrimary Architecture Ownership (Milestone 1) \nIntern 1 \nTeam Lead / Backend & \nIdentity Managem",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Intern 1 \nTeam Lead / Backend & \nIdentity Management \nAPI Gateway, Authentication Service (JWT + OAuth2), RBAC, User & \nRole Management Service, repository structure, service integration, \nAPI contracts \nIntern 2 \nJob & Data Intelligence \nJob / company / startup data schema, seed dataset, Job Listing Service, \nSwipe Service (interaction schema + APIs), filtering & search logic",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Intern \nDomain \nPrimary Architecture Ownership (Milestone 1) \nIntern 3 \nAI/ML Career Intelligence \nResume Service skeleton, feature planning, EDA on resumes & job \ndescriptions, heuristic ATS-scoring stub, heuristic recommendation \nstub, Milestone-2 ML roadmap \nIntern 4 \nFrontend & User Experience \nReact application, UI/UX wireframes, login UI, swipe-based job-\ndiscovery UI, dashboard shell, resume-upload UI \nIntern 5 \nPlatform, Testing & \nDeployment \nCode-quality tooling, CI (build/lint/test \u2014",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ment \nCode-quality tooling, CI (build/lint/test \u2014 no deploy), local Docker \nCompose environment, test design & automation, defect tracking, \nintegration validation \nDeployment (packaging for production, cloud release, AWS/Azure hosting) is intentionally excluded from Intern 5's \nMilestone 1 scope. It is scheduled after Milestone 4 is complete. \n5. Milestone 1 Objectives \n\u25cf \nFinalize system architecture, database schema, and API contracts across all services. \n\u25cf \nStand up project repositories, co",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ll services. \n\u25cf \nStand up project repositories, coding standards, and a local multi-service Docker Compose environment for \nintegration (development only, not production). \n\u25cf \nImplement authentication and role-based access control (Job Seeker, Recruiter, Admin). \n\u25cf \nImplement job/company/startup data schema and a live Job & Swipe Service: listings, filtering/search, and swipe-\naction recording. \n\u25cf \nStand up a Resume Service and a heuristic ATS-scoring / recommendation stub to unblock frontend/QA",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "oring / recommendation stub to unblock frontend/QA \nintegration ahead of real NLP model training in Milestone 2. \n\u25cf \nDeliver a connected frontend with login, a swipe-based job-discovery interface, and a dashboard shell consuming \nreal backend APIs. \n\u25cf \nValidate the full increment through integration testing, automated checks, and a defect-tracked QA cycle \u2014 \nwithout production deployment. \n6. Functional Requirements \u2014 Milestone 1 Scope \nReq ID \nRequirement \nOwner \nPriority \nFR-01 \nUsers can regi",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "equirement \nOwner \nPriority \nFR-01 \nUsers can register / log in (email-password and OAuth2) and receive a JWT \nencoding their role \nIntern 1 \nHigh \nFR-02 \nProtected endpoints enforce RBAC (Job Seeker / Recruiter / Admin) \nIntern 1 \nHigh \nFR-03 \nSystem stores job, company and startup records per a defined schema and \nexposes seed data \nIntern 2 \nHigh \nFR-04 \nSystem exposes job-listing APIs with filter / search (company type, location, \nremote, salary, skills) \nIntern 2 \nHigh \nFR-05 \nSystem record",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ary, skills) \nIntern 2 \nHigh \nFR-05 \nSystem records swipe actions (right = apply/save, left = skip) and per-user \nswipe history \nIntern 2 \nHigh \nFR-06 \nSystem exposes a resume-upload endpoint that stores and parses basic \nresume fields \nIntern 3 \nMedium \nFR-07 \nSystem exposes a heuristic ATS-score endpoint comparing a resume to a job \ndescription (placeholder for the Milestone-2 NLP model) \nIntern 3 \nMedium \nFR-08 \nSystem exposes a heuristic job-recommendation endpoint based on skill / \nkeyword",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "recommendation endpoint based on skill / \nkeyword overlap \nIntern 3 \nMedium",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Req ID \nRequirement \nOwner \nPriority \nFR-09 \nUsers can log in through the web application and reach a role-aware landing \nscreen \nIntern 4 \nHigh \nFR-10 \nUsers can browse jobs through a swipe-based interface consuming live Job \nService data \nIntern 4 \nHigh \nFR-11 \nDashboard displays saved/applied jobs and, where available, ATS-score / \nrecommendation stub output \nIntern 4 \nHigh \nFR-12 \nAll services run together inside a local Docker Compose integration \nenvironment \nIntern 5 \nHigh \nFR-13 \nAll pul",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ation \nenvironment \nIntern 5 \nHigh \nFR-13 \nAll pull requests pass automated lint / build / test checks before merge \nIntern 5 \nHigh \nFR-14 \nThe Milestone 1 increment passes a documented integration and RBAC test \ncycle \nIntern 5 \nHigh \n7. Interface Contracts & Integration Points \nThese contracts are frozen by Day 2 so that all five interns can build against a stable interface instead of waiting on one \nanother's implementation. \n7.1 Authentication & User Service (owner: Intern 1) \n\u25cf \nPOST /api/v",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "n & User Service (owner: Intern 1) \n\u25cf \nPOST /api/v1/auth/register \u2014 { name, email, password, role } \u2192 201 { user_id } \n\u25cf \nPOST /api/v1/auth/login \u2014 { email, password } \u2192 200 { access_token, refresh_token, role } \n\u25cf \nGET /api/v1/auth/oauth/google \u2014 OAuth2 login \u2192 200 { access_token, role } \n\u25cf \nPOST /api/v1/auth/refresh \u2014 { refresh_token } \u2192 200 { access_token } \n\u25cf \nGET /api/v1/auth/me \u2014 Header: Bearer token \u2192 200 { user_id, name, role } \nConsumed by: Intern 4 (login UI), Intern 5 (auth test suite",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "by: Intern 4 (login UI), Intern 5 (auth test suite), and indirectly by Intern 2 & 3 endpoints that require role-gated \naccess. \n7.2 Job & Swipe Service (owner: Intern 2) \n\u25cf \nGET /api/v1/jobs?type=&location=&remote=&salary_min=&salary_max=&skills= \u2192 200 [ { job_id, title, \ncompany, type, location, salary_range, skills[], posted_at } ] \n\u25cf \nGET /api/v1/jobs/{job_id} \u2192 200 job detail \n\u25cf \nPOST /api/v1/swipes \u2014 { job_id, direction } \u2192 201 { swipe_id } \n\u25cf \nGET /api/v1/swipes/history \u2192 200 [ { job_id, d",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "\u25cf \nGET /api/v1/swipes/history \u2192 200 [ { job_id, direction, swiped_at } ] \nConsumed by: Intern 4 (swipe UI / dashboard), Intern 3 (feature input for the recommendation stub), Intern 5 (functional \n+ regression tests). \n7.3 Resume & Career Intelligence Service \u2014 Heuristic Stub (owner: Intern 3) \n\u25cf \nPOST /api/v1/resume/upload (multipart file) \u2192 201 { resume_id, parsed_skills[] } \n\u25cf \nGET \n/api/v1/resume/{resume_id}/ats-score?job_id={id} \n\u2192 \n200 \n{ \nmatch_score, \nmissing_keywords[], \ngenerated_by: \"",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "match_score, \nmissing_keywords[], \ngenerated_by: \"heuristic-v0\" } \n\u25cf \nGET /api/v1/recommendations?user_id={id} \u2192 200 [ { job_id, match_percentage, generated_by: \"heuristic-v0\" \n} ] \nThese endpoints use simple rule-based logic (keyword/skill overlap) rather than a trained model. They exist solely to give \nIntern 1 (gateway routing), Intern 4 (UI hook-up), and Intern 5 (test coverage) a stable contract to integrate against before \nreal NLP/embedding-model training begins in Milestone 2.",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "g-model training begins in Milestone 2.",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "7.4 Local Integration Environment (owner: Intern 5) \n\u25cf \ndocker-compose.dev.yml \u2014 brings up PostgreSQL, Redis, and all three backend services together for local \nintegration testing \n\u25cf \nShared Postman/pytest collection \u2014 used by all interns to validate their endpoints against the frozen contracts \nabove \nThis environment is for local/dev integration validation only and is explicitly not a deployment target. \n8. Cross-Team Dependency Matrix \nConsumer \nDepends On \nArtifact Needed \nNeeded By \nIntern",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "er \nDepends On \nArtifact Needed \nNeeded By \nIntern 1 \nIntern 5 \nLocal DB / Redis environment (docker-compose skeleton) \nDay 2 \nIntern 2 \nIntern 1 \nApproved DB technology & schema conventions \nDay 1 \nIntern 3 \nIntern 2 \nJob / company data schema + seed dataset \nDay 2 \nIntern 3 \nIntern 1 \nAuth contract (role claims used for personalisation) \nDay 3 \nIntern 4 \nIntern 1 \nAuth API contract + working /login, /register \nDay 3 \nIntern 4 \nIntern 2 \nJob & Swipe API \nDay 4 \nIntern 4 \nIntern 3 \nATS-score & r",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "wipe API \nDay 4 \nIntern 4 \nIntern 3 \nATS-score & recommendation stub API \nDay 5 \nIntern 5 \nIntern 1 / 2 / 3 \nDev endpoints for each service as they land \nDays 3\u20135 \nIntern 1 \nIntern 2 / 3 \nService routes to register in the API Gateway \nDays 4\u20135 \n9. Master 7-Day Execution Timeline \nAll five interns work in parallel every day. The table below is the single-glance view; Section 10 gives the full detail (task, \ndeliverable, dependency, hand-off) for each intern. \nDay \nIntern 1 Backend & \nIdentity \nIn",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ach intern. \nDay \nIntern 1 Backend & \nIdentity \nIntern 2 Job & Data \nIntelligence \nIntern 3 AI/ML \nCareer Intelligence \nIntern 4 Frontend & \nUX \nIntern 5 \nPlatform/Testing \n1 \nArchitecture + repo \n+ API contract \nskeleton \nJob/company data \nschema + synthetic \ndataset \nML/NLP env setup + \nfeature planning \nWireframes + React \ninit \nLint/CI standards + \ntest plan + defect \ntracker \n2 \nDB schema + \nbackend skeleton + \nJWT/OAuth2 design \nJob/Swipe schema + \nseed-data script \nEDA on job & resume \nsa",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "chema + \nseed-data script \nEDA on job & resume \nsamples \nComponents + \nrouting + API client \nCI (lint/build) + \ndocker-\ncompose.dev.yml \n3 \nAuth APIs + RBAC \nmiddleware \nJob Service APIs \n(/jobs, /jobs/{id}) \nResume Service \nskeleton + \nupload/parse stub \nLogin/Register UI \nwired to Auth API \nTest cases for Auth \n+ Job Service; API \ntest skeleton \n4 \nRBAC enforcement + \ngateway routing to \nJob Service \nSwipe Service APIs + \nfilter/search logic \nHeuristic ATS-scoring \nlogic on live data \nSwipe in",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "euristic ATS-scoring \nlogic on live data \nSwipe interface (job \ncards) wired to Job \nAPI \nExecute functional \ntests; CI runs tests \non PR \n5 \nIntegrate Job/Swipe \n+ Resume/ATS \nbehind Gateway \nSupport integration; \ndocument data feed \nfor M2 \nIntegrate ATS + \nrecommendation \nstub; M2 roadmap \ndoc \nDashboard shell + \nresume upload + ATS \ndisplay \nFull integration \ntest cycle \n(Auth+Job+ATS+UI)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Day \nIntern 1 Backend & \nIdentity \nIntern 2 Job & Data \nIntelligence \nIntern 3 AI/ML \nCareer Intelligence \nIntern 4 Frontend & \nUX \nIntern 5 \nPlatform/Testing \n6 \nEnd-to-end backend \nintegration + bug \nfixes \nUnit tests + query \noptimisation + \ndefect fixes \nUnit tests for \nheuristic logic + \ndefect fixes \nUI polish, \nresponsiveness, \nerror handling \nRegression testing \n+ static code-\nquality reports \n7 \nCode freeze + \nSwagger docs + sign-\noff \nFinal validation + \nmodule handoff \nnotes \nFinal re",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "inal validation + \nmodule handoff \nnotes \nFinal review + M1 \nscope / M2 handoff \ndoc \nFinal UI fixes + demo \nwalkthrough prep \nFinal QA sign-off \nreport + M1 test \nsummary",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "10. Detailed Day-Wise Task Breakdown (Per Intern) \nFor every day, the table explains the task in simple terms, lists a separate checklist to tick off once the work is actually \ndone, and shows what the intern depends on to start that task and what they hand off to the rest of the team. Tick each \nchecklist box only when that item is actually working, not just attempted. \nIntern 1 \u2014 Backend & Identity Management \nDay \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n1 \nSit with",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Checklist \nDepends On \nProvides To \n1 \nSit with the team and lock the overall \narchitecture. Create the shared code \nrepository with folders for each service \n\u2014 like drawing the floor plan before \nbuilding starts. Write a simple first \ndraft of what the Auth, Job/Swipe, and \nResume/ATS APIs will look like. \n\u2610 Architecture finalized \n\u2610 Repo created with \nservice folders \n\u2610 Draft API contracts \nwritten \n\u2610 Plan shared with team \nNone \nAll interns \n(repo, \ncontracts) \n2 \nDesign the database tables",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "(repo, \ncontracts) \n2 \nDesign the database tables for Users \nand Roles. Build a basic skeleton of the \nbackend app that will later route \nrequests to every other service. Decide \nhow login tokens (JWT) and \"Sign in \nwith Google\" (OAuth2) will work. \n\u2610 Users/Roles schema \nfinalized \n\u2610 Backend skeleton \nrunning \n\u2610 JWT/OAuth2 approach \ndecided \n\u2610 Local DB/Redis \nconfirmed working \nIntern 5's local \nDB/Redis \nenvironment \nIntern 2/3 \n(gateway \npattern to plug \ninto) \n3 \nBuild the real login system:",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "rn to plug \ninto) \n3 \nBuild the real login system: Register, \nLogin, Sign-in-with-Google, Refresh \nToken, and \"who am I\". Add a rule that \ndecides what each type of user (Job \nSeeker, Recruiter, Admin) is allowed to \ndo. \n\u2610 Register API working \n\u2610 Login + OAuth2 \nworking \n\u2610 Refresh API working \n\u2610 Role rule (RBAC) added \n& tested \nOwn DB \nschema \nIntern 4 (login \nintegration), \nIntern 5 (test \ntarget) \n4 \nMake sure the login rules are enforced \neverywhere. Connect the shared entry \npoint (Gateway",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "erywhere. Connect the shared entry \npoint (Gateway) to Intern 2's Job/Swipe \nservice so requests pass through \nsmoothly. Leave a placeholder \nconnection ready for Intern 3's \nResume/ATS service. \n\u2610 RBAC enforced on \nprotected routes \n\u2610 Gateway routes to Job \nService \n\u2610 Placeholder route for \nResume/ATS \n\u2610 Tested with different \nuser roles \nIntern 2's job \nendpoints \n(skeleton) \nIntern 4 \n(protected \ndashboard \nroutes) \n5 \nBring the Resume/ATS stub online \nthrough the same Gateway, so Auth + \nJob",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "b online \nthrough the same Gateway, so Auth + \nJob/Swipe + Resume/ATS are all \nreachable from one place today. \nUpdate the shared Postman collection \nso the whole team can test easily. \n\u2610 All three services \nreachable via one \nGateway \n\u2610 Postman collection \nupdated \n\u2610 Joint test with Intern 5 \ndone \nIntern 2 & 3's \ncompleted \nendpoints \nIntern 4 & 5 \n(integrated \nbackend to \nconsume/test) \n6 \nRun the whole backend together, fix \nany issues QA (Intern 5) finds, and \nwrite simple documentation (Sw",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tern 5) finds, and \nwrite simple documentation (Swagger) \nso anyone can see what each API does. \n\u2610 End-to-end backend \ntest done \n\u2610 QA-reported bugs fixed \n\u2610 Swagger/API docs \nupdated \nIntern 5's \ndefect log \nIntern 5 (fixed \nbuild for \nregression)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Day \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n\u2610 Backend confirmed \nstable \n7 \nFinal Integration Day \u2014 freeze the \nbackend code, take part in the full \nteam demo, and write a short summary \nof what was built. \n\u2610 Backend code frozen \n\u2610 Took part in full team \ndemo \n\u2610 Short backend \nsummary written \n\u2610 Last-minute critical \nbugs fixed \nPassed QA \nregression \nMilestone 1 \ndemo / mentor \nreview \nIntern 2 \u2014 Job & Data Intelligence \nDay \nTask Expected To Be \nCompleted \nChecklis",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "nce \nDay \nTask Expected To Be \nCompleted \nChecklist \nDepends On \nProvides To \n1 \nDecide how job, company, and \nstartup information will be \norganized (title, skills, salary, \ncompany type) and create a \nsample dataset that pretends to \nbe real job postings \u2014 like \ndesigning a form before \ncollecting real entries. Confirm \nthe database choice with Intern \n1. \n\u2610 Job/company data design \nfinalized \n\u2610 Sample job/company dataset \ncreated \n\u2610 Database tech confirmed with \nIntern 1 \nNone (runs in \nparal",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ech confirmed with \nIntern 1 \nNone (runs in \nparallel) \nIntern 3 \n(schema for \nfeature \nplanning) \n2 \nFinalize how a \"swipe\" is \nrecorded (which job, which \ndirection, when), and write a \nsmall script that fills the \ndatabase with sample jobs and \nswipes so testing can begin. \n\u2610 Job/Swipe schema finalized \n\u2610 Seed script working \n\u2610 Dev database populated \nOwn schema; \nIntern 5's DB \ncontainer \nIntern 3 (EDA \ndata source) \n3 \nBuild the APIs that let other \nparts of the system ask: \"show \nme the jo",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "t other \nparts of the system ask: \"show \nme the jobs\" and \"show me \ndetails of this one job\", \nincluding basic filters like \nlocation, remote, and salary. \n\u2610 Job-listing API working \n\u2610 Job-detail API working \n\u2610 Filters \n(type/location/remote/salary/skills) \nworking \nOwn seed \ndata \nIntern 1 \n(gateway \nregistration), \nIntern 4 (swipe \nUI data), \nIntern 5 (test \ntarget) \n4 \nBuild the swipe feature: save a \nswipe when a user swipes \nright/left, and let a user see \ntheir swipe history. Add a fast \nc",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "let a user see \ntheir swipe history. Add a fast \ncache (Redis) so the job feed \nloads quickly. \n\u2610 Swipe-save API working \n\u2610 Swipe-history API working \n\u2610 Redis caching added \nIntern 5's \nRedis service \nIntern 4 (richer \ndashboard \ndata), Intern 3 \n(swipe-\nbehaviour \ninput for M2) \n5 \nConnect the Job/Swipe service \ninto the shared Gateway with \nIntern 1, and write a short note \nexplaining the job/swipe data so \nIntern 3 can use it for real \nrecommendations in Milestone \n2. \n\u2610 Gateway integration v",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ndations in Milestone \n2. \n\u2610 Gateway integration verified \n\u2610 M2 data-feed notes documented \nIntern 1's \ngateway \nrouting \nIntern 3 (M2 \nplanning \ninput)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Day \nTask Expected To Be \nCompleted \nChecklist \nDepends On \nProvides To \n6 \nWrite simple automated tests \nfor the job-listing and swipe \nlogic, speed up any slow \ndatabase queries the team \npoints out, and fix bugs QA \nreports. \n\u2610 Unit tests written \n\u2610 Slow queries fixed \n\u2610 QA-reported bugs fixed \nIntern 5's \ndefect log \nIntern 5 \n(regression \nbuild) \n7 \nFinal Integration Day \u2014 confirm \nthe Job/Swipe service works \nsmoothly with everyone else's \nwork, and write a short \nhandover note for Milesto",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "work, and write a short \nhandover note for Milestone 2. \n\u2610 Final test with full team done \n\u2610 Module docs and handoff notes \nwritten \nPassed \nregression \nMilestone 1 \ndemo \nIntern 3 \u2014 AI/ML Career Intelligence \nDay \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n1 \nSet up the AI/NLP tools (pandas, scikit-\nlearn, spaCy, pdfplumber) and think \nthrough what information (skills, \nkeywords, experience) would help \nscore a resume against a job \u2014 like \ndeciding what clues a detective",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "inst a job \u2014 like \ndeciding what clues a detective would \nlook for. \n\u2610 ML/NLP environment \nready \n\u2610 Feature plan written \ndown \n\u2610 Plan shared with the \nteam \nNone (uses \nprovisional \nmock data) \nSelf (Day 2 \nEDA) \n2 \nOnce Intern 2's sample job data is \nready, explore it and a few sample \nresumes to look for useful patterns \u2014 \nthis is called Exploratory Data Analysis \n(EDA). \n\u2610 Job/resume data \nexplored \n\u2610 Findings written down \n\u2610 Key features confirmed \nIntern 2's \ndataset/schema \nOwn Day-3 \nser",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "firmed \nIntern 2's \ndataset/schema \nOwn Day-3 \nservice design \n3 \nBuild a simple Resume Service that lets \na user upload a resume file and pulls \nout basic information (text, skill \nkeywords) using a simple, non-AI \nparser for now. \n\u2610 Resume Service \nskeleton created \n\u2610 Upload endpoint \nworking \n\u2610 Basic skill extraction \nworking \nOwn feature \nplan \nIntern 1 (route \nto register), \nIntern 4 \n(contract to \nbuild against) \n4 \nTurn the placeholder into simple rule-\nbased scoring \u2014 for example, \"count",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "o simple rule-\nbased scoring \u2014 for example, \"count \nhow many required skills from the job \nalso appear in the resume\" \u2014 and use \nthe same idea to suggest matching \njobs. \n\u2610 ATS-score endpoint \nworking \n\u2610 Recommendation \nendpoint working \n\u2610 Response format \nfinalized \nIntern 2's live \njob data \nIntern 1 \n(integration), \nIntern 4 (UI \nhook-up) \n5 \nConnect the \nResume/ATS/Recommendation service \ninto the shared Gateway with Intern 1, \nagree with Intern 4 on how scores will \nbe shown on the dashboar",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ern 4 on how scores will \nbe shown on the dashboard, and write \na short plan for the real AI model in \nMilestone 2. \n\u2610 Services integrated \nbehind Gateway \n\u2610 M2 roadmap written \n\u2610 Display plan agreed \nwith Intern 4 \nIntern 1's \ngateway \nIntern 4 \n(display \ncontract), \nMentor (M2 \nplan) \n6 \nWrite simple tests for the rule-based \nscoring and recommendation logic, \nand fix anything QA finds broken. \n\u2610 Tests written for \nscoring/recommendation \nlogic \nIntern 5's \ndefect log \nIntern 5 \n(regression \nb",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Intern 5's \ndefect log \nIntern 5 \n(regression \nbuild)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Day \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n\u2610 QA-reported bugs fixed \n7 \nFinal Integration Day \u2014 join the full \nteam test, and clearly write down that \nthis milestone only used simple rules, \nnot a trained AI model. \n\u2610 Final test with full team \ndone \n\u2610 Scope documented as \nheuristic-only \n\u2610 Handover notes written \nPassed \nregression \nMilestone 1 \ndemo \nIntern 4 \u2014 Frontend & User Experience \nDay \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n1 \nSe",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "mpleted \nChecklist \nDepends On \nProvides To \n1 \nSet up the website project and sketch \nsimple designs for the Login, \nSwipe/Job-Discovery, Dashboard, \nResume-Upload, and Profile screens \u2014 \nlike drawing a floor plan before \nbuilding a house. \n\u2610 React project created \n\u2610 Wireframes made for \nall key screens \n\u2610 Plan shared with the \nteam \nIntern 1's draft \nAPI contracts \n(for screen \ndata needs) \nSelf (Day 2 \nbuild) \n2 \nBuild the reusable building blocks of \nthe website \u2014 navigation bar, layout, \njo",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ocks of \nthe website \u2014 navigation bar, layout, \njob card, buttons \u2014 and set up the \nbasic pages and navigation between \nthem. \n\u2610 Reusable components \nbuilt \n\u2610 Page routing set up \n\u2610 API client configured \nOwn \nwireframes \nSelf (Day 3 auth \nintegration) \n3 \nBuild the Login and Register pages and \nconnect them to Intern 1's real login \nsystem, including a \"Sign in with \nGoogle\" button, so a real user can \nactually log in. \n\u2610 Login page working \n\u2610 Register page working \n\u2610 OAuth2 (Google) \nbutton wi",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "egister page working \n\u2610 OAuth2 (Google) \nbutton wired \nIntern 1's Auth \nAPI \nIntern 5 (UI test \ntarget) \n4 \nBuild the swipe-based job-discovery \nscreen \u2014 job cards that a user can \nswipe right (apply/save) or left (skip) \u2014 \nusing real job data from Intern 2's \nservice. \n\u2610 Job cards show live \ndata \n\u2610 Swipe right/left saved \nvia API \n\u2610 Basic filters wired up \nIntern 2's \nJob/Swipe API \nIntern 5 (swipe-\nflow test \ntarget) \n5 \nBuild the Dashboard (saved and \napplied jobs) and the Resume-Upload \nscr",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "aved and \napplied jobs) and the Resume-Upload \nscreen, and show Intern 3's resume \nscore and job recommendations on the \ndashboard. \n\u2610 Dashboard shows \nsaved/applied jobs \n\u2610 Resume upload \nworking \n\u2610 ATS \nscore/recommendations \ndisplayed \nIntern 2's data; \nIntern 3's stub \nAPIs \nIntern 5 (full UI \ntest target) \n6 \nPolish the app \u2014 fix rough spots, make \nsure it works on different screen sizes, \nand show friendly messages if \nsomething goes wrong instead of a \nblank/broken screen. \n\u2610 Responsive d",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "instead of a \nblank/broken screen. \n\u2610 Responsive design \nchecked \n\u2610 Friendly error messages \nadded \n\u2610 QA-reported bugs fixed \nIntern 5's \ndefect log \nIntern 5 \n(regression \nbuild) \n7 \nFinal Integration Day \u2014 fix any last \nissues and rehearse a simple \nwalkthrough/demo of the whole app. \n\u2610 Final test with full team \ndone \n\u2610 Demo walkthrough \nrehearsed \n\u2610 Frontend notes \ndocumented \nPassed \nregression \nMilestone 1 \ndemo",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Intern 5 \u2014 Platform, Testing & Deployment \nDay \nTask Expected To Be Completed \nChecklist \nDepends On \nProvides To \n1 \nSet up the ground rules for good code \n(linting tools) and create a simple \nchecklist/board to track testing tasks \nand bugs for Milestone 1 \u2014 like \npreparing a quality-control checklist \nbefore a factory line starts. \n\u2610 Linting/code-style tools \nset up \n\u2610 Test plan document \ncreated \n\u2610 Bug/defect tracking \nboard set up \nIntern 1's repo \nstructure \nAll interns \n(quality gates) \n2",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "s repo \nstructure \nAll interns \n(quality gates) \n2 \nSet up an automatic check (CI) that \nruns every time someone submits \ncode, to make sure it builds and follows \nthe rules. Set up a way for the whole \nteam to run all services together on \none laptop using Docker, for local \ntesting only. \n\u2610 CI pipeline set up (lint + \nbuild only) \n\u2610 docker-compose file \ncreated \n\u2610 Confirmed full stack \nruns locally \nIntern 1's \nbackend \nskeleton \nIntern 1/2/3 \n(shared dev \nenvironment) \n3 \nWrite down, in a sim",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "(shared dev \nenvironment) \n3 \nWrite down, in a simple list, what \nneeds to be tested for Login and the \nJob/Swipe service, and set up a tool to \nrun those tests automatically. \n\u2610 Test cases written for \nAuth & Job/Swipe \n\u2610 Automated testing tool \nset up \nIntern 1 & 2's \nAPI contracts \nSelf (Day 4 \nexecution) \n4 \nActually run those tests against Intern 1 \nand Intern 2's real APIs, note down \nanything broken with a priority, and \nmake the automatic check also run \ntests every time. \n\u2610 Auth & Job/S",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "check also run \ntests every time. \n\u2610 Auth & Job/Swipe APIs \ntested \n\u2610 Bugs logged with \npriority \n\u2610 CI now also runs \nautomated tests \nIntern 1 & 2's \nlive endpoints \nIntern 1 & 2 \n(defect list to \nfix) \n5 \nBring everyone's work together on one \nshared local setup and test the whole \njourney \u2014 login, browse/swipe jobs, \nupload a resume, see a score \u2014 and \nnote down anything that doesn't work. \n\u2610 Full local integration \ntest run done \n\u2610 Role-based access \ntested end-to-end \n\u2610 All issues found ar",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "d access \ntested end-to-end \n\u2610 All issues found are \nlogged \nAll four other \ninterns' Day-5 \nintegrated \nbuild \nAll interns \n(defect backlog \nfor Day 6) \n6 \nRe-test everything after the team's \nfixes, and run a basic code-quality \ncheck to catch messy or risky code. \n\u2610 Regression testing \ndone after fixes \n\u2610 Code-quality report \ngenerated \n\u2610 System confirmed \nstable \nFixes from \nInterns 1\u20134 \nAll interns \n(go/no-go \nsignal) \n7 \nFinal Integration Day \u2014 run one last full \ncheck of everything, write",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ay \u2014 run one last full \ncheck of everything, write a simple \nsummary of what was tested and what \npassed, and confirm no deployment \nwork has been done (that comes later). \n\u2610 Final full test cycle \ncompleted \n\u2610 QA sign-off report \nwritten \n\u2610 Confirmed: no \ndeployment activity \nperformed \nClean \nregression \nbuild \nMentor / \nMilestone 1 \nreview \n11. Daily Coordination & Integration Sync Protocol \n11.1 Daily Standup (15 minutes, start of day)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "\u25cf \nEach intern states: what was completed yesterday, what is planned today, and any blocker relative to the \nDependency Matrix (Section 8). \n\u25cf \nIntern 1 (Team Lead) tracks blockers and re-sequences work if a dependency is late. \n11.2 Integration Checkpoints \nCheckpoint \nDay \nPurpose \nContract Freeze \nDay 2 \n(EOD) \nAuth, Job/Swipe, and Resume/ATS API contracts are frozen; no breaking \nchanges without team sign-off \nFirst Vertical Slice \nDay 4 \nAuth + Job/Swipe reachable end-to-end from the fronte",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "h + Job/Swipe reachable end-to-end from the frontend through the \nGateway \nFull Integration \nDay 5 \nAll four services (Auth, Job/Swipe, Resume/ATS stub, Frontend) run together \nin docker-compose.dev.yml and pass smoke tests \nRegression & Sign-off \nDay 7 \nFinal validation cycle passes; Milestone 1 increment is signed off by QA and \nthe Team Lead \n11.3 Change Control \nAny change to a frozen interface contract after Day 2 must be raised by the owning intern in standup, agreed by all \nconsumers list",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "g intern in standup, agreed by all \nconsumers listed in Section 8, and reflected the same day in the shared Postman/pytest collection maintained by Intern \n5. \n12. Milestone 1 Deliverables Checklist \nDeliverable \nOwner \nDue \nArchitecture document + repository structure \nIntern 1 \nDay 1 \nFrozen API contracts (Auth, Job/Swipe, Resume/ATS) \nIntern 1 / 2 / 3 \nDay 2 \nDB schema (Users/Roles + Job/Company/Swipe data) \nIntern 1 / 2 \nDay 2 \ndocker-compose.dev.yml + CI (lint/build/test) \nIntern 5 \nDay 2 /",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": ".dev.yml + CI (lint/build/test) \nIntern 5 \nDay 2 / 4 \nWorking Auth + RBAC service (JWT + OAuth2) \nIntern 1 \nDay 3\u20134 \nWorking Job & Swipe Service (listing, filter, swipe, history) \nIntern 2 \nDay 3\u20134 \nResume Service + heuristic ATS-score & recommendation stub \nIntern 3 \nDay 3\u20134 \nLogin page + Swipe-based Job Discovery UI + Dashboard shell \nIntern 4 \nDay 3\u20135 \nTest plan, test cases, defect log \nIntern 5 \nDay 1\u20137 (continuous) \nFull integration inside local Docker Compose \nAll (led by Intern 1 & 5) \nDa",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ocal Docker Compose \nAll (led by Intern 1 & 5) \nDay 5 \nRegression report + code-quality report \nIntern 5 \nDay 6 \nMilestone 1 sign-off report + demo \nAll \nDay 7 \n13. Milestone 1 Acceptance Criteria \n\u25cf \nProject initialization, architecture, and database schema are complete and documented. \n\u25cf \nAuthentication and role-based access control (Job Seeker / Recruiter / Admin) are implemented and enforced \nacross protected routes.",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "\u25cf \nJob/company/startup data schema and a live Job & Swipe Service (listing, filter/search, swipe recording) are \nfunctional and expose data via REST APIs. \n\u25cf \nThe frontend presents a working login flow, a swipe-based job-discovery interface, and a dashboard shell driven \nby real backend data. \n\u25cf \nThe Resume Service and heuristic ATS-score/recommendation stub are reachable end-to-end through the \nGateway and displayed on the dashboard, clearly scoped as a placeholder for Milestone 2's trained mod",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ped as a placeholder for Milestone 2's trained model. \n\u25cf \nAll services run together and pass integration/smoke tests inside the local Docker Compose environment. \n\u25cf \nCI enforces lint, build, and automated test checks on every pull request. \n\u25cf \nEvery tool used across the milestone was free/open-source \u2014 no paid subscriptions were required. \n\u25cf \nNo production deployment activity has occurred; deployment remains explicitly scheduled for after Milestone 4. \n14. Risks & Mitigations \nRisk \nImpact \nMiti",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ne 4. \n14. Risks & Mitigations \nRisk \nImpact \nMitigation \nInterface contracts change after Day 2, \nbreaking downstream work \nHigh \nContract-freeze checkpoint (Section 11.2) + change-control \nprocess (Section 11.3) \nAuth service delayed, blocking \nFrontend and QA \nHigh \nFrontend/QA build against a mocked Auth response until Day \n3; Intern 1 prioritizes Auth over gateway polish \nSynthetic job/resume data \nunrepresentative, limiting later ML \nvalue \nMedium \nIntern 2 documents data-generation assump",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Medium \nIntern 2 documents data-generation assumptions; Intern 3 \nflags gaps early in the M2 roadmap \nScope creep \u2014 AI/ML intern attempts \nreal NLP/model training in M1 \nMedium \nExplicit scope boundary in Sections 10 & 13: heuristic stub only \nin Milestone 1 \nLocal integration environment differs \nacross teammates' machines \nMedium \nSingle shared docker-compose.dev.yml maintained by Intern 5; \nall integration testing happens inside it \nLate defect discovery on Day 6\u20137 with \nno buffer \nMedium \nC",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ct discovery on Day 6\u20137 with \nno buffer \nMedium \nContinuous QA involvement from Day 3 onward rather than \ntesting only at the end \nTeam accidentally starts production-\ndeployment work \nLow \nReminder in every stand-up that deployment is out of scope \nfor Milestone 1 and reserved for after Milestone 4 \n15. Tools & Technology Stack (Milestone 1 Scope) \nLayer \nTechnology \nBackend \nPython, FastAPI / Django REST Framework \nFrontend \nReact.js, Tailwind CSS \nAuthentication \nJWT, OAuth2 \nDatabase \nPostgr",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "CSS \nAuthentication \nJWT, OAuth2 \nDatabase \nPostgreSQL (relational), Redis (cache) \nAI/ML (Milestone-1 scope) \npandas, scikit-learn, spaCy, pdfplumber (EDA + heuristic ATS/recommendation \nlogic only) \nAPI Testing \nPostman, pytest \nVersion Control \nGit + GitHub \nCI \nGitHub Actions (lint, build, test \u2014 no deploy stage)",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Layer \nTechnology \nLocal Integration Environment \nDocker & Docker Compose (development use only) \nCode Quality \nESLint, Flake8 / Black \n16. Sign-Off \nThis section is completed at the end of Day 7, once the Milestone 1 Acceptance Criteria (Section 13) have been verified \nagainst the working increment and the QA sign-off report (Section 11.2 / Section 10 \u2014 Intern 5) has been reviewed. \nRole \nName \nSignature \nDate \nIntern 1 \u2014 Team Lead / \nBackend & Identity \nManagement \n \n \n \nIntern 2 \u2014 Job & Data",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Identity \nManagement \n \n \n \nIntern 2 \u2014 Job & Data \nIntelligence \n \n \n \nIntern 3 \u2014 AI/ML Career \nIntelligence \n \n \n \nIntern 4 \u2014 Frontend & User \nExperience \n \n \n \nIntern 5 \u2014 Platform, Testing \n& Deployment \n \n \n \nEducator / Mentor \n(Milestone approval) \n \n \n \nSign-off confirms: all Section 13 acceptance criteria are met; the Section 12 deliverables checklist is complete; no \nproduction-deployment activity has occurred; and the team is cleared to begin Milestone 2 planning.",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "egin Milestone 2 planning.",
+    "source_file": "SwipeX_Milestone1_SRS .pdf",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "SwipeX \u2014 Intern 4\nFrontend & User Experience \u2014 Milestone 1\nDay 1 to Day 7 Responsibilities, Checklists, Dependencies & Handoffs\nPrepared from the SwipeX Milestone 1 Software Requirements Specification (SRS).\nDay 1 \u2014 Wireframes + React Initialization\nMain goal: Set up the website and plan the key screens before building them.\nWhat Intern 4 does:\n\u2022 Create the React project.\n\u2022 Sketch simple designs/wireframes for Login, Swipe/Job Discovery, Dashboard, Resume Upload and Profile screens.\n\u2022 Use Intern",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "d, Resume Upload and Profile screens.\n\u2022 Use Intern 1's draft API contracts to understand what data each screen needs.\n\u2022 Share the UI plan with the team.\nChecklist:\nI React project created\nI Wireframes made for all key screens\nI Plan shared with team\nDepends on: Intern 1's draft API contracts.\nProvides to: Self \u2014 Day-2 frontend build.\nDay 2 \u2014 Reusable Components + Routing + API Client\nMain goal: Build the reusable frontend foundation.\nWhat Intern 4 does:\n\u2022 Create reusable UI components such as na",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "4 does:\n\u2022 Create reusable UI components such as navigation bar, layout, job card and buttons.\n\u2022 Create the basic pages.\n\u2022 Set up page routing/navigation.\n\u2022 Configure the frontend API client.\nChecklist:\nI Reusable components built\nI Page routing set up\nI API client configured\nDepends on: Own wireframes.\nProvides to: Self \u2014 Day-3 authentication integration.\nDay 3 \u2014 Login + Register Integration\nMain goal: Connect the frontend authentication screens to Intern 1's real Auth service.\nWhat Intern 4 doe",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "to Intern 1's real Auth service.\nWhat Intern 4 does:\n\u2022 Build the Login page.\n\u2022 Build the Register page.\n\u2022 Connect Login/Register to Intern 1's Auth API.",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "\u2022 Add and wire the 'Sign in with Google' OAuth2 button.\n\u2022 Verify a real user can log in.\nChecklist:\nI Login page working\nI Register page working\nI OAuth2 (Google) button wired\nDepends on: Intern 1's Auth API.\nProvides to: Intern 5 \u2014 UI authentication test target.\nDay 4 \u2014 Swipe-Based Job Discovery UI\nMain goal: Build the job-discovery screen using real Job Service data.\nWhat Intern 4 does:\n\u2022 Build job cards for the swipe interface.\n\u2022 Connect the UI to Intern 2's Job/Swipe API.\n\u2022 Allow right swipe",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "I to Intern 2's Job/Swipe API.\n\u2022 Allow right swipe for apply/save and left swipe for skip.\n\u2022 Send swipe actions to the backend API.\n\u2022 Wire up the basic job filters.\nChecklist:\nI Job cards show live data\nI Swipe right/left saved via API\nI Basic filters wired up\nDepends on: Intern 2's Job/Swipe API.\nProvides to: Intern 5 \u2014 swipe-flow test target.\nDay 5 \u2014 Dashboard + Resume Upload + ATS Display\nMain goal: Connect the main career dashboard to real backend data.\nWhat Intern 4 does:\n\u2022 Build the Dashbo",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ckend data.\nWhat Intern 4 does:\n\u2022 Build the Dashboard shell.\n\u2022 Display saved and applied jobs.\n\u2022 Build the Resume-Upload screen.\n\u2022 Connect resume upload to Intern 3's Resume Service.\n\u2022 Display ATS score and job recommendations from Intern 3's stub APIs.\nChecklist:\nI Dashboard shows saved/applied jobs\nI Resume upload working\nI ATS score/recommendations displayed\nDepends on: Intern 2's data and Intern 3's stub APIs.\nProvides to: Intern 5 \u2014 full UI integration test target.\nDay 6 \u2014 UI Polish + Respo",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "integration test target.\nDay 6 \u2014 UI Polish + Responsiveness + Error Handling",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Main goal: Make the frontend stable and user-friendly.\nWhat Intern 4 does:\n\u2022 Polish rough UI areas.\n\u2022 Check responsiveness across different screen sizes.\n\u2022 Add friendly error messages instead of blank or broken screens.\n\u2022 Review QA defects from Intern 5.\n\u2022 Fix frontend bugs reported by QA.\nChecklist:\nI Responsive design checked\nI Friendly error messages added\nI QA-reported bugs fixed\nDepends on: Intern 5's defect log.\nProvides to: Intern 5 \u2014 regression build.\nDay 7 \u2014 Final UI Fixes + Demo Walkth",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ession build.\nDay 7 \u2014 Final UI Fixes + Demo Walkthrough\nMain goal: Finish the frontend and prepare the complete application walkthrough.\nWhat Intern 4 does:\n\u2022 Fix remaining frontend issues.\n\u2022 Join the final full-team test.\n\u2022 Rehearse the demo walkthrough of the whole app.\n\u2022 Document frontend notes for the milestone.\nChecklist:\nI Final test with full team done\nI Demo walkthrough rehearsed\nI Frontend notes documented\nDepends on: Passed regression.\nProvides to: Milestone 1 demo and final sign-off.",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Provides to: Milestone 1 demo and final sign-off.",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Team Lead \u2014 Quick View\nDay\nIntern 4's key output\n1\nReact project + wireframes for key screens\n2\nReusable components + routing + API client\n3\nLogin/Register + Google OAuth2 integration\n4\nSwipe job cards + live Job API + filters\n5\nDashboard + resume upload + ATS/recommendations display\n6\nUI polish + responsive design + error handling + bug fixes\n7\nFinal UI fixes + demo walkthrough + frontend notes\nKey dependencies: Intern 4 needs Intern 1's Auth API by Day 3, Intern 2's Job/Swipe API by Day 4, and",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "I by Day 3, Intern 2's Job/Swipe API by Day 4, and Intern 3's\nATS-score/recommendation stub by Day 5.\nSource: SwipeX Milestone 1 SRS, Intern 4 detailed Day-wise task breakdown and dependency/deliverable sections.",
+    "source_file": "SwipeX_Intern_4_Day_1_to_7.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "# Product Requirements Document\n\n## Sovereign On-Premise Agentic AI Workbench\n### Using Open-Weight Multimodal LLMs for Confidential Industrial Work\n\n---\n\n## 1. Overview\n\nAn AI-powered workbench that runs entirely inside an organization's own\nlocal network \u2014 no cloud, no internet dependency \u2014 enabling industries\nwith confidential data (manufacturing, pharma, defense, healthcare) to\nuse AI-assisted inspection, troubleshooting, and reporting without any\nrisk of data leaving their premises.\n\n---\n\n#",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "t any\nrisk of data leaving their premises.\n\n---\n\n## 2. Problem Statement\n\nIndustries handling highly confidential data cannot use mainstream\ncloud AI tools (ChatGPT, Gemini, Claude) because these tools transmit\nuser data \u2014 including images of equipment, internal documents, and\nqueries \u2014 to third-party servers over the internet.\n\nThis creates two blockers:\n- **Data leak risk** \u2014 confidential designs, formulas, or records could\n  be exposed\n- **Compliance/legal risk** \u2014 many regulated industries a",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "pliance/legal risk** \u2014 many regulated industries are prohibited\n  from sending data outside their own premises\n\nAs a result, workers in these industries are unable to access AI\nassistance for tasks like equipment troubleshooting, referencing\nmanuals, or logging maintenance issues \u2014 despite clear potential\nbenefit.\n\n---\n\n## 3. Proposed Solution\n\nA workbench where the AI model, document knowledge base, and all\nprocessing run **locally**, inside the organization's own network.\nWorkers interact via",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "organization's own network.\nWorkers interact via mobile devices connected over local WiFi; nothing\nis ever sent to the internet.\n\nCore capabilities:\n- Visual equipment inspection via phone camera\n- AI-guided repair instructions overlaid on the camera feed (AR-style)\n- Question-answering grounded in the company's own private manuals/SOPs\n- Automatic ticket creation and escalation when needed\n- A manager dashboard for oversight and trend tracking\n\n---\n\n## 4. Target Users / Roles\n\n| Role | Descrip",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "---\n\n## 4. Target Users / Roles\n\n| Role | Description | Primary Needs |\n|---|---|---|\n| Worker | Frontline staff on the floor | Fast, visual, minimal-friction answers |\n| Manager/Supervisor | Oversees operations | Visibility into issues, trends, escalations |\n\nBoth roles share the same backend and AI model; only the frontend\ndiffers per role.\n\n---\n\n## 5. Architecture\n\n- **Server (on-premise \"brain\")**: A laptop/workstation hosts the AI\n  model (via Ollama) and backend (FastAPI). This plays the",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "via Ollama) and backend (FastAPI). This plays the role of the\n  organization's private server.\n- **Client (worker/manager device)**: A phone/tablet connects to the\n  server over the same local WiFi/LAN \u2014 no internet required. Accessed\n  via a browser-based PWA.\n- **Data flow**: All requests (image, text, voice) go from\n  device \u2192 local server \u2192 local model/RAG \u2192 response back to device.\n  At no point does data leave the local network.\n\nThis directly mirrors real-world deployment: the laptop beco",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tly mirrors real-world deployment: the laptop becomes a\nproper on-premise server, and worker devices become their handheld\nclients \u2014 just demoed at a smaller scale.\n\n---\n\n## 6. Hero Features\n\nSelected from a larger feature list based on two criteria: **real\npractical value on the floor**, and **clarity of impact in a demo**.\n\n### 6.1 AI Camera Inspection\nWorker points their phone camera at equipment. The image is sent to\nthe local multimodal LLM, which analyzes it against known\nspecifications/ma",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "which analyzes it against known\nspecifications/manual data and reports whether the equipment looks\nnormal or has a detected issue.\n\n### 6.2 Live AR Guidance\nWhen an issue is detected, the camera view is overlaid (via HTML5\nCanvas) with a marker/arrow pointing to the exact problem area, along\nwith step-by-step repair instructions shown directly on screen.\n\n### 6.3 Local RAG over Confidential Documents\nCompany manuals, SOPs, and maintenance logs are indexed into a local\nvector database (ChromaDB)",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "re indexed into a local\nvector database (ChromaDB). When a worker asks a question or the AI\nneeds context, it retrieves relevant sections from these documents\nrather than relying on the model's general knowledge \u2014 keeping answers\naccurate and fully private.\n\n### 6.4 Agentic Actions (Ticket Creation)\nBeyond just answering, the AI can take action \u2014 automatically creating\na maintenance ticket in the system database when an issue is\nconfirmed, without requiring the worker to fill out a form.\n\n### 6.",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "t requiring the worker to fill out a form.\n\n### 6.5 Confidence-Based Escalation\nEvery AI response includes a confidence score. If confidence is low\n(an uncertain or high-risk case), the system automatically escalates\nthe case to a human supervisor rather than letting the AI proceed\nalone.\n\n### 6.6 Manager Analytics Dashboard\nA separate dashboard aggregates all worker activity \u2014 tickets raised,\nescalations, and trends such as which machines fail most often and\naverage repair time \u2014 giving manager",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ost often and\naverage repair time \u2014 giving managers visibility without needing to be\non the floor.\n\n### 6.7 100% On-Premise / Zero Cloud\nThe foundation underlying every other feature: all inference, storage,\nand processing happen inside the local network. No component makes an\nexternal API/internet call.\n\n---\n\n## 7. End-to-End Workflow\n\n```\nWorker opens phone app (connected to laptop server via local WiFi)\n        \u2193\nPoints camera at machine  \u2192  [AI Camera Inspection]\n        \u2193\nAI analyzes image",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "AI Camera Inspection]\n        \u2193\nAI analyzes image + cross-checks local manual (RAG)\n        \u2193\nIssue found?\n   \u251c\u2500\u2500 No  \u2192 \"All Normal\" shown, flow ends\n   \u2514\u2500\u2500 Yes \u2192 AR overlay shows exact spot + repair steps  [Live AR Guidance]\n              \u2193\n        AI checks its own confidence  [Confidence-Based Escalation]\n              \u2193\n        Confidence high?\n           \u251c\u2500\u2500 Yes \u2192 Auto-creates maintenance ticket  [Agentic Actions]\n           \u2514\u2500\u2500 No  \u2192 Escalates to supervisor immediately\n              \u2193",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "tes to supervisor immediately\n              \u2193\n        Manager sees ticket/escalation live on dashboard  [Manager Dashboard]\n        \u2193\n        All of the above occurs with zero internet/cloud involvement\n```\n\n---\n\n## 8. Tech Stack\n\n| Layer | Technology | Purpose |\n|---|---|---|\n| AI Model | Ollama + Qwen2-VL / LLaVA (multimodal), Llama 3.2 (lightweight text) | Local model inference, no cloud calls |\n| Backend | FastAPI (Python) | Wraps Ollama, exposes REST endpoints, handles WebSockets |\n| RAG |",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "oses REST endpoints, handles WebSockets |\n| RAG | ChromaDB + sentence-transformers | Local vector search over confidential documents |\n| Database | SQLite | Stores tickets, escalations, audit logs, machine data |\n| Worker Frontend | React (Vite) + Tailwind, PWA | Mobile-friendly, installable without app store |\n| AR Overlay | HTML5 Canvas | Lightweight overlay on camera feed, no native AR SDK needed |\n| Manager Dashboard | Same React app, separate role-based route + Recharts | Analytics and tren",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "e role-based route + Recharts | Analytics and trend visualization |\n| Real-Time Updates | WebSockets | Live dashboard updates as workers interact with the system |\n| Voice (stretch) | Web Speech API | Hands-free interaction, browser-native |\n| Networking | Local IP over WiFi/LAN (e.g. laptop at 192.168.x.x:8000) | Zero internet dependency |\n\nAll components are free and open-source, reinforcing the sovereignty\npitch even at the tooling level.\n\n---\n\n## 9. Non-Functional Requirements\n\n- **Privacy**",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "## 9. Non-Functional Requirements\n\n- **Privacy**: No data (image, text, voice, documents) leaves the local\n  network at any point.\n- **Offline capability**: The entire workflow must function without\n  internet access.\n- **Low latency**: Given on-device/on-laptop inference, responses\n  should remain fast enough for real-time interaction during a demo.\n- **Simplicity of demo setup**: The full system should run on a single\n  laptop + a single phone, connected over local WiFi, without\n  additional",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 14,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "e, connected over local WiFi, without\n  additional infrastructure.\n\n---\n\n## 10. Out of Scope (for Hackathon MVP)\n\n- Full native AR SDK integration (ARKit/ARCore)\n- Admin role and full user management system\n- Multi-server/distributed deployment\n- Production-grade security hardening\n- Support for more than a small number of simultaneous users\n\n---\n\n## 11. Success Criteria (Demo)\n\nThe demo is considered successful if it can show, end-to-end:\n1. A worker scanning equipment and getting an AI-generat",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 15,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "orker scanning equipment and getting an AI-generated diagnosis\n2. AR-style overlay guidance for a detected issue\n3. An answer sourced from a private/local document via RAG\n4. An automatically created ticket or escalation\n5. That ticket/escalation appearing live on the manager dashboard\n6. All of the above with no internet connection active\n\n---\n\n## 12. Open Questions\n\n- Specific target industry/use case for the demo (manufacturing,\n  pharma, defense, etc.) \u2014 not yet finalized\n- Final decision on",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 16,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "nse, etc.) \u2014 not yet finalized\n- Final decision on which stretch features (voice, QR/NFC scan) make\n  it into the MVP given time constraints",
+    "source_file": "PRD_Sovereign_AI_Workbench.md",
+    "source_page": 17,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "[IMAGE / SCHEMATIC: pfp.jpg uploaded for session session-1788993789741]",
+    "source_file": "pfp.jpg",
+    "source_page": 1,
+    "modality": "figure",
+    "image_snippet_url": "/uploads/images/sessions/session-1788993789741/pfp.jpg",
+    "table_data": null
+  },
+  {
+    "text": "[IMAGE / SCHEMATIC: gojo-satoru-gojou-satoru.png uploaded for session session-1788993789741]",
+    "source_file": "gojo-satoru-gojou-satoru.png",
+    "source_page": 1,
+    "modality": "figure",
+    "image_snippet_url": "/uploads/images/sessions/session-1788993789741/gojo-satoru-gojou-satoru.png",
+    "table_data": null
+  },
+  {
+    "text": "SwipeX\n1. Title: SwipeX: Swipe-Based Intelligent Job\nDiscovery and Career Assistance Platform\n2. Objective\nBuild a swipe-based intelligent job discovery and career assistance platform that\nhelps candidates discover and apply for relevant jobs using AI-powered resume\nanalysis, ATS scoring, personalized recommendations, and real-time opportunity\ntracking.\nThe system should allow users to explore opportunities through an intuitive swipe-\nbased interface, analyze resume compatibility, receive person",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "face, analyze resume compatibility, receive personalized\nrecommendations, track applications, and identify the most suitable opportunities\nacross MNCs, startups, and newly founded companies.\nThe platform is designed to support modern job discovery by combining artificial\nintelligence, recommendation systems, ATS optimization, and career analytics into\na centralized application.\nThis solution can be used by students, fresh graduates, experienced\nprofessionals, recruiters, career coaches, and job",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "rofessionals, recruiters, career coaches, and job placement platforms.\nOutcomes\nDeveloped and deployed a swipe-based intelligent job discovery platform.\nImplemented secure authentication and role-based access control.\nBuilt swipe-based job exploration and application workflows.\nIntegrated AI-powered resume analysis and ATS scoring.\nDeveloped personalized recommendation and matching systems.\nImplemented real-time job freshness and competition tracking.\nBuilt dashboards for applications, analytics",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "king.\nBuilt dashboards for applications, analytics, and recommendations.\nAdded startup discovery and intelligent notification systems.\nSwipeX\n1",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 1,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "[DIAGRAM / SCHEMATIC extracted from AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf, Page 2]",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 2,
+    "modality": "figure",
+    "image_snippet_url": "/uploads/diagrams/sessions/session-1788993789741/AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform_p2_diag0.png",
+    "table_data": null
+  },
+  {
+    "text": "Deployed the platform using Docker and cloud deployment platforms such as\nAWS or Azure.\n3. Architecture Diagram\n4. Modules to be Implemented\n1. User Authentication & Role-Based Access\nAuthentication Features\nJWT Authentication\nOAuth2 Login\nSecure Session Management\nRole Management\nSwipeX\n2",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 2,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Job Seeker\nCreate and manage profiles\nUpload resumes\nApply for jobs\nSave jobs\nTrack applications\nView recommendations\nRecruiter\nPost jobs\nReview applicants\nManage hiring workflows\nAccess analytics\nMonitor application trends\nAdmin\nManage users\nManage recruiters\nMonitor platform activities\nConfigure system settings\nAccess platform-wide analytics\n2. User Profiles & Resume Management\nProfile creation\nResume upload\nMultiple resume versions\nSkill tagging\nExperience management\nSwipeX\n3",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ng\nExperience management\nSwipeX\n3",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 3,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Portfolio management\n3. Swipe-Based Job Discovery\nSwipe Actions\nSwipe Right:\nApply\nSave jobs\nAdd to favorites\nSwipe Left:\nSkip jobs\nImprove future recommendations\nFeatures\nDynamic job cards\nPersonalized recommendations\nAI-powered preference learning\n4. Smart Job Search & Filtering\nUsers can filter jobs by:\nMNCs\nStartups\nNewly founded startups\nRemote jobs\nInternship opportunities\nFull-time jobs\nSalary range\nSkills and technologies\nSwipeX\n4",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 4,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Location\nExperience level\nAdvanced Filters\nFresher-friendly jobs\nLow competition jobs\nRecently posted jobs\n5. Real-Time Job Freshness & Competition Tracking\nPosted-time indicators\nApplicant count display\nCompetition level tracking\nEarly applicant indicators\nCompetition Levels\nLow\nMedium\nHigh\n6. AI Resume Analyzer & ATS Scoring\nResume upload and parsing\nATS compatibility analysis\nKeyword matching\nMissing skill detection\nResume-job compatibility scoring\nAI-generated improvement suggestions\nExample",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "oring\nAI-generated improvement suggestions\nExample\nIf ATS Match Score is below 80%:\nSwipeX\n5",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 5,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Missing skills are highlighted\nMissing keywords are identified\nResume optimization recommendations are generated\n7. Personalized Job Recommendation System\nSkill-based recommendations\nResume-based recommendations\nExperience-based suggestions\nAI-generated match percentages\nRecommendation learning from swipe behavior\n8. Smart Notifications & Alerts\nInstant job notifications\nStartup hiring alerts\nPersonalized recommendations\nHigh-match opportunity alerts\nLow-competition opportunity alerts\n9. Applica",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "erts\nLow-competition opportunity alerts\n9. Application Tracking System\nSaved jobs tracking\nApplied jobs tracking\nInterview tracking\nRejected status tracking\nShortlisted status tracking\nApplication history dashboard\n10. Dashboard & Analytics\nApplication analytics\nSwipeX\n6",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 6,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Resume performance tracking\nSkill gap analysis\nRecommendation insights\nHiring trend visualization\n11. Final Integration, Testing & Deployment\nModule integration\nEnd-to-end testing\nPerformance validation\nProduction deployment\nDocumentation and demonstration\n5. Week-wise Module Implementation and High-Level\nRequirements\nMilestone 1: Week 1 & 2 \u2014 Requirements, Database Design & Core\nSetup\nDefine project scope and user roles.\nDesign database schema.\nSetup frontend and backend environments.\nConfigure",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Setup frontend and backend environments.\nConfigure PostgreSQL database.\nImplement authentication APIs.\nBuild initial frontend structure.\nOutcomes\nBackend and frontend architecture setup completed.\nAuthentication workflows functional.\nDatabase schema finalized.\nSwipeX\n7",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 7,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Milestone 2: Week 3 & 4 \u2014 Swipe System & Job Discovery\nBuild job listing APIs.\nImplement swipe-based recommendation workflows.\nCreate filtering and search functionality.\nDevelop job card interfaces.\nBuild company and startup listing pages.\nOutcomes\nSwipe-based job discovery operational.\nDynamic recommendation feed implemented.\nSmart filtering system functional.\nMilestone 3: Week 5 & 6 \u2014 AI Resume Analysis &\nRecommendations\nImplement resume upload and parsing workflows.\nBuild ATS scoring engine.",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "and parsing workflows.\nBuild ATS scoring engine.\nDevelop resume-job compatibility analysis.\nImplement recommendation algorithms.\nGenerate AI-powered suggestions.\nOutcomes\nAI resume analyzer operational.\nMatch percentage system functional.\nResume optimization recommendations generated.\nMilestone 4: Week 7 & 8 \u2014 Notifications, Analytics & Deployment\nImplement notification systems.\nBuild analytics dashboard.\nAdd applicant competition indicators.\nSwipeX\n8",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ipeX\n8",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 8,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Perform testing and validations.\nDeploy platform using cloud environments.\nConfigure environment variables and security settings.\nOutcomes\nFully deployed production-ready application.\nNotification and analytics systems operational.\nComplete end-to-end workflow demonstrated.\n6. Evaluation Criteria\nMilestone 1 (Week 2)\nBackend initialization completed.\nAuthentication workflows implemented.\nDatabase schema finalized.\nFrontend setup completed.\nMilestone 2 (Week 4)\nSwipe-based job discovery operation",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "one 2 (Week 4)\nSwipe-based job discovery operational.\nSmart filtering system functional.\nDynamic recommendation feed implemented.\nMilestone 3 (Week 6)\nResume upload and ATS scoring operational.\nAI recommendation system functional.\nResume-job compatibility workflow completed.\nMilestone 4 (Week 8)\nFully deployed frontend and backend.\nSwipeX\n9",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 9,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Notification and analytics systems operational.\nEnd-to-end workflow demonstrated.\n7. Tools & Tech Stack\nProgramming Language\nBackend: Python (Django REST Framework / FastAPI)\nFrontend: React.js\nDatabase\nPostgreSQL\nSQLite (Development)\nAI & NLP Technologies\nOpenAI API\nspaCy\nsentence-transformers\nscikit-learn\nAuthentication\nJWT Authentication\nOAuth2 Authentication\nCloud & DevOps\nDocker\nAWS / Azure\nGitHub Actions\nLibraries & Frameworks\nDjango\nSwipeX\n10",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "10",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 10,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Django REST Framework\nFastAPI\nReact.js\nReact Router\nAxios\nTailwind CSS\nRedux / Context API\nFramer Motion\nTesting Tools\nPytest\nDjango Test Client\nJest\nReact Testing Library\nDev & Deployment Tools\nVS Code\nGit & GitHub\nDocker & Docker Compose\nGitHub Actions\nPostman\nRender / AWS / Vercel\n8. Performance Metrics\nJob Recommendation Performance\nRecommendation accuracy\nJob matching relevance\nSwipeX\n11",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 11,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ATS scoring effectiveness\nRecommendation response time\nResume Analysis Performance\nResume parsing accuracy\nSkill extraction accuracy\nKeyword detection effectiveness\nResume-job compatibility accuracy\nAnalytics Performance\nDashboard response time\nReport generation performance\nRecommendation processing efficiency\nSystem Performance\nAPI response time\nConcurrent user handling\nDatabase query optimization\n9. Example Quantitative Goals\nJob Discovery\nProvide highly relevant job recommendations based on c",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "ide highly relevant job recommendations based on candidate profiles and\nresume analysis.\nResume Optimization\nGenerate actionable ATS and resume improvement suggestions.\nRecommendation Engine\nImprove job matching accuracy through personalized recommendation algorithms.\nSwipeX\n12",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 12,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  },
+  {
+    "text": "Analytics\nProvide real-time insights into applications, recommendations, and hiring trends.\nPlatform Performance\nSupport multiple concurrent users with stable recommendation and application\ntracking workflows.\nSwipeX\n13",
+    "source_file": "AI_Swipe-Based Intelligent Job Discovery and Career Assistance Platform.pdf",
+    "source_page": 13,
+    "modality": "text",
+    "image_snippet_url": null,
+    "table_data": null
+  }
+]

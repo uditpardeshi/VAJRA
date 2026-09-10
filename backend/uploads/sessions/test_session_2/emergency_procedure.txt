@@ -1,0 +1,1 @@
+VAJRA Emergency Shutdown Procedure: In case of spindle overheating above 85C, immediately hit E-Stop switch S1.

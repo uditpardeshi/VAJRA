@@ -1,0 +1,10 @@
+[
+  {
+    "text": "CSV test_spec.csv (rows 1-4):\nParameter | Standard | Measured | Status\nSpindle Runout | 0.005mm | 0.003mm | Pass\nCoolant Pressure | 4.5 bar | 4.2 bar | Pass\nVibration Peak | 1.8 mm/s | 2.9 mm/s | Warning",
+    "source_file": "test_spec.csv",
+    "source_page": 1,
+    "modality": "table",
+    "image_snippet_url": null,
+    "table_data": "Parameter | Standard | Measured | Status\nSpindle Runout | 0.005mm | 0.003mm | Pass\nCoolant Pressure | 4.5 bar | 4.2 bar | Pass\nVibration Peak | 1.8 mm/s | 2.9 mm/s | Warning"
+  }
+]

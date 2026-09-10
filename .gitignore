@@ -1,8 +1,3 @@
-# Virtual Environment
-.venv/
-venv/
-ENV/
-env/
 
 # Node modules & build artifacts
 node_modules/
@@ -11,29 +6,5 @@ dev-dist/
 build/
 .output/
 
-# Databases & local state
-*.db
-*.sqlite
-*.sqlite3
-chroma_db/
-uploads/
-reports/
 
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# IDE & OS files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.log
-
-# Python cache & RAG storage
-__pycache__/
-*.py[cod]
-*$py.class
-backend/rag_storage/
 
