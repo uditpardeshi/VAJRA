@@ -42,6 +42,9 @@ export interface InspectRequest {
   machine_id: string;
   image_base64: string;
   prompt_override?: string;
+  source?: 'voice' | 'manual';
+  voice_command?: string;
+  voice_confidence?: number;
 }
 
 export interface InspectResponse {
@@ -88,6 +91,11 @@ export interface ChatRequest {
   top_k?: number;
   reasoning?: boolean;
   history?: Array<{ role: string; content: string }>;
+  source?: 'voice' | 'text' | 'camera';
+  voice_confidence?: number;
+  voice_transcript?: string;
+  audio_duration_ms?: number;
+  language?: string;
 }
 
 export interface ChatResponse {

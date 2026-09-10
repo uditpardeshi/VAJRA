@@ -39,6 +39,9 @@ import { SessionSidebar } from './SessionSidebar'
 import { api } from '@/config/api'
 import { cn } from '@/utils/cn'
 
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
+import { LanguageSelector } from '@/components/voice/LanguageSelector'
+
 export interface ChatInterfaceProps {
   machines: Machine[]
   selectedMachineId: string
@@ -75,6 +78,7 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [voiceLanguage, setVoiceLanguage] = useState('en-IN')
   const [reasoningEnabled, setReasoningEnabled] = useState(() => {
     const saved = localStorage.getItem('vajra_reasoning_enabled')
     return saved !== null ? saved === 'true' : true
@@ -87,11 +91,33 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
       return next
     })
   }
-  const [isListening, setIsListening] = useState(false)
 
   const { mutateAsync: sendChat, isPending } = useChat()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { state: speechState, transcript: liveTranscript, confidence: speechConfidence, start: startSpeech, stop: stopSpeech, isListening } = useSpeechRecognition({
+    language: voiceLanguage,
+    continuous: true,
+    interimResults: true,
+    onResult: (result) => {
+      if (result.transcript) {
+        setInput(result.transcript)
+      }
+      if (result.isFinal && result.transcript.trim()) {
+        submitQuestion(result.transcript, true, result.confidence)
+        stopSpeech()
+      }
+    },
+  })
+
+  const toggleSpeechInput = () => {
+    if (isListening) {
+      stopSpeech()
+    } else {
+      startSpeech()
+    }
+  }
 
   const quickActions: QuickAction[] = [
     {
@@ -187,7 +213,7 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
     }
   }
 
-  const submitQuestion = async (queryText: string) => {
+  const submitQuestion = async (queryText: string, isVoice = false, voiceConfidence = 0.95) => {
     if (!queryText.trim() || isPending || !activeSession) return
 
     const userMsg: ChatMessageType = {
@@ -212,6 +238,9 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
         session_id: activeSession.id,
         reasoning: reasoningEnabled,
         history: historyPayload,
+        source: isVoice ? 'voice' : 'text',
+        voice_confidence: isVoice ? voiceConfidence : undefined,
+        language: voiceLanguage,
       })
 
       const botMsg: ChatMessageType = {
@@ -719,17 +748,20 @@ export function ChatInterface({ machines, selectedMachineId, onSelectMachine }: 
                   </button>
                 </div>
 
-                {/* Right Action Icons: Mic + Run Button */}
+                {/* Right Action Icons: Language + Mic + Run Button */}
                 <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Language Selector */}
+                  <LanguageSelector value={voiceLanguage} onChange={setVoiceLanguage} />
+
                   {/* Voice Button */}
                   <button
                     type="button"
                     onClick={toggleSpeechInput}
                     className={cn(
-                      'w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-md flex items-center justify-center text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] transition-colors',
-                      isListening && 'text-[#D33F49] bg-[#D33F49]/20 animate-pulse border border-[#D33F49]/60'
+                      'w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-md flex items-center justify-center text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] transition-colors relative',
+                      isListening && 'text-[#D33F49] bg-[#D33F49]/20 animate-pulse border border-[#D33F49]/60 shadow-lg'
                     )}
-                    title={isListening ? 'Stop voice recording' : 'Voice input'}
+                    title={isListening ? 'Stop voice recording' : 'Voice input (Click to speak)'}
                   >
                     {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
                   </button>
