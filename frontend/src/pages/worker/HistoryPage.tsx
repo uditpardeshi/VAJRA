@@ -6,9 +6,11 @@ import { CheckCircle, AlertTriangle } from 'lucide-react'
 
 export function HistoryPage() {
   const mockHistory = [
-    { id: 101, machine: 'HX-204', finding: 'Spindle bearing wear acceptable', confidence: 0.94, date: '10m ago', status: 'pass' },
-    { id: 102, machine: 'CNC-500', finding: 'Coolant pressure low (2.1 bar)', confidence: 0.64, date: '1h ago', status: 'escalated' },
-    { id: 103, machine: 'LATHE-3', finding: 'Tool alignment normal', confidence: 0.91, date: '3h ago', status: 'pass' },
+    { id: 101, machine: 'HX-204', finding: 'Spindle bearing runout verified at 4.2 μm (OEM tolerance: ≤ 5.0 μm)', confidence: 0.94, date: '14m ago', status: 'pass' },
+    { id: 102, machine: 'CNC-500', finding: 'Hydraulic chuck pressure below threshold (2.1 bar vs 3.5 bar nominal)', confidence: 0.64, date: '1h ago', status: 'escalated' },
+    { id: 103, machine: 'LATHE-3', finding: 'Carbide insert flank wear measured at 0.18 mm (wear limit: 0.30 mm)', confidence: 0.91, date: '3h ago', status: 'pass' },
+    { id: 104, machine: 'HX-204', finding: 'Drive belt tension within calibrated range (55 Hz harmonic)', confidence: 0.96, date: '5h ago', status: 'pass' },
+    { id: 105, machine: 'CNC-500', finding: 'Spindle chiller temperature nominal at 21.4°C', confidence: 0.89, date: 'Yesterday', status: 'pass' },
   ]
 
   return (

@@ -30,3 +30,10 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Python cache & RAG storage
+__pycache__/
+*.py[cod]
+*$py.class
+backend/rag_storage/
+

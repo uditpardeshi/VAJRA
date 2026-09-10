@@ -9,19 +9,23 @@ export interface AgentRunsTableProps {
 
 export function AgentRunsTable({ runs }: AgentRunsTableProps) {
   if (runs.length === 0) {
-    return <div className="p-6 text-center text-slate-400 text-sm">No historical agent runs.</div>
+    return (
+      <div className="p-8 text-center text-slate-400 text-xs bg-white border border-slate-200 rounded-2xl">
+        No document verification records logged yet. Uploaded compliance documents will appear here.
+      </div>
+    )
   }
 
   return (
-    <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white">
+    <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-xs">
       <table className="w-full text-left text-xs text-slate-700">
         <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
           <tr>
-            <th className="p-3">Run ID</th>
-            <th className="p-3">Input File</th>
-            <th className="p-3">Status</th>
-            <th className="p-3">Tools Used</th>
-            <th className="p-3">Date</th>
+            <th className="p-3">Record ID</th>
+            <th className="p-3">Source Document</th>
+            <th className="p-3">Validation Status</th>
+            <th className="p-3">Pipeline Executed</th>
+            <th className="p-3">Timestamp</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">

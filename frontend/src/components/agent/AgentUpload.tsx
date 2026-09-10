@@ -59,7 +59,7 @@ export function AgentUpload({ onSuccessRun }: AgentUploadProps) {
         isLoading={isPending}
         className="w-full"
       >
-        Execute Multi-Tool Agent Pipeline
+        Verify Measurements &amp; Check Tolerances
       </Button>
     </div>
   )

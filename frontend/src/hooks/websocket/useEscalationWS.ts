@@ -18,7 +18,16 @@ export function useWebSocket({ role = 'reviewer', userId = 1, enabled = true, on
   const connect = useCallback(() => {
     if (!enabled) return
     try {
-      const url = `${wsBase}/escalations?role=${role}&user_id=${userId}`
+      const base = wsBase.replace(/\/$/, '')
+      const wsPath = base.endsWith('/ws/escalations')
+        ? base
+        : base.endsWith('/api/v1')
+        ? `${base}/ws/escalations`
+        : `${base}/api/v1/ws/escalations`
+
+      // Backend expects role in: reviewer, admin, engineer
+      const targetRole = role === 'admin' ? 'admin' : 'reviewer'
+      const url = `${wsPath}?role=${targetRole}&user_id=${userId}`
       const ws = new WebSocket(url)
       wsRef.current = ws
 

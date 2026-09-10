@@ -4,14 +4,16 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden;
+    @apply text-slate-900 font-sans antialiased overflow-x-hidden;
+    background: radial-gradient(circle at 50% 0%, rgba(224, 242, 254, 0.5) 0%, rgba(248, 250, 252, 0.8) 40%, #f8fafc 100%);
+    min-height: 100vh;
   }
 }
 
-/* Custom scrollbars */
+/* Custom smooth scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -27,17 +29,54 @@
   background: #94a3b8;
 }
 
-/* Glassmorphism helpers */
-.glass-panel {
+/* Hide scrollbar for clean chip strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Ambient soft styling mirroring modern AI aesthetic */
+.ambient-mesh {
+  background: radial-gradient(circle at 50% 12%, rgba(219, 234, 254, 0.6) 0%, rgba(243, 232, 255, 0.3) 30%, rgba(254, 243, 199, 0.2) 60%, rgba(248, 250, 252, 1) 100%);
+}
+
+.glass-dock {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 12px 36px -4px rgba(15, 23, 42, 0.08), 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+}
+
+.glass-pill {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card-pastel {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-pastel:hover {
+  transform: translateY(-2px);
+}
+
+/* Crisp modern surface styling */
+.glass-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .glass-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0f172a;
+  border: 1px solid #1e293b;
 }
+

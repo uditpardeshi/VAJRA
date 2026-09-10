@@ -57,22 +57,41 @@ export function useAROverlay(
       switch (obj.type) {
         case 'box': {
           ctx.strokeStyle = baseColor
-          ctx.fillStyle = baseColor + '33'
+          ctx.fillStyle = baseColor + '22'
+          ctx.lineWidth = 2
           ctx.beginPath()
-          ctx.roundRect(x, y, w, h, 8)
+          ctx.rect(x, y, w, h)
           ctx.stroke()
           ctx.fill()
-          if (obj.label) {
-            ctx.fillStyle = baseColor
-            ctx.fillRect(x, y - 24, ctx.measureText(obj.label).width + 12, 22)
-            ctx.fillStyle = '#ffffff'
-            ctx.fillText(obj.label, x + 6, y - 20)
-          }
-          if (obj.confidence !== undefined) {
-            const confText = `${Math.round(obj.confidence * 100)}%`
-            ctx.fillStyle = baseColor
-            ctx.fillText(confText, x + w - 40, y - 20)
-          }
+
+          // Corner reticles for precision machine vision look
+          const cornerLen = Math.min(14, w / 4, h / 4)
+          ctx.lineWidth = 3
+          ctx.beginPath()
+          // Top-left
+          ctx.moveTo(x, y + cornerLen); ctx.lineTo(x, y); ctx.lineTo(x + cornerLen, y)
+          // Top-right
+          ctx.moveTo(x + w - cornerLen, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + cornerLen)
+          // Bottom-left
+          ctx.moveTo(x, y + h - cornerLen); ctx.lineTo(x, y + h); ctx.lineTo(x + cornerLen, y + h)
+          // Bottom-right
+          ctx.moveTo(x + w - cornerLen, y + h); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w, y + h - cornerLen)
+          ctx.stroke()
+
+          // Technical label badge
+          const confText = obj.confidence !== undefined ? ` [${Math.round(obj.confidence * 100)}%]` : ''
+          const tagText = `${obj.label || 'DEFECT'}${confText}`
+          ctx.font = '600 11px JetBrains Mono, monospace'
+          const textWidth = ctx.measureText(tagText).width
+          
+          ctx.fillStyle = '#0f172aee'
+          ctx.fillRect(x, Math.max(0, y - 22), textWidth + 14, 20)
+          ctx.strokeStyle = baseColor
+          ctx.lineWidth = 1
+          ctx.strokeRect(x, Math.max(0, y - 22), textWidth + 14, 20)
+
+          ctx.fillStyle = '#f8fafc'
+          ctx.fillText(tagText, x + 7, Math.max(4, y - 18))
           break
         }
         case 'pulse': {

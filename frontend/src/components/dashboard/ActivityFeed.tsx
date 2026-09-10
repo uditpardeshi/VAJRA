@@ -7,10 +7,10 @@ export interface ActivityFeedProps {
 
 export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
   const activities = [
-    { id: 1, type: 'inspect', text: 'Worker performed inspection on HX-204', time: '5m ago', icon: Camera, color: 'text-primary' },
-    { id: 2, type: 'escalation', text: 'Low-confidence escalation triggered for CNC-500', time: '12m ago', icon: AlertTriangle, color: 'text-rose-500' },
-    { id: 3, type: 'agent', text: 'Agent generated DOCX report for LATHE-3', time: '25m ago', icon: FileText, color: 'text-purple-500' },
-    { id: 4, type: 'resolve', text: 'Reviewer resolved escalation #104', time: '40m ago', icon: CheckCircle, color: 'text-emerald-500' },
+    { id: 1, type: 'inspect', text: 'Shift inspection logged: HX-204 spindle runout (4.2 μm)', time: '4m ago', icon: Camera, color: 'text-primary' },
+    { id: 2, type: 'escalation', text: 'Pressure anomaly flagged: CNC-500 line 2 (2.1 bar)', time: '12m ago', icon: AlertTriangle, color: 'text-rose-500' },
+    { id: 3, type: 'agent', text: 'Compliance report filed: LATHE-3 carbide flank wear', time: '25m ago', icon: FileText, color: 'text-primary-600' },
+    { id: 4, type: 'resolve', text: 'Reviewer approved seal replacement on ticket #104', time: '41m ago', icon: CheckCircle, color: 'text-emerald-500' },
   ].slice(0, limit)
 
   return (

@@ -67,11 +67,24 @@ export interface Citation {
   source_page: number;
   text_snippet: string;
   score: number;
+  source_file?: string;
+  table_data?: string;
+  image_snippet_url?: string;
+  modality?: 'text' | 'table' | 'figure';
+}
+
+export interface SessionFileItem {
+  filename: string;
+  total_chunks: number;
+  tables: number;
+  figures: number;
+  status: string;
 }
 
 export interface ChatRequest {
   question: string;
   machine_id?: string;
+  session_id?: string;
   top_k?: number;
 }
 
@@ -90,6 +103,16 @@ export interface ChatMessage {
   confidence?: number;
   timestamp: string;
   isLoading?: boolean;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  machine_id?: string;
+  files: SessionFileItem[];
+  messages: ChatMessage[];
+  created_at: string;
+  updated_at: string;
 }
 
 // ==================== ESCALATION ====================

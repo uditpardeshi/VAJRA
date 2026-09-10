@@ -14,8 +14,8 @@ export function AgentRunCard({ run }: AgentRunCardProps) {
     <Card className="space-y-4 bg-white border border-slate-200">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <span className="text-xs text-slate-400 font-bold uppercase">Agent Run #{run.run_id}</span>
-          <h4 className="font-bold text-slate-900 text-sm">Target: {run.machine_id || 'Equipment Inspection'}</h4>
+          <span className="text-xs text-slate-400 font-bold uppercase">Verification Run #{run.run_id}</span>
+          <h4 className="font-bold text-slate-900 text-sm">Target Equipment: {run.machine_id || 'Standard Machinery'}</h4>
         </div>
         <Badge variant={run.status === 'completed' ? 'success' : run.status === 'failed' ? 'accent' : 'warning'}>
           {run.status.toUpperCase()}
@@ -24,7 +24,7 @@ export function AgentRunCard({ run }: AgentRunCardProps) {
 
       {/* Tool Execution Trace */}
       <div className="space-y-2">
-        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Multi-Tool Trace History</span>
+        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Verification Steps &amp; Execution Trace</span>
         <div className="space-y-1.5">
           {run.tool_trace?.map((trace, idx) => (
             <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-xs">
@@ -38,20 +38,23 @@ export function AgentRunCard({ run }: AgentRunCardProps) {
         </div>
       </div>
 
-      {/* Agent Analysis Output */}
+      {/* Analysis Output */}
       {run.result && (
-        <div className="p-4 bg-primary-50/50 border border-primary-100 rounded-xl space-y-2 text-xs text-slate-700">
-          <div className="font-bold text-slate-900">Analysis Summary:</div>
-          {run.result.equipment && <p><strong>Equipment:</strong> {run.result.equipment}</p>}
+        <div className="p-4 bg-primary-50/40 border border-primary-100 rounded-xl space-y-2 text-xs text-slate-700">
+          <div className="font-bold text-slate-900 text-xs uppercase tracking-wider">Engineering Assessment:</div>
+          {run.result.equipment && <p><strong>Equipment Identified:</strong> {run.result.equipment}</p>}
           {run.result.measured_thickness_mm !== undefined && (
-            <p><strong>Measured Thickness:</strong> {run.result.measured_thickness_mm}mm (Required: {run.result.required_thickness_mm}mm)</p>
+            <p className="font-mono">
+              <strong>Measured Thickness:</strong> {run.result.measured_thickness_mm} mm{' '}
+              <span className="text-slate-400">(Required: {run.result.required_thickness_mm} mm)</span>
+            </p>
           )}
-          {run.result.recommendation && <p><strong>Recommendation:</strong> {run.result.recommendation}</p>}
+          {run.result.recommendation && <p><strong>Action / Recommendation:</strong> {run.result.recommendation}</p>}
 
           {run.result.report_path && (
             <div className="pt-2">
               <Button size="sm" variant="accent" onClick={() => window.open(run.result.report_path, '_blank')}>
-                <Download className="w-4 h-4 mr-1" /> Download Generated DOCX Report
+                <Download className="w-4 h-4 mr-1.5" /> Download Formal Audit Report (.DOCX)
               </Button>
             </div>
           )}

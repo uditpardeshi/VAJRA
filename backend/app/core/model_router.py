@@ -23,7 +23,10 @@ class ModelRouter:
 
     @property
     def headers(self) -> Dict[str, str]:
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "X-VAJRA-KEY": settings.VAJRA_API_KEY,
+        }
         if settings.NGROK_SKIP_WARNING:
             headers["ngrok-skip-browser-warning"] = "true"
         return headers
@@ -89,10 +92,44 @@ class ModelRouter:
         prompt: str,
         system: Optional[str] = None,
         model: Optional[str] = None,
-        temperature: float = 0.2,
-        max_tokens: int = 2048
+        temperature: float = 0.7,
+        max_tokens: int = 1024
     ) -> str:
-        payload = {
+        base = self.base_url
+        if not base:
+            return "Model service currently unavailable (NGROK_OLLAMA_URL not set)."
+
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        # 1. Primary: /api/chat with X-VAJRA-KEY (OpenAI / vLLM / Qwen format)
+        payload_chat = {
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        }
+        if model:
+            payload_chat["model"] = model
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
+                resp = await client.post(f"{base}/api/chat", json=payload_chat)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    choices = data.get("choices", [])
+                    if choices and "message" in choices[0]:
+                        return choices[0]["message"].get("content", "")
+                    elif "response" in data:
+                        return data["response"]
+                else:
+                    logger.warning(f"/api/chat returned status {resp.status_code}: {resp.text[:200]}")
+        except Exception as e:
+            logger.warning(f"Error calling /api/chat at {base}: {e}")
+
+        # 2. Fallback: Ollama /api/generate
+        payload_gen = {
             "model": model or self._get_model("text"),
             "prompt": prompt,
             "system": system,
@@ -100,11 +137,11 @@ class ModelRouter:
             "options": {"temperature": temperature, "num_predict": max_tokens}
         }
         try:
-            data = await self._post("/api/generate", payload)
+            data = await self._post("/api/generate", payload_gen)
             return data.get("response", "")
         except Exception as e:
             logger.warning(f"ModelRouter text endpoint unavailable ({e}).")
-            return "Model service currently unavailable"
+            return "Model service currently unavailable. Please check your model endpoint and API key."
 
     # ---------- CODE: Prompt -> code dict ----------
     async def code_execute(

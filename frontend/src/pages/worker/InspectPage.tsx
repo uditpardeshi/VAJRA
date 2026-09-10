@@ -43,7 +43,7 @@ export function InspectPage() {
     const base64 = takePhoto(0.85)
     if (!base64) {
       // Fallback mock image for testing/development when webcam is occupied
-      toast.info('Simulating vision analysis for demo...')
+      toast.info('Processing test frame for defect inspection...')
       const res = await inspect({ machine_id: selectedMachineId, image_base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' })
       return
     }
@@ -102,14 +102,30 @@ export function InspectPage() {
         <CameraView videoRef={videoRef} canvasRef={canvasRef} isActive={isActive} error={error} />
 
         <div className="absolute top-4 left-4 z-20 flex gap-2">
-          <div className="bg-slate-900/80 backdrop-blur-md text-white px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-2 border border-white/10">
-            <Camera className="w-3.5 h-3.5" /> {fps} FPS
+          <div className="bg-slate-900/90 text-white px-3 py-1.5 rounded-xl text-xs font-mono flex items-center gap-2 border border-white/10">
+            <Camera className="w-3.5 h-3.5 text-slate-300" /> {fps} FPS · OPTICAL 1.0X
           </div>
           {isPending && (
-            <div className="bg-primary text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2">
-              <Aperture className="w-3.5 h-3.5 animate-spin" /> Analyzing via qwen2-vl...
+            <div className="bg-primary text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg">
+              <Aperture className="w-3.5 h-3.5 animate-spin" /> Analyzing component condition...
             </div>
           )}
+        </div>
+
+        {/* Industrial Viewfinder Crosshairs & Reticle */}
+        <div className="absolute inset-8 pointer-events-none z-10 flex flex-col justify-between opacity-60">
+          <div className="flex justify-between">
+            <div className="w-6 h-6 border-t-2 border-l-2 border-white/70" />
+            <div className="w-6 h-6 border-t-2 border-r-2 border-white/70" />
+          </div>
+          <div className="self-center w-8 h-8 relative opacity-40">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-white" />
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 border-l border-white" />
+          </div>
+          <div className="flex justify-between">
+            <div className="w-6 h-6 border-b-2 border-l-2 border-white/70" />
+            <div className="w-6 h-6 border-b-2 border-r-2 border-white/70" />
+          </div>
         </div>
 
         <CameraControls

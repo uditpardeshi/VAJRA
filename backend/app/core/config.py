@@ -7,9 +7,10 @@ class Settings(BaseSettings):
     PORT: int = 8000
     FRONTEND_ORIGIN: str = "http://localhost:5173"
 
-    # ngrok tunnel to Colab Ollama
-    NGROK_OLLAMA_URL: str = ""
+    # ngrok tunnel to Colab / Model endpoint
+    NGROK_OLLAMA_URL: str = "https://elmiest-julieta-unmelodramatically.ngrok-free.dev"
     NGROK_SKIP_WARNING: bool = True
+    VAJRA_API_KEY: str = "VAJRA-2026-SECRET"
 
     # Model registry (task -> model name)
     MODEL_VISION: str = "qwen2-vl"
@@ -29,6 +30,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./sovereign.db"
     CHROMA_PERSIST_DIR: str = "./chroma_db"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+
+    # Multimodal RAG (RAG-Anything) settings
+    RAG_MODE: str = "multimodal"  # "multimodal" | "chroma"
+    RAG_STORAGE_DIR: str = "./rag_storage"
+    ENABLE_MULTIMODAL_EXTRACTION: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",

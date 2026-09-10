@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useMachines } from '@/hooks/api/useMachines'
 import { useAuthStore } from '@/store/authStore'
 import { ChatInterface } from '@/components/chat/ChatInterface'
-import { PageHeader } from '@/components/layout/PageHeader'
 
 export function ChatPage() {
   const { data: machines } = useMachines()
@@ -16,8 +15,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Equipment Manual QA Assistant" subtitle="Ask technical questions grounded in local PDF manual vectors" />
+    <div className="h-full w-full min-w-0 flex flex-col">
       <ChatInterface
         machines={machines || []}
         selectedMachineId={selectedId}
