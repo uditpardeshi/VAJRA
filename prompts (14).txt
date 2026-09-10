@@ -1,0 +1,664 @@
+### **Shift Handover Report + QR — Implementation Plan**
+
+---
+
+## **Feature Summary**
+**What it does**: Worker ends shift → taps "Generate Handover" → auto-creates one-page summary with open tickets, pending escalations, machines to watch, parts needed, safety incidents. Next worker scans QR → sees exact same page. No verbal briefing needed.
+
+**Demo Line**: *"This is what the night shift supervisor reads with coffee. No 'he said she said'."*
+
+---
+
+## **Backend Implementation Plan**
+
+---
+
+### **1. Database Schema Changes**
+
+```python
+# app/models/tables.py — ADD to existing models
+
+class ShiftHandover(Base):
+    __tablename__ = "shift_handovers"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    shift_type = Column(String(20), nullable=False, index=True)  # 'morning' | 'evening' | 'night'
+    shift_date = Column(Date, nullable=False, index=True)
+    generated_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    generated_at = Column(DateTime, default=datetime.utcnow)
+    
+    # JSON payload with all handover data
+    payload_json = Column(Text, nullable=False)  # Contains all sections below
+    
+    # QR code reference
+    qr_code = Column(String(100), unique=True, index=True)  # UUID for QR
+    
+    # Tracking
+    viewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    viewed_at = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    generator = relationship("User", foreign_keys=[generated_by])
+    viewer = relationship("User", foreign_keys=[viewed_by])
+```
+
+---
+
+### **2. Pydantic Schemas**
+
+```python
+# app/schemas/handover.py
+
+from pydantic import BaseModel, Field
+from typing import Optional, List, Dict, Any
+from datetime import datetime, date
+from enum import Enum
+
+class ShiftType(str, Enum):
+    MORNING = "morning"
+    EVENING = "evening"
+    NIGHT = "night"
+
+class HandoverTicket(BaseModel):
+    id: int
+    title: str
+    machine_id: str
+    machine_name: str
+    status: str
+    priority: int
+    created_at: datetime
+    assigned_to: Optional[str] = None
+
+class HandoverEscalation(BaseModel):
+    id: int
+    ticket_id: int
+    machine_id: str
+    reason: str
+    status: str
+    confidence: float
+    created_at: datetime
+
+class HandoverMachineWatch(BaseModel):
+    machine_id: str
+    machine_name: str
+    last_inspection: datetime
+    last_finding: str
+    confidence: float
+    health_score: int
+
+class HandoverPartNeeded(BaseModel):
+    part_name: str
+    part_number: str
+    machine_id: str
+    quantity_needed: int
+    in_stock: int
+    on_order: bool
+    eta: Optional[str] = None
+
+class HandoverSafetyIncident(BaseModel):
+    id: int
+    type: str
+    machine_id: str
+    description: str
+    severity: str
+    reported_at: datetime
+    status: str
+
+class HandoverPayload(BaseModel):
+    # Core sections
+    shift_type: ShiftType
+    shift_date: date
+    generated_by: str
+    generated_at: datetime
+    
+    # Sections
+    open_tickets: List[HandoverTicket] = []
+    pending_escalations: List[HandoverEscalation] = []
+    machines_to_watch: List[HandoverMachineWatch] = []
+    parts_needed: List[HandoverPartNeeded] = []
+    safety_incidents: List[HandoverSafetyIncident] = []
+    
+    # Summary counts
+    summary: Dict[str, int] = Field(default_factory=dict)  # tickets_open, escalations_pending, etc.
+
+class ShiftHandoverCreate(BaseModel):
+    shift_type: ShiftType
+    shift_date: Optional[date] = None  # Defaults to today
+
+class ShiftHandoverResponse(BaseModel):
+    id: int
+    shift_type: ShiftType
+    shift_date: date
+    generated_by: int
+    generated_by_name: str
+    generated_at: datetime
+    qr_code: str
+    qr_code_url: str  # Full URL for QR image
+    payload: HandoverPayload
+    viewed_by: Optional[int] = None
+    viewed_at: Optional[datetime] = None
+    created_at: datetime
+
+class ShiftHandoverViewResponse(BaseModel):
+    """Returned when scanning QR"""
+    handover: ShiftHandoverResponse
+    viewer_name: str
+    viewed_at: datetime
+    is_first_view: bool
+```
+
+---
+
+### **3. Handover Service**
+
+```python
+# app/services/handover_service.py
+
+import json
+import uuid
+import qrcode
+import io
+import base64
+from datetime import datetime, date, timedelta
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, func
+from sqlalchemy.orm import selectinload
+from app.models.tables import (
+    ShiftHandover, Ticket, TicketStatus, Escalation, EscalationStatus, 
+    Machine, Inspection, User, AuditLog
+)
+from app.schemas.handover import (
+    ShiftHandoverCreate, ShiftHandoverResponse, HandoverPayload,
+    HandoverTicket, HandoverEscalation, HandoverMachineWatch,
+    HandoverPartNeeded, HandoverSafetyIncident, ShiftHandoverViewResponse
+)
+from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
+
+class HandoverService:
+    
+    @staticmethod
+    async def generate_handover(
+        db: AsyncSession,
+        request: ShiftHandoverCreate,
+        user_id: int
+    ) -> ShiftHandoverResponse:
+        """Generate shift handover report with all current data."""
+        
+        shift_date = request.shift_date or date.today()
+        shift_type = request.shift_type
+        
+        # Determine shift time windows
+        shift_start, shift_end = HandoverService._get_shift_window(shift_date, shift_type)
+        
+        # 1. Open Tickets (created during this shift or still open)
+        tickets_query = select(Ticket).options(
+            selectinload(Ticket.machine),
+            selectinload(Ticket.inspection)
+        ).where(
+            Ticket.status.in_([TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.PENDING_REVIEW])
+        )
+        tickets_result = await db.execute(tickets_query)
+        tickets = tickets_result.scalars().all()
+        
+        open_tickets = [
+            HandoverTicket(
+                id=t.id,
+                title=t.title,
+                machine_id=t.machine.machine_id if t.machine else "UNKNOWN",
+                machine_name=t.machine.name if t.machine else "UNKNOWN",
+                status=t.status.value,
+                priority=t.priority,
+                created_at=t.created_at,
+                assigned_to=t.assigned_to
+            ) for t in tickets
+        ]
+        
+        # 2. Pending Escalations
+        escalations_query = select(Escalation).options(
+            selectinload(Escalation.ticket).selectinload(Ticket.machine)
+        ).where(Escalation.status == EscalationStatus.PENDING)
+        escalations_result = await db.execute(escalations_query)
+        escalations = escalations_result.scalars().all()
+        
+        pending_escalations = [
+            HandoverEscalation(
+                id=e.id,
+                ticket_id=e.ticket_id,
+                machine_id=e.ticket.machine.machine_id if e.ticket and e.ticket.machine else "UNKNOWN",
+                reason=e.reason,
+                status=e.status.value,
+                confidence=0.0,  # Will be populated from inspection if linked
+                created_at=e.created_at
+            ) for e in escalations
+        ]
+        
+        # 3. Machines to Watch (recent inspections with issues)
+        recent_inspections = await db.execute(
+            select(Inspection)
+            .options(selectinload(Inspection.machine))
+            .where(
+                and_(
+                    Inspection.created_at >= datetime.combine(shift_date, datetime.min.time()),
+                    Inspection.needs_escalation == 1
+                )
+            )
+            .order_by(Inspection.created_at.desc())
+            .limit(20)
+        )
+        recent_inspections = recent_inspections.scalars().all()
+        
+        machines_to_watch = []
+        seen_machines = set()
+        for insp in recent_inspections:
+            if insp.machine_id not in seen_machines:
+                seen_machines.add(insp.machine_id)
+                machines_to_watch.append(HandoverMachineWatch(
+                    machine_id=insp.machine.machine_id,
+                    machine_name=insp.machine.name,
+                    last_inspection=insp.created_at,
+                    last_finding=insp.finding[:100] + "..." if len(insp.finding) > 100 else insp.finding,
+                    confidence=insp.confidence,
+                    health_score=100 - int(insp.confidence * 30)  # Simple heuristic
+                ))
+        
+        # 3b. Also include machines with open tickets
+        for ticket in tickets:
+            if ticket.machine_id and ticket.machine_id not in seen_machines:
+                seen_machines.add(ticket.machine_id)
+                # Get latest inspection for health score
+                latest_insp = await db.execute(
+                    select(Inspection)
+                    .where(Inspection.machine_id == ticket.machine_id)
+                    .order_by(Inspection.created_at.desc())
+                    .limit(1)
+                )
+                latest = latest_insp.scalar_one_or_none()
+                machines_to_watch.append(HandoverMachineWatch(
+                    machine_id=ticket.machine.machine_id,
+                    machine_name=ticket.machine.name,
+                    last_inspection=latest.created_at if latest else datetime.now(),
+                    last_finding=latest.finding[:100] if latest else "Open ticket",
+                    confidence=latest.confidence if latest else 0.5,
+                    health_score=80
+                ))
+        
+        # 4. Parts Needed (from tickets/inspections - simplified)
+        parts_needed = []  # TODO: Implement when parts catalog exists
+        
+        # 5. Safety Incidents (escalations with safety_critical reason)
+        safety_incidents = [
+            HandoverSafetyIncident(
+                id=e.id,
+                type="AI Escalation",
+                machine_id=e.ticket.machine.machine_id if e.ticket and e.ticket.machine else "UNKNOWN",
+                description=e.ticket.description[:200] if e.ticket and e.ticket.description else "Safety critical issue",
+                severity="HIGH",
+                reported_at=e.created_at,
+                status=e.status.value
+            ) for e in escalations if e.reason == "safety_critical"
+        ]
+        
+        # Build payload
+        payload = HandoverPayload(
+            shift_type=request.shift_type,
+            shift_date=shift_date,
+            generated_by="",  # Will be filled below
+            generated_at=datetime.utcnow(),
+            open_tickets=open_tickets,
+            pending_escalations=pending_escalations,
+            machines_to_watch=machines_to_watch[:10],  # Top 10
+            parts_needed=parts_needed,
+            safety_incidents=safety_incidents,
+            summary={
+                "tickets_open": len(open_tickets),
+                "escalations_pending": len(pending_escalations),
+                "machines_watching": len(machines_to_watch),
+                "parts_needed": len(parts_needed),
+                "safety_incidents": len(safety_incidents)
+            }
+        )
+        
+        # Generate QR code
+        qr_code = f"handover_{uuid.uuid4().hex[:12]}"
+        qr_url = f"{settings.FRONTEND_ORIGIN}/handover/{qr_code}"
+        
+        # Generate QR code image
+        qr_img = qrcode.make(qr_url)
+        buffered = io.BytesIO()
+        qr_img.save(buffered, format="PNG")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+        qr_data_url = f"data:image/png;base64,{qr_base64}"
+        
+        # Get generator user
+        generator = await db.execute(select(User).where(User.id == user_id))
+        generator_user = generator.scalar_one_or_none()
+        
+        # Create handover record
+        handover = ShiftHandover(
+            shift_type=request.shift_type.value,
+            shift_date=shift_date,
+            generated_by=user_id,
+            payload_json=payload.model_dump_json(),
+            qr_code=qr_code,
+            generated_at=datetime.utcnow()
+        )
+        
+        # Set generated_by in payload
+        payload.generated_by = generator_user.username if generator_user else f"User_{user_id}"
+        
+        handover.payload_json = payload.model_dump_json()
+        
+        db.add(handover)
+        
+        # Audit log
+        audit = AuditLog(
+            user_id=user_id,
+            action="handover_generated",
+            resource_type="shift_handover",
+            resource_id=handover.id,
+            details=json.dumps({
+                "shift_type": shift_type.value,
+                "shift_date": shift_date.isoformat(),
+                "tickets_count": len(open_tickets),
+                "escalations_count": len(pending_escalations),
+                "qr_code": qr_code
+            })
+        )
+        db.add(audit)
+        
+        await db.commit()
+        await db.refresh(handover)
+        
+        return ShiftHandoverResponse(
+            id=handover.id,
+            shift_type=request.shift_type,
+            shift_date=shift_date,
+            generated_by=user_id,
+            generated_by_name=generator_user.username if generator_user else f"User_{user_id}",
+            generated_at=handover.generated_at,
+            qr_code=qr_code,
+            qr_code_url=qr_data_url,
+            payload=payload,
+            viewed_by=None,
+            viewed_at=None,
+            created_at=handover.created_at
+        )
+    
+    @staticmethod
+    def _get_shift_window(shift_date: date, shift_type: ShiftType) -> tuple:
+        """Get shift start/end datetime for a given date and shift type."""
+        if shift_type == ShiftType.MORNING:
+            return (
+                datetime.combine(shift_date, datetime.min.time().replace(hour=6)),
+                datetime.combine(shift_date, datetime.min.time().replace(hour=14))
+            )
+        elif shift_type == ShiftType.EVENING:
+            return (
+                datetime.combine(shift_date, datetime.min.time().replace(hour=14)),
+                datetime.combine(shift_date, datetime.min.time().replace(hour=22))
+            )
+        else:  # NIGHT
+            return (
+                datetime.combine(shift_date, datetime.min.time().replace(hour=22)),
+                datetime.combine(shift_date + timedelta(days=1), datetime.min.time().replace(hour=6))
+            )
+    
+    @staticmethod
+    async def get_handover_by_qr(
+        db: AsyncSession,
+        qr_code: str,
+        viewer_id: int
+    ) -> ShiftHandoverViewResponse:
+        """Get handover by QR code (when scanning)."""
+        result = await db.execute(
+            select(ShiftHandover).where(ShiftHandover.qr_code == qr_code)
+        )
+        handover = result.scalar_one_or_none()
+        
+        if not handover:
+            raise ValueError("Invalid QR code")
+        
+        # Parse payload
+        payload = HandoverPayload.model_validate_json(handover.payload_json)
+        
+        # Check if first view
+        is_first_view = handover.viewed_by is None
+        
+        # Update view tracking
+        if is_first_view:
+            handover.viewed_by = viewer_id
+            handover.viewed_at = datetime.utcnow()
+            await db.commit()
+        
+        # Get generator info
+        generator = await db.execute(select(User).where(User.id == handover.generated_by))
+        generator_user = generator.scalar_one_or_none()
+        
+        # Get viewer info
+        viewer = await db.execute(select(User).where(User.id == viewer_id))
+        viewer_user = viewer.scalar_one_or_none()
+        
+        handover_response = ShiftHandoverResponse(
+            id=handover.id,
+            shift_type=ShiftType(handover.shift_type),
+            shift_date=handover.shift_date,
+            generated_by=handover.generated_by,
+            generated_by_name=handover.payload.generated_by,
+            generated_at=handover.generated_at,
+            qr_code=handover.qr_code,
+            qr_code_url=f"{settings.FRONTEND_ORIGIN}/handover/{handover.qr_code}",
+            payload=payload,
+            viewed_by=handover.viewed_by,
+            viewed_at=handover.viewed_at,
+            created_at=handover.created_at
+        )
+        
+        return ShiftHandoverViewResponse(
+            handover=handover_response,
+            viewer_name=viewer_user.username if viewer_user else f"User_{viewer_id}",
+            viewed_at=handover.viewed_at or datetime.utcnow(),
+            is_first_view=is_first_view
+        )
+    
+    @staticmethod
+    async def list_handovers(
+        db: AsyncSession,
+        limit: int = 20,
+        shift_type: str = None
+    ) -> list:
+        """List recent handovers for admin/manager view."""
+        query = select(ShiftHandover).order_by(ShiftHandover.generated_at.desc()).limit(limit)
+        if shift_type:
+            query = query.where(ShiftHandover.shift_type == shift_type)
+        
+        result = await db.execute(query)
+        handovers = result.scalars().all()
+        
+        results = []
+        for h in handovers:
+            payload = HandoverPayload.model_validate_json(h.payload_json)
+            generator = await db.execute(select(User).where(User.id == h.generated_by))
+            gen_user = generator.scalar_one_or_none()
+            
+            results.append(ShiftHandoverResponse(
+                id=h.id,
+                shift_type=ShiftType(h.shift_type),
+                shift_date=h.shift_date,
+                generated_by=h.generated_by,
+                generated_by_name=payload.generated_by,
+                generated_at=h.generated_at,
+                qr_code=h.qr_code,
+                qr_code_url=f"{settings.FRONTEND_ORIGIN}/handover/{h.qr_code}",
+                payload=payload,
+                viewed_by=h.viewed_by,
+                viewed_at=h.viewed_at,
+                created_at=h.created_at
+            ))
+        return results
+```
+
+---
+
+### **4. API Routes**
+
+```python
+# app/api/v1/routes_handover.py
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+from app.services.handover_service import HandoverService
+from app.schemas.handover import (
+    ShiftHandoverCreate, ShiftHandoverResponse, 
+    ShiftHandoverViewResponse
+)
+from app.core.auth import get_current_user  # Assuming you have auth
+
+router = APIRouter(prefix="/api/v1", tags=["handover"])
+
+@router.post("/handover/generate", response_model=ShiftHandoverResponse, status_code=status.HTTP_201_CREATED)
+async def generate_handover(
+    request: ShiftHandoverCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)  # Assuming auth dependency
+):
+    """Generate shift handover report with QR code."""
+    try:
+        return await HandoverService.generate_handover(db, request, current_user.id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate handover: {str(e)}")
+
+@router.get("/handover/{qr_code}", response_model=ShiftHandoverViewResponse)
+async def view_handover_by_qr(
+    qr_code: str,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """View handover by scanning QR code."""
+    try:
+        return await HandoverService.get_handover_by_qr(db, qr_code, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve handover: {str(e)}")
+
+@router.get("/handovers", response_model=list)
+async def list_handovers(
+    limit: int = 20,
+    shift_type: str = None,
+    db: AsyncSession = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """List recent handovers (admin/manager)."""
+    return await HandoverService.list_handovers(db, limit, shift_type)
+```
+
+---
+
+### **5. Database Migration**
+
+```sql
+-- Create shift_handovers table
+CREATE TABLE shift_handovers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shift_type VARCHAR(20) NOT NULL,
+    shift_date DATE NOT NULL,
+    generated_by INTEGER NOT NULL REFERENCES users(id),
+    payload_json TEXT NOT NULL,
+    qr_code VARCHAR(100) UNIQUE NOT NULL,
+    generated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    viewed_by INTEGER REFERENCES users(id),
+    viewed_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_shift_handovers_date ON shift_handovers(shift_date);
+CREATE INDEX idx_shift_handovers_qr ON shift_handovers(qr_code);
+CREATE INDEX idx_shift_handovers_generated ON shift_handovers(generated_at);
+
+-- Add voice columns to audit_log (if not already)
+ALTER TABLE audit_log ADD COLUMN voice_source VARCHAR(20);
+ALTER TABLE audit_log ADD COLUMN voice_confidence FLOAT;
+ALTER TABLE audit_log ADD COLUMN voice_language VARCHAR(10);
+```
+
+---
+
+### **6. Required Dependencies**
+
+```txt
+# requirements.txt additions
+qrcode==7.4.2
+pillow==10.0.0  # Required by qrcode
+```
+
+---
+
+### **6. Register Router**
+
+```python
+# app/main.py
+from app.api.v1 import routes_handover
+app.include_router(routes_handover.router)
+```
+
+---
+
+## **Testing Commands**
+
+```bash
+# 1. Install deps
+pip install qrcode pillow
+
+# 2. Run migration
+cd backend && alembic upgrade head
+
+# 3. Start backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# 4. Test generate handover (as authenticated user)
+curl -X POST http://localhost:8000/api/v1/handover/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"shift_type": "night", "shift_date": "2026-09-10"}'
+
+# 5. Test QR view (simulate scan)
+curl -X GET http://localhost:8000/api/v1/handover/handover_abc123 \
+  -H "Authorization: Bearer <token>"
+
+# 5. Verify QR code works - open in browser:
+# http://localhost:5173/handover/handover_abc123
+```
+
+---
+
+## **Frontend Integration Points (Your Friend's Work)**
+
+| Frontend Task | API Call |
+|---------------|----------|
+| "End Shift" button → Generate handover | `POST /api/v1/handover/generate` |
+| Show QR code modal with `qr_code_url` | Response has `qr_code_url` (data URL) |
+| "Scan Handover" page (camera) → reads QR → redirects | `GET /handover/{qr_code}` (frontend route) |
+| Handover view page → displays payload sections | `GET /api/v1/handover/{qr_code}` |
+| Admin: List recent handovers | `GET /api/v1/handovers` |
+
+---
+
+## **Handoff Note for Antigravity**
+
+> **New Feature**: Shift Handover Report with QR
+> **Tables**: `shift_handovers` (id, shift_type, shift_date, generated_by, payload_json, qr_code, viewed_by, viewed_at)
+> **Endpoints**: `POST /handover/generate`, `GET /handover/{qr_code}`, `GET /handovers`
+> **QR**: Generates data URL (base64 PNG) + stores QR code string for scanning
+> **Payload**: Full JSON with tickets, escalations, machines to watch, parts, safety incidents
+> **Dependencies**: `qrcode`, `pillow`
+> **Auth**: Requires authenticated user (uses existing auth dependency)
+
+---
+
+**Ready for Antigravity?** This is the complete backend spec. Frontend QR generation/scanning is separate work for your friend.

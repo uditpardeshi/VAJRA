@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum as PyEnum
 from sqlalchemy import (
-    Column, Integer, String, Text, Float, DateTime, ForeignKey, Enum, Index
+    Column, Integer, String, Text, Float, DateTime, Date, ForeignKey, Enum, Index
 )
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -139,9 +139,26 @@ class ChatMessageRecord(Base):
     confidence = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
+class ShiftHandover(Base):
+    __tablename__ = "shift_handovers"
+    id = Column(Integer, primary_key=True, index=True)
+    shift_type = Column(String(20), nullable=False, index=True)  # 'morning' | 'evening' | 'night'
+    shift_date = Column(Date, nullable=False, index=True)
+    generated_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    generated_at = Column(DateTime, default=datetime.utcnow)
+    payload_json = Column(Text, nullable=False)
+    qr_code = Column(String(100), unique=True, index=True)
+    viewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    viewed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    generator = relationship("User", foreign_keys=[generated_by])
+    viewer = relationship("User", foreign_keys=[viewed_by])
+
 # Indexes for common queries
 Index("ix_inspections_machine_created", Inspection.machine_id, Inspection.created_at)
 Index("ix_tickets_status_created", Ticket.status, Ticket.created_at)
 Index("ix_audit_log_user_created", AuditLog.user_id, AuditLog.created_at)
 Index("ix_agent_runs_user_created", AgentRun.user_id, AgentRun.created_at)
 Index("ix_chat_messages_session_created", ChatMessageRecord.session_id, ChatMessageRecord.created_at)
+Index("ix_shift_handovers_date", ShiftHandover.shift_date)
