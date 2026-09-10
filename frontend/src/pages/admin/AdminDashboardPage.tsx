@@ -3,31 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   Server,
-  Activity,
   Key,
   Globe,
   Shield,
   RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
   Database,
   Cpu,
   ArrowRight,
   FileCheck,
-  Terminal,
 } from 'lucide-react'
-import { PageHeader } from '@/components/layout/PageHeader'
-import { Card } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/store/authStore'
-import { DEFAULT_API_BASE, DEFAULT_MODEL_URL } from '@/config/api'
+import { DEFAULT_API_BASE } from '@/config/api'
 import { useAuditTrail, useSystemMetrics } from '@/hooks/api/useAnalytics'
 import { useMachines } from '@/hooks/api/useMachines'
 
 export function AdminDashboardPage() {
   const navigate = useNavigate()
-  const { apiBase, modelUrl } = useAuthStore()
+  const { apiBase } = useAuthStore()
   const { data: systemAuditEvents } = useAuditTrail()
   const { data: sysMetrics } = useSystemMetrics()
   const { data: machines } = useMachines()
@@ -58,175 +51,146 @@ export function AdminDashboardPage() {
   const systemMetrics = [
     {
       label: 'FastAPI Backend Core',
-      status: backendOnline === true ? 'ONLINE' : backendOnline === false ? 'OFFLINE' : 'CHECKING',
+      status: backendOnline === true ? 'Online' : backendOnline === false ? 'Offline' : 'Checking',
       value: backendOnline ? `${latencyMs}ms round-trip` : 'Connection Refused',
-      badge: backendOnline ? 'success' : 'accent',
+      isOk: backendOnline === true,
       icon: Server,
     },
     {
-      label: 'Edge Gateway Host',
-      status: 'CONFIGURED',
+      label: 'Gateway Host',
+      status: 'Configured',
       value: (apiBase || DEFAULT_API_BASE).replace('http://', '').replace('https://', ''),
-      badge: 'success',
+      isOk: true,
       icon: Globe,
     },
     {
       label: 'SQLite Data Store',
-      status: sysMetrics?.db_status || 'ONLINE',
+      status: sysMetrics?.db_status || 'Online',
       value: `sovereign.db · ${sysMetrics?.db_size_kb ? `${sysMetrics.db_size_kb} KB` : '124 KB'}`,
-      badge: 'success',
+      isOk: true,
       icon: Database,
     },
     {
-      label: 'Registered Machine Fleet',
-      status: 'LIVE',
-      value: `${machines?.length ?? sysMetrics?.machines_registered ?? 3} Active Shop Units`,
-      badge: 'success',
+      label: 'Machine Fleet',
+      status: 'Live',
+      value: `${machines?.length ?? sysMetrics?.machines_registered ?? 3} Active Units`,
+      isOk: true,
       icon: Cpu,
     },
   ]
 
   return (
-    <div className="space-y-3">
-      <PageHeader
-        title="System &amp; Infrastructure Operations"
-        subtitle="On-premise node telemetry, machine gateway registry, and security audit log"
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={checkHealth}
-              disabled={checking}
-              className="bg-[#262730] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-[#77BA99] ${checking ? 'animate-spin' : ''}`} />
-              Ping Node Status
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => navigate('/settings')}
-              className="bg-[#77BA99] hover:bg-[#88caa9] text-[#1d1e25] font-bold text-xs"
-            >
-              <Key className="w-3.5 h-3.5 mr-1.5" /> Endpoints &amp; Keys
-            </Button>
-          </div>
-        }
-      />
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#22232d] p-4 rounded-xl border border-[#2e303d]">
+        <div>
+          <h1 className="text-lg sm:text-xl font-bold text-[#EFF0D1]">
+            System Administration
+          </h1>
+          <p className="text-xs text-[#D7C0D0]/80 mt-0.5">
+            Infrastructure telemetry, machine fleet registry, and security audit log
+          </p>
+        </div>
 
-      {/* System Node Telemetry Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={checkHealth}
+            disabled={checking}
+            className="bg-[#181920] hover:bg-[#262730] text-[#EFF0D1] border border-[#2e303d] text-xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-[#77BA99] ${checking ? 'animate-spin' : ''}`} />
+            Ping Status
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate('/settings')}
+            className="bg-[#77BA99] hover:bg-[#88caa9] text-[#1a1b23] font-bold text-xs"
+          >
+            <Key className="w-3.5 h-3.5 mr-1.5" /> API Keys &amp; Settings
+          </Button>
+        </div>
+      </div>
+
+      {/* Node Telemetry Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {systemMetrics.map((m, i) => {
           const Icon = m.icon
-          const isError = m.badge === 'accent'
           return (
-            <Card
+            <div
               key={i}
-              className="p-3 bg-[#262730] border border-[#3d3e4b] shadow-md flex flex-col justify-between space-y-2"
+              className="bg-[#22232d] border border-[#2e303d] rounded-xl p-3.5 space-y-2 flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="p-1.5 rounded-lg bg-[#1d1e25] text-[#77BA99] border border-[#3d3e4b] shrink-0">
-                    <Icon className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-[#D7C0D0] uppercase tracking-wider truncate">
-                    {m.label}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-[#D7C0D0]/70 uppercase tracking-wider">
+                  {m.label}
+                </span>
                 <span
-                  className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold uppercase shrink-0 border ${
-                    isError
-                      ? 'bg-[#D33F49]/15 text-[#D33F49] border-[#D33F49]/30'
-                      : 'bg-[#77BA99]/15 text-[#77BA99] border-[#77BA99]/30'
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                    m.isOk
+                      ? 'bg-[#77BA99]/15 text-[#77BA99]'
+                      : 'bg-[#D33F49]/15 text-[#D33F49]'
                   }`}
                 >
                   {m.status}
                 </span>
               </div>
 
-              <div className="pt-0.5">
-                <span className="text-xs font-mono font-bold text-[#EFF0D1] block truncate" title={m.value}>
+              <div className="flex items-center gap-2 pt-1">
+                <div className="p-1.5 rounded-lg bg-[#181920] text-[#77BA99] border border-[#2e303d] shrink-0">
+                  <Icon className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-mono font-medium text-[#EFF0D1] truncate" title={m.value}>
                   {m.value}
                 </span>
               </div>
-            </Card>
+            </div>
           )
         })}
       </div>
 
-      {/* Compact Quick Operations Ribbon */}
-      <div className="flex flex-wrap items-center gap-2 p-2 bg-[#262730] border border-[#3d3e4b] rounded-xl shadow-md">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#D7C0D0] px-1 font-mono flex items-center gap-1.5">
-          <Terminal className="w-3.5 h-3.5 text-[#77BA99]" />
-          Admin Controls:
-        </span>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => navigate('/settings')}
-          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
-        >
-          <Globe className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Network &amp; API Keys
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => navigate('/machines')}
-          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
-        >
-          <Cpu className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Machine Fleet Registry
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => navigate('/reports')}
-          className="bg-[#1d1e25] hover:bg-[#32333e] text-[#EFF0D1] border border-[#3d3e4b] text-xs font-semibold"
-        >
-          <FileCheck className="w-3.5 h-3.5 mr-1.5 text-[#77BA99]" /> Compliance &amp; Reports
-        </Button>
-      </div>
-
-      {/* Main Admin Workspace: Machine Fleet Nodes + Audit Trail */}
+      {/* Main Section: Machine Fleet Table & Audit Trail */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
         {/* Left Column (5 cols): Connected Machine Fleet Nodes */}
-        <Card className="lg:col-span-5 p-3.5 bg-[#262730] border border-[#3d3e4b] space-y-2.5 shadow-md">
-          <div className="flex items-center justify-between border-b border-[#3d3e4b] pb-2">
+        <div className="lg:col-span-5 bg-[#22232d] border border-[#2e303d] rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#2e303d] pb-2.5">
             <div className="flex items-center gap-2">
               <Cpu className="w-4 h-4 text-[#77BA99]" />
-              <h4 className="font-bold text-[#EFF0D1] text-xs uppercase tracking-wider">
-                Connected Machine Nodes ({machines?.length || 0})
-              </h4>
+              <h2 className="font-semibold text-xs sm:text-sm text-[#EFF0D1]">
+                Registered Fleet ({machines?.length || 0})
+              </h2>
             </div>
             <Button
               size="sm"
               variant="ghost"
               onClick={() => navigate('/machines')}
-              className="text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] text-xs"
+              className="text-xs text-[#D7C0D0] hover:text-[#EFF0D1]"
             >
-              Full Fleet &rarr;
+              Manage &rarr;
             </Button>
           </div>
 
-          <div className="divide-y divide-[#3d3e4b]">
+          <div className="divide-y divide-[#2e303d]">
             {(machines && machines.length > 0) ? (
               machines.map((m) => (
                 <div key={m.machine_id} className="py-2.5 first:pt-1 last:pb-1 flex items-center justify-between text-xs">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#EFF0D1]">{m.machine_id}</span>
-                      <span className="text-[10px] font-mono text-[#D7C0D0]">{m.name}</span>
+                      <span className="font-semibold text-[#EFF0D1]">{m.machine_id}</span>
+                      <span className="text-[#D7C0D0]/80">{m.name}</span>
                     </div>
-                    <span className="text-[10px] text-[#D7C0D0]/70 font-mono block mt-0.5">
+                    <span className="text-[11px] text-[#D7C0D0]/60 block mt-0.5">
                       {m.type || 'CNC Station'} · {m.location || 'Bay 2'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#77BA99]/15 text-[#77BA99] border border-[#77BA99]/30">
-                      NOMINAL
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#77BA99]/15 text-[#77BA99]">
+                      Online
                     </span>
                     <button
                       onClick={() => navigate('/machines')}
-                      className="p-1 rounded text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e]"
+                      className="p-1 rounded text-[#D7C0D0] hover:text-[#EFF0D1]"
                       title="Inspect machine"
                     >
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -235,62 +199,56 @@ export function AdminDashboardPage() {
                 </div>
               ))
             ) : (
-              <div className="py-6 text-center text-xs text-[#D7C0D0]">
-                No machine nodes registered yet.
+              <div className="py-6 text-center text-xs text-[#D7C0D0]/60">
+                No machines registered yet.
               </div>
             )}
           </div>
-        </Card>
+        </div>
 
-        {/* Right Column (7 cols): Immutable System & Security Audit Trail */}
-        <Card className="lg:col-span-7 p-3.5 bg-[#262730] border border-[#3d3e4b] space-y-2.5 shadow-md">
-          <div className="flex items-center justify-between border-b border-[#3d3e4b] pb-2">
+        {/* Right Column (7 cols): System Security & Audit Trail */}
+        <div className="lg:col-span-7 bg-[#22232d] border border-[#2e303d] rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#2e303d] pb-2.5">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-[#77BA99]" />
-              <h4 className="font-bold text-[#EFF0D1] text-xs uppercase tracking-wider">
-                System Security &amp; Audit Trail
-              </h4>
+              <h2 className="font-semibold text-xs sm:text-sm text-[#EFF0D1]">
+                Security Audit Log
+              </h2>
             </div>
-            <span className="text-[10px] font-mono text-[#D7C0D0]/80">Logged Transactions</span>
+            <span className="text-xs text-[#D7C0D0]/60">Recent events</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-[#D7C0D0]">
-              <thead className="bg-[#1d1e25] border-b border-[#3d3e4b] text-[#D7C0D0] font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-[#181920] border-b border-[#2e303d] text-[#D7C0D0]/70 font-semibold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="p-2">Action Code</th>
-                  <th className="p-2">Transaction Detail</th>
-                  <th className="p-2">User</th>
-                  <th className="p-2">Status</th>
-                  <th className="p-2">Timestamp</th>
+                  <th className="p-2.5">Action</th>
+                  <th className="p-2.5">Detail</th>
+                  <th className="p-2.5">User</th>
+                  <th className="p-2.5">Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#3d3e4b] font-mono text-[11px]">
+              <tbody className="divide-y divide-[#2e303d] text-[11px]">
                 {(systemAuditEvents && systemAuditEvents.length > 0) ? (
                   systemAuditEvents.map((evt) => (
-                    <tr key={evt.id} className="hover:bg-[#32333e]/50">
-                      <td className="p-2 font-bold text-[#EFF0D1]">{evt.action}</td>
-                      <td className="p-2 font-sans text-[#EFF0D1]">{evt.detail}</td>
-                      <td className="p-2 text-[#D7C0D0]">{evt.user}</td>
-                      <td className="p-2">
-                        <span className="text-[#77BA99] bg-[#77BA99]/15 border border-[#77BA99]/30 px-1.5 py-0.2 rounded text-[9px] font-bold">
-                          VERIFIED
-                        </span>
-                      </td>
-                      <td className="p-2 text-[#D7C0D0]/80 font-sans">{evt.time}</td>
+                    <tr key={evt.id} className="hover:bg-[#262730]/40">
+                      <td className="p-2.5 font-semibold text-[#EFF0D1]">{evt.action}</td>
+                      <td className="p-2.5 text-[#EFF0D1]/90">{evt.detail}</td>
+                      <td className="p-2.5 text-[#D7C0D0]/70">{evt.user}</td>
+                      <td className="p-2.5 text-[#D7C0D0]/50 font-mono">{evt.time}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-4 text-center text-[#D7C0D0] font-sans text-xs">
-                      No transactions recorded in system audit log yet.
+                    <td colSpan={4} className="p-6 text-center text-[#D7C0D0]/60 text-xs">
+                      No audit events recorded yet.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   )

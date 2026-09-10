@@ -1,0 +1,9 @@
+{
+  "appId": "com.vajra.app",
+  "appName": "Vajra",
+  "webDir": "frontend/dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

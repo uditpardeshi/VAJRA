@@ -1,18 +1,21 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Wrench, LayoutDashboard, Shield, Menu, ChevronDown } from 'lucide-react'
+import { Wrench, ShieldAlert, Settings, Menu } from 'lucide-react'
 import { useAuthStore, UserRole } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
+import { useMachines } from '@/hooks/api/useMachines'
+import { MachineSelector } from '@/components/common/MachineSelector'
 
 export function TopBar() {
   const navigate = useNavigate()
-  const { role, setRole, userName } = useAuthStore()
+  const { role, setRole, userName, currentMachine, setCurrentMachine } = useAuthStore()
   const { toggleSidebar } = useUIStore()
+  const { data: machines } = useMachines()
 
   const roles: { id: UserRole; label: string; icon: any; defaultRoute: string }[] = [
-    { id: 'worker', label: 'Technician', icon: Wrench, defaultRoute: '/worker-dashboard' },
-    { id: 'reviewer', label: 'Reviewer', icon: LayoutDashboard, defaultRoute: '/dashboard' },
-    { id: 'admin', label: 'Admin', icon: Shield, defaultRoute: '/admin-dashboard' },
+    { id: 'worker', label: 'Operator', icon: Wrench, defaultRoute: '/worker-dashboard' },
+    { id: 'reviewer', label: 'QA Review', icon: ShieldAlert, defaultRoute: '/dashboard' },
+    { id: 'admin', label: 'Admin', icon: Settings, defaultRoute: '/admin-dashboard' },
   ]
 
   const handleRoleSelect = (selectedRole: UserRole, route: string) => {
@@ -20,83 +23,77 @@ export function TopBar() {
     navigate(route)
   }
 
+  const activeMachineId = currentMachine?.machine_id || (machines && machines[0]?.machine_id) || 'HX-204'
+
   return (
-    <header className="h-11 sm:h-12 bg-[#262730]/95 backdrop-blur-md border-b border-[#3d3e4b] px-2.5 sm:px-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
-      <div className="flex items-center gap-2 sm:gap-2.5">
+    <header className="h-13 bg-[#1e1f29] border-b border-[#2e303d] px-3 sm:px-5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+      {/* Left: Brand Identity & Mobile Menu Toggle */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={toggleSidebar}
-          className="p-1 text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#32333e] active:bg-[#1d1e25] rounded-lg lg:hidden transition-colors"
+          className="p-1.5 text-[#D7C0D0] hover:text-[#EFF0D1] hover:bg-[#262730] rounded-lg lg:hidden transition-colors"
           title="Toggle Navigation"
         >
-          <Menu className="w-4 h-4" />
+          <Menu className="w-5 h-5" />
         </button>
 
-        {/* Brand Logo & Pill Indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[#77BA99] text-[#1d1e25] flex items-center justify-center font-black text-xs shadow-xs tracking-wider border border-[#77BA99]">
+        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/worker-dashboard')}>
+          <div className="w-7 h-7 rounded-lg bg-[#77BA99] text-[#1a1b23] flex items-center justify-center font-black text-sm tracking-tight shadow-xs">
             V
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-[#EFF0D1] text-xs sm:text-sm tracking-tight flex items-center gap-1.5">
-              VAJRA <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-[#1d1e25] border border-[#3d3e4b] text-[#77BA99]">MACHINERY</span>
-            </span>
-
-            {/* System Status Pill */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 bg-[#1d1e25] border border-[#3d3e4b] rounded-full text-[10px] font-semibold text-[#EFF0D1] shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#77BA99]" />
-              <span className="text-[#EFF0D1] font-mono">OEM Specs: Active</span>
-            </div>
-          </div>
+          <span className="font-bold text-sm tracking-tight text-[#EFF0D1]">
+            VAJRA
+          </span>
         </div>
       </div>
 
-      {/* Prominent Role Selector Tabs & User Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5">
-        {/* Role pills */}
-        <div className="flex items-center bg-[#1d1e25] p-0.5 rounded-full border border-[#3d3e4b] shadow-2xs">
-          {roles.map((r) => {
-            const Icon = r.icon
-            const active = role === r.id
-            const activeStyles = {
-              worker: 'bg-[#77BA99]/25 text-[#77BA99] border border-[#77BA99]/60 font-bold shadow-xs',
-              reviewer: 'bg-[#D7C0D0]/25 text-[#D7C0D0] border border-[#D7C0D0]/60 font-bold shadow-xs',
-              admin: 'bg-[#D33F49]/25 text-[#D33F49] border border-[#D33F49]/60 font-bold shadow-xs',
-            }[r.id]
+      {/* Center: Modern Sleek Segmented Role Switcher */}
+      <div className="flex items-center bg-[#15161c] p-1 rounded-lg border border-[#2e303d] shadow-2xs">
+        {roles.map((r) => {
+          const Icon = r.icon
+          const active = role === r.id
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => handleRoleSelect(r.id, r.defaultRoute)}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                active
+                  ? 'bg-[#262730] text-[#EFF0D1] font-semibold shadow-xs border border-[#363845]'
+                  : 'text-[#D7C0D0]/70 hover:text-[#EFF0D1]'
+              }`}
+            >
+              <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#77BA99]' : 'text-[#D7C0D0]/60'}`} />
+              <span className="hidden sm:inline">{r.label}</span>
+            </button>
+          )
+        })}
+      </div>
 
-            const iconColors = {
-              worker: active ? 'text-[#77BA99]' : 'text-[#D7C0D0]/70',
-              reviewer: active ? 'text-[#D7C0D0]' : 'text-[#D7C0D0]/70',
-              admin: active ? 'text-[#D33F49]' : 'text-[#D7C0D0]/70',
-            }[r.id]
-
-            return (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => handleRoleSelect(r.id, r.defaultRoute)}
-                className={`flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full transition-all ${
-                  active
-                    ? activeStyles
-                    : 'text-[#D7C0D0]/80 hover:text-[#EFF0D1]'
-                }`}
-              >
-                <Icon className={`w-3 h-3 ${iconColors}`} />
-                <span className="hidden sm:inline">{r.label}</span>
-              </button>
-            )
-          })}
+      {/* Right: Machine Selector & User Profile */}
+      <div className="flex items-center gap-2.5">
+        {/* Machine Context Dropdown */}
+        <div className="hidden md:block">
+          <MachineSelector
+            machines={machines || []}
+            value={activeMachineId}
+            onChange={(id) => {
+              const found = machines?.find((m) => m.machine_id === id)
+              if (found) setCurrentMachine(found)
+            }}
+            className="w-44 text-xs"
+          />
         </div>
 
-        {/* User Avatar Circle */}
-        <div className="flex items-center gap-1.5 pl-1.5 sm:border-l border-[#3d3e4b]">
-          <div className="relative">
-            <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#262730] border border-[#3d3e4b] flex items-center justify-center text-[#EFF0D1] font-bold text-[10px] shadow-2xs">
-              {userName?.charAt(0)?.toUpperCase() || 'T'}
-            </div>
-            <span className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-[#77BA99] ring-1 ring-[#1d1e25]" />
+        {/* User Avatar */}
+        <div className="flex items-center gap-2 pl-2 border-l border-[#2e303d]">
+          <div className="w-7 h-7 rounded-full bg-[#262730] border border-[#363845] flex items-center justify-center text-[#EFF0D1] font-semibold text-xs shadow-2xs">
+            {userName?.charAt(0)?.toUpperCase() || 'O'}
           </div>
-          <span className="hidden md:inline font-sans text-xs text-[#EFF0D1] font-semibold">{userName}</span>
+          <span className="hidden lg:inline text-xs font-medium text-[#EFF0D1]">
+            {userName}
+          </span>
         </div>
       </div>
     </header>

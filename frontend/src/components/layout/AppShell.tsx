@@ -10,7 +10,7 @@ export function AppShell() {
   const isChatPage = location.pathname === '/chat'
 
   return (
-    <div className="min-h-screen bg-[#0a0e17] text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-[#1a1b23] text-[#EFF0D1] flex flex-col font-sans selection:bg-[#77BA99] selection:text-[#1a1b23]">
       <TopBar />
       <div className="flex flex-1 relative min-w-0">
         <SideNav />
